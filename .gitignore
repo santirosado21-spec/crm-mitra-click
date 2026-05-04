@@ -38,3 +38,25 @@ dist-ssr
 .claude
 .agent
 .zed
+
+# Vite cache
+.vite
+.vite/
+
+# iCloud / Finder duplicates ("file 2.ext" pattern)
+**/* 2.ts
+**/* 2.tsx
+**/* 2.js
+**/* 2.jsx
+**/* 2.json
+**/* 2.css
+**/* 2.html
+**/* 2.png
+**/* 2.jpg
+**/* 2.svg
+**/* 2.sql
+**/* 2.mjs
+**/* 2.cjs
+
+# Embedded subrepo (legacy, not used)
+scm-dashboard/
