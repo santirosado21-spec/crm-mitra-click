@@ -206,6 +206,16 @@ export function Sidebar() {
             </div>
           </div>
         )}
+
+        {/* Botón "Cerrar sidebar" — solo móvil, visible al final de la lista */}
+        <button
+          type="button"
+          onClick={close}
+          className="lg:hidden mt-2 inline-flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold text-white shadow-sm active:scale-[0.98]"
+          style={{ background: 'var(--brand-navy)' }}
+        >
+          <X size={16} /> Cerrar sidebar
+        </button>
       </nav>
 
       <div className="p-4 border-t" style={{ borderColor: 'var(--card-border)' }}>
