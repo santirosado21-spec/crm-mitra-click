@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SupplyChain México - Cotizador de Fletes</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f5f5f5; color: #1a1a5e; min-height: 100vh; font-size: 16px; }
+    input, select, textarea, button { font-family: inherit; font-size: 16px; }
+    
+    .header { padding: 15px 30px; background: #fff; border-bottom: 3px solid #1a1a5e; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .logo { display: flex; flex-direction: column; }
+    .logo-text { font-size: 22px; font-weight: 800; line-height: 1; }
+    .logo-text .supply { color: #1a1a5e; }
+    .logo-text .chain { color: #c41e3a; }
+    .logo-sub { font-size: 9px; color: #888; letter-spacing: 3px; font-weight: 600; margin-top: 2px; }
+    
+    .fecha-actual { background: #f0f0f0; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; color: #333; }
+    .alerta-badge { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: #fff0f0; border: 2px solid #c41e3a; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; color: #c41e3a; }
+    
+    .nav { display: flex; gap: 8px; }
+    .nav-btn { padding: 12px 20px; background: #f5f5f5; color: #666; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; position: relative; transition: all 0.2s; }
+    .nav-btn:hover { background: #eee; }
+    .nav-btn.active { background: #1a1a5e; color: #fff; border-color: #1a1a5e; }
+    .nav-btn .badge { position: absolute; top: -6px; right: -6px; background: #c41e3a; color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    
+    .main { padding: 30px; max-width: 1400px; margin: 0 auto; }
+    .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 16px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #1a1a5e; }
+    .card-subtitle { font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 12px; font-weight: 700; letter-spacing: 1px; }
+    
+    .input { width: 100%; padding: 14px 16px; background: #f8f8f8; border: 2px solid #e0e0e0; border-radius: 10px; color: #333; font-size: 16px; }
+    .input:focus { outline: none; border-color: #1a1a5e; background: #fff; }
+    .input-lg { font-size: 24px; font-weight: 700; text-align: center; }
+    
+    .btn { padding: 14px 24px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 16px; transition: all 0.2s; }
+    .btn:hover { opacity: 0.9; }
+    .btn-primary { background: #1a1a5e; color: #fff; }
+    .btn-secondary { background: #f0f0f0; color: #666; }
+    .btn-danger { background: #c41e3a; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-sm { padding: 10px 16px; font-size: 14px; }
+    
+    .toggle { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: 700; }
+    .toggle.active { background: #1a1a5e; color: #fff; }
+    .toggle:not(.active) { background: #f0f0f0; color: #888; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 450px; gap: 25px; }
+    .grid-half { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    
+    .stat-box { background: #f8f8f8; border-radius: 12px; padding: 20px; border: 2px solid #e8e8e8; }
+    .stat-label { font-size: 12px; color: #888; margin-bottom: 10px; font-weight: 700; text-transform: uppercase; }
+    .stat-total { font-size: 14px; color: #28a745; margin-top: 8px; text-align: center; font-weight: 600; }
+    
+    .result-card { background: linear-gradient(135deg, #1a1a5e, #2d3a5a); color: #fff; border-radius: 16px; padding: 30px; text-align: center; margin-bottom: 20px; }
+    .result-label { font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 2px; }
+    .result-price { font-size: 48px; font-weight: 800; margin: 10px 0; }
+    .result-sub { font-size: 16px; color: rgba(255,255,255,0.8); }
+    
+    /* Desglose mejorado con margen visible */
+    .desglose { background: #f8f8f8; border-radius: 12px; overflow: hidden; }
+    .desglose-section { padding: 18px 25px; border-bottom: 1px solid #e8e8e8; }
+    .desglose-section:last-child { border-bottom: none; }
+    .desglose-title { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 700; }
+    .desglose-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; }
+    .desglose-row.highlight { background: #fff3cd; margin: 0 -25px; padding: 12px 25px; font-weight: 700; font-size: 12px; }
+    .desglose-row.total { background: #1a1a5e; color: #fff; margin: 0 -25px; padding: 20px 30px; font-size: 11px; font-weight: 700; border-radius: 0; }
+    .desglose-row.margen { background: #cce5ff; color: #004085; margin: 0 -25px; padding: 18px 30px; font-size: 10px; font-weight: 600; }
+    .desglose-row.ganancia { background: #d4edda; color: #155724; margin: 0 -25px; padding: 18px 30px; font-size: 10px; font-weight: 600; }
+    
+    .horas-extra-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
+    .hora-item { background: #f8f8f8; border-radius: 10px; padding: 15px; text-align: center; border: 2px solid #e8e8e8; }
+    .hora-item label { font-size: 13px; color: #666; display: block; margin-bottom: 8px; font-weight: 600; }
+    .hora-item .price { color: #28a745; font-weight: 700; }
+    .hora-item input { width: 80px; padding: 10px; background: #fff; border: 2px solid #ddd; border-radius: 8px; font-size: 18px; text-align: center; font-weight: 700; }
+    
+    .info-box { background: #e7f3ff; border: 2px solid #4a90d9; border-radius: 12px; padding: 18px; margin-bottom: 20px; font-size: 15px; color: #1a365d; }
+    .error { margin-top: 15px; background: #fff0f0; border: 2px solid #c41e3a; border-radius: 10px; padding: 15px; color: #c41e3a; font-weight: 600; }
+    .gmap-link { display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: #28a745; border-radius: 10px; color: #fff; text-decoration: none; font-weight: 700; }
+    
+    /* Contenedores */
+    .contenedor-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f0f7ff; border-radius: 8px; margin-bottom: 8px; }
+    .contenedor-item .cantidad { font-weight: 800; font-size: 18px; color: #1a1a5e; min-width: 40px; }
+    .contenedor-item .tipo { font-weight: 600; color: #333; }
+    .contenedor-item .eliminar { background: none; border: none; color: #c41e3a; cursor: pointer; font-size: 16px; padding: 5px; }
+    
+    /* Historial */
+    .historial-item { background: #fff; border-radius: 16px; padding: 25px; margin-bottom: 20px; border: 2px solid #e8e8e8; }
+    .historial-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; flex-wrap: wrap; gap: 15px; }
+    .historial-cliente { font-size: 22px; font-weight: 800; color: #1a1a5e; }
+    .historial-meta { font-size: 14px; color: #888; margin-top: 5px; }
+    .historial-precio { font-size: 32px; font-weight: 800; color: #1a1a5e; }
+    .historial-ruta { font-size: 18px; font-weight: 700; color: #333; margin: 15px 0; padding: 15px; background: #f8f8f8; border-radius: 10px; }
+    .historial-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+    
+    .estado-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+    .estado-pendiente { background: #fff3cd; color: #856404; }
+    .estado-enruta { background: #cce5ff; color: #004085; }
+    .estado-completado { background: #d4edda; color: #155724; }
+    
+    .fotos-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .foto-thumb { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 2px solid #e8e8e8; }
+    
+    /* Modal */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-content { background: #fff; border-radius: 20px; padding: 30px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; }
+    .form-group { margin-bottom: 18px; }
+    .form-label { font-size: 13px; color: #888; display: block; margin-bottom: 8px; font-weight: 700; }
+    .form-actions { display: flex; gap: 12px; margin-top: 25px; }
+    
+    .foto-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .foto-modal img { max-width: 95%; max-height: 95vh; border-radius: 10px; }
+    .foto-modal-close { position: absolute; top: 20px; right: 20px; background: #fff; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; }
+    
+    /* Trámites */
+    .alerta-section { background: #fff0f0; border: 2px solid #c41e3a; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    .alerta-title { font-size: 18px; font-weight: 800; color: #c41e3a; margin-bottom: 15px; }
+    .alerta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .alerta-item { background: #fff; border-radius: 12px; padding: 15px; border-left: 4px solid; }
+    
+    .table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .table th { padding: 15px; text-align: left; background: #f8f8f8; font-weight: 700; }
+    .table td { padding: 15px; border-bottom: 1px solid #f0f0f0; }
+    .tramite-badge { padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .tramite-vencido { background: #c41e3a; color: #fff; }
+    .tramite-urgente { background: #f59e0b; color: #fff; }
+    .tramite-proximo { background: #fbbf24; color: #1a1a5e; }
+    .tramite-ok { background: #e8e8e8; color: #666; }
+    
+    /* Calendario Visual en Cubitos */
+    .calendario-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .calendario-card { background: #fff; border-radius: 12px; overflow: hidden; border: 2px solid #e8e8e8; transition: all 0.2s; }
+    .calendario-card:hover { border-color: #1a1a5e; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .calendario-card.vencido { border-color: #c41e3a; background: #fff5f5; }
+    .calendario-card.urgente { border-color: #f59e0b; background: #fffbeb; }
+    .calendario-card.proximo { border-color: #fbbf24; background: #fffef0; }
+    .calendario-header { padding: 12px 15px; background: #1a1a5e; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .calendario-card.vencido .calendario-header { background: #c41e3a; }
+    .calendario-card.urgente .calendario-header { background: #f59e0b; }
+    .calendario-card.proximo .calendario-header { background: #eab308; }
+    .calendario-placa { font-weight: 800; font-size: 16px; }
+    .calendario-tipo { font-size: 11px; opacity: 0.8; }
+    .calendario-body { padding: 15px; text-align: center; }
+    .calendario-dias { font-size: 36px; font-weight: 800; color: #1a1a5e; line-height: 1; }
+    .calendario-card.vencido .calendario-dias { color: #c41e3a; }
+    .calendario-card.urgente .calendario-dias { color: #d97706; }
+    .calendario-label { font-size: 12px; color: #888; margin-top: 5px; }
+    .calendario-fecha { font-size: 13px; color: #666; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; }
+    .calendario-tramite { font-size: 14px; font-weight: 600; color: #1a1a5e; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .calendario-dot { width: 10px; height: 10px; border-radius: 50%; }
+    
+    .config-section { background: #fff; border-radius: 16px; padding: 25px; margin-bottom: 20px; }
+    .config-title { font-size: 18px; font-weight: 800; margin-bottom: 15px; }
+    .config-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+    .config-item { background: #f8f8f8; border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; }
+    
+    .empty { text-align: center; padding: 60px; color: #888; }
+    .empty-icon { font-size: 60px; margin-bottom: 15px; }
+    .hidden { display: none !important; }
+    
+    /* Centro de Notificaciones */
+    .notif-btn { position: relative; padding: 10px 16px; background: #f0f0f0; border-radius: 10px; cursor: pointer; font-size: 18px; transition: all 0.2s; }
+    .notif-btn:hover { background: #e0e0e0; }
+    .notif-btn.has-notif { background: #fff0f0; animation: pulse 2s infinite; }
+    .notif-count { position: absolute; top: -5px; right: -5px; background: #c41e3a; color: #fff; border-radius: 50%; min-width: 22px; height: 22px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(196, 30, 58, 0.4); } 50% { box-shadow: 0 0 0 10px rgba(196, 30, 58, 0); } }
+    
+    .notif-panel { position: absolute; top: 70px; right: 30px; width: 400px; max-height: 500px; background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000; overflow: hidden; }
+    .notif-header { padding: 20px; background: #1a1a5e; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .notif-header h3 { font-size: 16px; font-weight: 700; }
+    .notif-body { max-height: 400px; overflow-y: auto; }
+    .notif-item { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 15px; align-items: flex-start; transition: background 0.2s; cursor: pointer; }
+    .notif-item:hover { background: #f8f8f8; }
+    .notif-item.unread { background: #fff8f0; border-left: 4px solid #f59e0b; }
+    .notif-item.urgent { background: #fff0f0; border-left: 4px solid #c41e3a; }
+    .notif-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .notif-icon.warning { background: #fff3cd; }
+    .notif-icon.danger { background: #f8d7da; }
+    .notif-icon.info { background: #cce5ff; }
+    .notif-content { flex: 1; }
+    .notif-title { font-weight: 700; font-size: 14px; color: #1a1a5e; margin-bottom: 4px; }
+    .notif-desc { font-size: 13px; color: #666; line-height: 1.4; }
+    .notif-time { font-size: 11px; color: #aaa; margin-top: 5px; }
+    .notif-empty { padding: 40px; text-align: center; color: #888; }
+    .notif-empty-icon { font-size: 50px; margin-bottom: 10px; }
+    .notif-actions { padding: 15px 20px; background: #f8f8f8; border-top: 1px solid #e8e8e8; display: flex; gap: 10px; }
+    
+    /* Toast de notificación */
+    .toast-container { position: fixed; top: 90px; right: 30px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+    .toast { background: #fff; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); padding: 15px 20px; display: flex; align-items: center; gap: 15px; min-width: 350px; animation: slideIn 0.3s ease; border-left: 4px solid; }
+    .toast.warning { border-color: #f59e0b; }
+    .toast.danger { border-color: #c41e3a; }
+    .toast.success { border-color: #28a745; }
+    .toast-icon { font-size: 24px; }
+    .toast-content { flex: 1; }
+    .toast-title { font-weight: 700; font-size: 14px; }
+    .toast-desc { font-size: 13px; color: #666; }
+    .toast-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #888; padding: 5px; }
+    
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    
+    @media (max-width: 900px) {
+      .grid-2, .grid-half { grid-template-columns: 1fr; }
+      .horas-extra-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <div class="logo-text">
+        <span class="supply">Supply</span><span class="chain">Chain</span>
+      </div>
+      <div class="logo-sub">MÉXICO</div>
+    </div>
+    <div class="fecha-actual" id="fechaActual">📅 Cargando...</div>
+    <div class="notif-btn" id="notifBtn" onclick="toggleNotificaciones()">
+      🔔 <span class="notif-count hidden" id="notifCount">0</span>
+    </div>
+    <div class="alerta-badge hidden" id="alertaBadge" onclick="cambiarVista('tramites')">⚠️ <span id="alertaCount">0</span> trámite(s)</div>
+    <div class="nav">
+      <button class="nav-btn active" data-vista="cotizar" onclick="cambiarVista('cotizar')">📝 Cotizar</button>
+      <button class="nav-btn" data-vista="historial" onclick="cambiarVista('historial')">📋 Historial</button>
+      <button class="nav-btn" data-vista="tramites" onclick="cambiarVista('tramites')">📅 Trámites <span class="badge hidden" id="tramitesBadge">0</span></button>
+      <button class="nav-btn" data-vista="config" onclick="cambiarVista('config')">⚙️</button>
+    </div>
+  </header>
+
+  <!-- Panel de Notificaciones -->
+  <div class="notif-panel hidden" id="notifPanel">
+    <div class="notif-header">
+      <h3>🔔 Centro de Notificaciones</h3>
+      <button class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: #fff;" onclick="marcarTodasLeidas()">Marcar leídas</button>
+    </div>
+    <div class="notif-body" id="notifBody"></div>
+    <div class="notif-actions">
+      <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="limpiarNotificaciones()">🗑️ Limpiar</button>
+      <button class="btn btn-primary btn-sm" style="flex:1;" onclick="cambiarVista('tramites'); toggleNotificaciones();">📅 Ver Trámites</button>
+    </div>
+  </div>
+  
+  <!-- Contenedor de Toasts -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <main class="main">
+    <!-- COTIZAR -->
+    <div id="vistaCotizar">
+      <div class="grid-2" id="cotizarGrid" style="grid-template-columns: 1fr;">
+        <div>
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+              <h3 class="card-title" style="margin: 0;">📍 Datos de la Ruta</h3>
+              <a href="https://www.gmap.com.mx/Console/index.php" target="_blank" class="gmap-link">🌐 GlobalMap</a>
+            </div>
+            <div class="info-box">💡 Abre GlobalMap, calcula tu ruta y copia los datos aquí (km, casetas, tiempo).</div>
+            <div class="grid-half" style="margin-bottom: 20px;">
+              <div><label class="form-label">ORIGEN</label><input type="text" class="input" id="inputOrigen" placeholder="Ej: Ciudad de México"></div>
+              <div><label class="form-label">DESTINO</label><input type="text" class="input" id="inputDestino" placeholder="Ej: Mérida, Yucatán"></div>
+            </div>
+            <div class="toggle active" id="toggleRedondo" onclick="toggleViajeRedondo()" style="margin-bottom: 20px;">↻ Viaje Redondo</div>
+            <div class="grid-3">
+              <div class="stat-box">
+                <label class="stat-label">KM (ida)</label>
+                <input type="number" class="input input-lg" id="inputKm" placeholder="0" oninput="actualizarTotales()">
+                <div class="stat-total" id="totalKm"></div>
+              </div>
+              <div class="stat-box">
+                <label class="stat-label">CASETAS $</label>
+                <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                  <div style="text-align: center;">
+                    <input type="number" class="input" id="inputCasetasIda" placeholder="0" style="width: 80px; text-align: center; font-size: 18px; font-weight: 700; padding: 10px 5px;" oninput="actualizarTotales()">
+                    <div style="font-size: 10px; color: #888;">Ida</div>
+                  </div>
+                  <span style="font-weight: 700; color: #888;">+</span>
+                  <div style="text-align: center;">
+                    <input type="number" class="input" id="inputCasetasRegreso" placeholder="0" style="width: 80px; text-align: center; font-size: 18px; font-weight: 700; padding: 10px 5px;" oninput="actualizarTotales()">
+                    <div style="font-size: 10px; color: #888;">Regreso</div>
+                  </div>
+                </div>
+                <div class="stat-total" id="totalCasetas"></div>
+              </div>
+              <div class="stat-box">
+                <label class="stat-label">TIEMPO (ida)</label>
+                <div style="display: flex; gap: 5px; align-items: center; justify-content: center;">
+                  <input type="number" class="input" id="inputHoras" placeholder="0" min="0" style="width: 60px; text-align: center; font-size: 20px; font-weight: 700; padding: 12px 8px;" oninput="actualizarTotales()">
+                  <span style="font-weight: 700;">:</span>
+                  <input type="number" class="input" id="inputMinutos" placeholder="00" min="0" max="59" style="width: 60px; text-align: center; font-size: 20px; font-weight: 700; padding: 12px 8px;" oninput="actualizarTotales()">
+                </div>
+                <div style="text-align: center; font-size: 11px; color: #888; margin-top: 5px;">hrs : min</div>
+                <div class="stat-total" id="totalHoras"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-half">
+            <div class="card">
+              <div class="card-subtitle">👤 CLIENTE</div>
+              <input type="text" class="input" id="inputCliente" placeholder="Nombre del cliente" style="margin-bottom: 12px;">
+              <select class="input" id="selectTipoCliente">
+                <option value="HERMANA">Empresa hermana (15%)</option>
+                <option value="INTERMEDIARIO">Intermediario (20%)</option>
+                <option value="PREMIUM">Cliente premium (25%)</option>
+                <option value="FINAL" selected>Cliente final (35%)</option>
+              </select>
+            </div>
+            <div class="card">
+              <div class="card-subtitle">🚛 UNIDAD</div>
+              <select class="input" id="selectUnidad" style="margin-bottom: 12px;"></select>
+              <div class="card-subtitle">👷 OPERADOR</div>
+              <select class="input" id="selectOperador"></select>
+            </div>
+          </div>
+
+          <!-- CONTENEDORES -->
+          <div class="card">
+            <div class="card-subtitle">📦 CONTENIDO / CARGA (opcional)</div>
+            <div id="contenedoresLista"></div>
+            <div class="grid-3" style="margin-top: 10px;">
+              <input type="number" class="input" id="contenedorCantidad" placeholder="Cantidad" min="1">
+              <input type="text" class="input" id="contenedorTipo" placeholder="Tipo (ej: Caja 40', Tarimas, Bultos...)">
+              <button class="btn btn-secondary" onclick="agregarContenedor()">+ Agregar</button>
+            </div>
+            <input type="text" class="input" id="contenedorDescripcion" placeholder="Descripción de la carga (opcional)" style="margin-top: 10px;">
+          </div>
+
+          <!-- MANIOBRA -->
+          <div class="card">
+            <div class="card-subtitle">🏗️ MANIOBRA (opcional)</div>
+            <div class="grid-3">
+              <div>
+                <label class="form-label">Horas</label>
+                <div style="display: flex; gap: 5px;">
+                  <input type="number" class="input" id="maniobrasHoras" placeholder="0" min="0" style="width: 70px;" oninput="calcularManiobra()">
+                  <span style="align-self: center;">hrs</span>
+                  <input type="number" class="input" id="maniobrasMinutos" placeholder="0" min="0" max="59" style="width: 70px;" oninput="calcularManiobra()">
+                  <span style="align-self: center;">min</span>
+                </div>
+              </div>
+              <div>
+                <label class="form-label">Costo por hora</label>
+                <div class="input-group">
+                  <span class="input-prefix">$</span>
+                  <input type="number" class="input" id="maniobraCosto" placeholder="150" min="0" oninput="calcularManiobra()">
+                </div>
+              </div>
+              <div>
+                <label class="form-label">Total Maniobra</label>
+                <div id="totalManiobra" style="font-size: 20px; font-weight: 800; color: #1a1a5e; padding: 10px;">$0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BONOS OPERADOR (opcional) -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <div class="card-subtitle" style="margin: 0;">💰 BONOS OPERADOR (opcional)</div>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="checkBonos" onchange="toggleBonos()">
+                <span style="font-size: 13px;">Incluir bonos</span>
+              </label>
+            </div>
+            <div id="bonosSection" class="hidden">
+              <div class="grid-half" style="gap: 15px;">
+                <div>
+                  <label class="form-label">Sueldo diario</label>
+                  <div class="input-group">
+                    <span class="input-prefix">$</span>
+                    <input type="number" class="input" id="bonoSueldo" placeholder="420" value="420">
+                  </div>
+                </div>
+                <div>
+                  <label class="form-label">Bono por km cargado</label>
+                  <div class="input-group">
+                    <span class="input-prefix">$</span>
+                    <input type="number" class="input" id="bonoKmCarga" placeholder="1" value="1">
+                  </div>
+                </div>
+                <div>
+                  <label class="form-label">Bono por km vacío</label>
+                  <div class="input-group">
+                    <span class="input-prefix">$</span>
+                    <input type="number" class="input" id="bonoKmVacio" placeholder="0.5" value="0.5" step="0.1">
+                  </div>
+                </div>
+                <div>
+                  <label class="form-label">Comida diaria</label>
+                  <div class="input-group">
+                    <span class="input-prefix">$</span>
+                    <input type="number" class="input" id="bonoComida" placeholder="150" value="150">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HORAS EXTRA -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="card-subtitle" style="margin: 0;">⏰ BONOS EXTRA (opcional - por día trabajado)</div>
+              <button class="btn btn-secondary btn-sm" onclick="limpiarHorasExtra()">Limpiar</button>
+            </div>
+            <div class="horas-extra-grid">
+              <div class="hora-item"><label>Matutino<br><span class="price">$200/día</span></label><input type="number" id="horasMatutino" placeholder="0" min="0" step="1" oninput="calcularTotalHorasExtra()"></div>
+              <div class="hora-item"><label>Nocturno<br><span class="price">$200/día</span></label><input type="number" id="horasNocturno" placeholder="0" min="0" step="1" oninput="calcularTotalHorasExtra()"></div>
+              <div class="hora-item"><label>Sábado<br><span class="price">$500/día</span></label><input type="number" id="horasSabado" placeholder="0" min="0" step="1" oninput="calcularTotalHorasExtra()"></div>
+              <div class="hora-item"><label>Domingo<br><span class="price">$500/día</span></label><input type="number" id="horasDomingo" placeholder="0" min="0" step="1" oninput="calcularTotalHorasExtra()"></div>
+              <div class="hora-item"><label>Día Festivo<br><span class="price">$1,000/día</span></label><input type="number" id="horasFestivo" placeholder="0" min="0" step="1" oninput="calcularTotalHorasExtra()"></div>
+              <div class="hora-item" style="background: #fffbeb; border-color: #f59e0b;"><label style="color: #92400e;">TOTAL</label><div id="totalHorasExtra" style="font-size: 22px; font-weight: 800; color: #d97706;">$0</div></div>
+            </div>
+          </div>
+
+          <div id="errorMsg" class="error hidden"></div>
+          <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button class="btn btn-primary" style="flex: 1; padding: 18px;" onclick="calcularCotizacion()">🧮 CALCULAR COTIZACIÓN</button>
+            <button class="btn btn-secondary" onclick="limpiarForm()">↺</button>
+          </div>
+        </div>
+
+        <div class="hidden" id="resultadoCard">
+          <div class="result-card">
+            <div class="result-label">PRECIO FINAL AL CLIENTE</div>
+            <div class="result-price" id="resultPrecio">$0</div>
+            <div class="result-sub" id="resultPorKm">$0/km</div>
+          </div>
+          <div style="background: #fff; border-radius: 12px; padding: 18px; text-align: center; margin-bottom: 15px; border: 2px solid #e8e8e8;">
+            <div style="font-size: 18px; font-weight: 700;" id="resultRuta">Origen ⟷ Destino</div>
+            <div style="color: #888; font-size: 14px; margin-top: 5px;" id="resultKm"></div>
+            <div style="color: #4a90d9; font-size: 14px; margin-top: 5px; font-weight: 600;" id="resultOperador"></div>
+          </div>
+          
+          <div class="desglose" id="desglose"></div>
+          
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn btn-primary" style="flex: 1;" onclick="descargarPDF()">📄 Descargar PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div id="vistaHistorial" class="hidden">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+          <h2 class="card-title" style="margin: 0;">📋 Historial de Cotizaciones</h2>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <select class="input" id="filtroPeriodo" style="width: auto;" onchange="renderHistorial()">
+              <option value="">Todo el tiempo</option>
+              <option value="hoy">Hoy</option>
+              <option value="semana">Esta semana</option>
+              <option value="mes">Este mes</option>
+            </select>
+            <select class="input" id="filtroEstado" style="width: auto;" onchange="renderHistorial()">
+              <option value="">Todos</option>
+              <option value="pendiente">🟡 Pendientes</option>
+              <option value="enruta">🔵 En Ruta</option>
+              <option value="completado">🟢 Completados</option>
+            </select>
+            <span id="historialCount" style="font-size: 14px; color: #888;"></span>
+          </div>
+        </div>
+        <div id="historialLista"></div>
+      </div>
+    </div>
+
+    <!-- TRÁMITES -->
+    <div id="vistaTramites" class="hidden">
+      <div class="alerta-section hidden" id="alertasSection">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+          <h3 class="alerta-title" style="margin: 0;">⚠️ Próximos a Vencer</h3>
+          <div style="display: flex; gap: 10px;">
+            <input type="email" class="input" id="emailAlertas" placeholder="Email" style="width: 200px;">
+            <button class="btn btn-danger btn-sm" onclick="enviarAlertas()">📧 Enviar</button>
+          </div>
+        </div>
+        <div class="alerta-grid" id="alertasGrid"></div>
+      </div>
+      
+      <!-- Calendario Visual en Cubitos -->
+      <div class="card">
+        <h2 class="card-title">📅 Vista de Calendario</h2>
+        <div class="calendario-grid" id="calendarioGrid"></div>
+      </div>
+      
+      <!-- Tabla de Trámites -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 class="card-title" style="margin: 0;">📋 Trámites por Unidad</h2>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalTramite()">+ Agregar</button>
+        </div>
+        <div style="overflow-x: auto;"><table class="table" id="tablaTramites"></table></div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div id="vistaConfig" class="hidden">
+      <div class="config-section">
+        <h2 class="config-title">👷 Operadores</h2>
+        <div class="config-grid" id="listaOperadores"></div>
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+          <input type="text" class="input" id="nuevoOperador" placeholder="Nombre del operador">
+          <button class="btn btn-primary" onclick="agregarOperador()">+ Agregar</button>
+        </div>
+      </div>
+      <div class="config-section">
+        <h2 class="config-title">📤 Exportar / Importar</h2>
+        <p style="color: #888; margin-bottom: 15px;">Respalda tus datos o compártelos con otra computadora.</p>
+        <button class="btn btn-secondary" onclick="exportarDatos()">📥 Exportar</button>
+        <button class="btn btn-secondary" style="margin-left: 10px;" onclick="document.getElementById('importFile').click()">📤 Importar</button>
+        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importarDatos(event)">
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Trámite -->
+  <div class="modal hidden" id="modalTramite">
+    <div class="modal-content">
+      <h3 class="modal-title" id="modalTramiteTitle">➕ Nuevo Trámite</h3>
+      <form onsubmit="guardarTramite(event)">
+        <input type="hidden" id="tramiteId">
+        <div class="form-group"><label class="form-label">Unidad</label><select class="input" id="tramiteUnidad" required></select></div>
+        <div class="form-group"><label class="form-label">Tipo</label><select class="input" id="tramiteTipo" required></select></div>
+        <div class="form-group"><label class="form-label">Fecha Vencimiento</label><input type="date" class="input" id="tramiteFecha" required></div>
+        <div class="form-group"><label class="form-label">Notas</label><textarea class="input" id="tramiteNotas" rows="2"></textarea></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="cerrarModal('modalTramite')">Cancelar</button>
+          <button type="button" class="btn btn-danger hidden" id="btnEliminarTramite" onclick="eliminarTramite()">🗑️</button>
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Estado -->
+  <div class="modal hidden" id="modalEstado">
+    <div class="modal-content">
+      <h3 class="modal-title">📦 Actualizar Viaje</h3>
+      <input type="hidden" id="estadoId">
+      <div class="form-group"><label class="form-label">Estado</label>
+        <select class="input" id="selectEstado">
+          <option value="pendiente">🟡 Pendiente</option>
+          <option value="enruta">🔵 En Ruta</option>
+          <option value="completado">🟢 Completado</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">📸 Fotos de Entrega</label>
+        <div class="fotos-grid" id="fotosPreview"></div>
+        <input type="file" id="inputFotos" accept="image/*" multiple style="display: none;" onchange="agregarFotos(event)">
+        <button type="button" class="btn btn-secondary btn-sm" style="margin-top: 10px;" onclick="document.getElementById('inputFotos').click()">+ Fotos</button>
+      </div>
+      <div class="form-group"><label class="form-label">Notas</label><textarea class="input" id="estadoNotas" rows="2"></textarea></div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="cerrarModal('modalEstado')">Cancelar</button>
+        <button type="button" class="btn btn-primary" style="flex: 1;" onclick="guardarEstado()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Horas Extra -->
+  <div class="modal hidden" id="modalHorasExtra">
+    <div class="modal-content">
+      <h3 class="modal-title">⏰ Agregar Horas Extra</h3>
+      <input type="hidden" id="horasExtraId">
+      <p style="color: #888; margin-bottom: 20px;">Agrega horas extra a esta cotización. El precio se recalculará automáticamente.</p>
+      <div class="grid-half" style="gap: 10px;">
+        <div class="form-group"><label class="form-label">Matutino ($100/hr)</label><input type="number" class="input" id="heMatutino" placeholder="0" min="0" step="0.5"></div>
+        <div class="form-group"><label class="form-label">Nocturno ($200/hr)</label><input type="number" class="input" id="heNocturno" placeholder="0" min="0" step="0.5"></div>
+        <div class="form-group"><label class="form-label">Sábado ($150/hr)</label><input type="number" class="input" id="heSabado" placeholder="0" min="0" step="0.5"></div>
+        <div class="form-group"><label class="form-label">Domingo ($200/hr)</label><input type="number" class="input" id="heDomingo" placeholder="0" min="0" step="0.5"></div>
+        <div class="form-group"><label class="form-label">Urgencia ($200/hr)</label><input type="number" class="input" id="heUrgencia" placeholder="0" min="0" step="0.5"></div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="cerrarModal('modalHorasExtra')">Cancelar</button>
+        <button type="button" class="btn btn-primary" style="flex: 1;" onclick="guardarHorasExtra()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Foto -->
+  <div class="foto-modal hidden" id="modalFoto" onclick="cerrarModal('modalFoto')">
+    <button class="foto-modal-close">✕</button>
+    <img id="fotoAmpliada" src="">
+  </div>
+
+  <script>
+    const UNIDADES = [
+      { clave: 'RAB_54AK8K', placa: '54AK8K', modelo: 'ISUZU Forward', tipo: 'Rabón', combustible: 'Diésel', rendimiento: 3.2, depreciacion: 346.78 },
+      { clave: 'RAB_56AK8K', placa: '56AK8K', modelo: 'VW Constellation', tipo: 'Rabón', combustible: 'Diésel', rendimiento: 3.8, depreciacion: 132.87 },
+      { clave: 'RAB_57AK8K', placa: '57AK8K', modelo: 'ISUZU Forward', tipo: 'Rabón', combustible: 'Diésel', rendimiento: 2.0, depreciacion: 129.43 },
+      { clave: 'VAN_98D4AA', placa: '98D4AA', modelo: 'VW Transporter', tipo: 'Van', combustible: 'Gasolina', rendimiento: 5.5, depreciacion: 86.51 },
+      { clave: 'VAN_D41BPR', placa: 'D41BPR', modelo: 'VW Caddy', tipo: 'Van ligera', combustible: 'Gasolina', rendimiento: 9.5, depreciacion: 122.13 },
+      { clave: 'AUT_MGP230A', placa: 'MGP230A', modelo: 'KIA Rio', tipo: 'Auto chico', combustible: 'Gasolina', rendimiento: 14, depreciacion: 35.96 },
+    ];
+    const CLIENTES = { HERMANA: 0.15, INTERMEDIARIO: 0.20, PREMIUM: 0.25, FINAL: 0.35 };
+    const COMBUSTIBLE = { 'Diésel': 26.6, 'Gasolina': 25.0 };
+    const BONOS_DEFAULT = { SUELDO: 420, KM_CARGA: 1, KM_VACIO: 0.5, COMIDA: 150, HOSPEDAJE: 1000 };
+    const HE_TARIFAS = { MATUTINO: 200, NOCTURNO: 200, SABADO: 500, DOMINGO: 500, FESTIVO: 1000 };
+    const FIJOS = { GPS: 30.77, RENTA: 80.78, SEGURO: 72.88 };
+    const TIPOS_TRAMITE = [
+      { id: 'tenencia', nombre: 'Tenencia', color: '#ef4444', diasAlerta: 30 },
+      { id: 'verificacion', nombre: 'Verificación', color: '#f59e0b', diasAlerta: 15 },
+      { id: 'servicio', nombre: 'Servicio', color: '#3b82f6', diasAlerta: 7 },
+      { id: 'seguro', nombre: 'Seguro', color: '#8b5cf6', diasAlerta: 30 },
+      { id: 'poliza', nombre: 'Póliza', color: '#06b6d4', diasAlerta: 30 },
+      { id: 'licencia', nombre: 'Licencia', color: '#10b981', diasAlerta: 60 },
+    ];
+
+    let viajeRedondo = true, cotizacionActual = null, historial = [], tramites = [], operadores = [], fotosTemp = [];
+    let notificaciones = [], notifMostradas = new Set();
+    let contenedoresTemp = [];
+
+    // Funciones de contenedores
+    function agregarContenedor() {
+      const cantidad = parseInt(document.getElementById('contenedorCantidad').value) || 0;
+      const tipo = document.getElementById('contenedorTipo').value;
+      if (!cantidad || !tipo) return;
+      contenedoresTemp.push({ cantidad, tipo });
+      document.getElementById('contenedorCantidad').value = '';
+      document.getElementById('contenedorTipo').value = '';
+      renderContenedores();
+    }
+
+    function eliminarContenedor(index) {
+      contenedoresTemp.splice(index, 1);
+      renderContenedores();
+    }
+
+    function renderContenedores() {
+      const lista = document.getElementById('contenedoresLista');
+      if (contenedoresTemp.length === 0) {
+        lista.innerHTML = '<p style="color: #888; font-size: 13px; margin-bottom: 10px;">No hay contenedores agregados</p>';
+        return;
+      }
+      lista.innerHTML = contenedoresTemp.map((c, i) => `
+        <div class="contenedor-item">
+          <span class="cantidad">${c.cantidad}x</span>
+          <span class="tipo">${c.tipo}</span>
+          <button class="eliminar" onclick="eliminarContenedor(${i})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    // Funciones de Maniobra
+    function calcularManiobra() {
+      const horas = parseFloat(document.getElementById('maniobrasHoras').value) || 0;
+      const minutos = parseFloat(document.getElementById('maniobrasMinutos').value) || 0;
+      const costo = parseFloat(document.getElementById('maniobraCosto').value) || 0;
+      const totalHoras = horas + (minutos / 60);
+      const total = Math.round(totalHoras * costo);
+      document.getElementById('totalManiobra').textContent = '$' + total.toLocaleString();
+      return total;
+    }
+
+    // Funciones de Bonos
+    function toggleBonos() {
+      const checked = document.getElementById('checkBonos').checked;
+      document.getElementById('bonosSection').classList.toggle('hidden', !checked);
+    }
+
+    function getBonos() {
+      if (!document.getElementById('checkBonos').checked) {
+        return null;
+      }
+      return {
+        sueldo: parseFloat(document.getElementById('bonoSueldo').value) || 0,
+        kmCarga: parseFloat(document.getElementById('bonoKmCarga').value) || 0,
+        kmVacio: parseFloat(document.getElementById('bonoKmVacio').value) || 0,
+        comida: parseFloat(document.getElementById('bonoComida').value) || 0
+      };
+    }
+
+    // Filtro por período
+    function filtrarPorPeriodo(lista, periodo) {
+      if (!periodo) return lista;
+      
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      
+      const inicioSemana = new Date(hoy);
+      inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+      
+      const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      
+      return lista.filter(c => {
+        const fechaCot = parseFechaMX(c.fecha);
+        if (!fechaCot) return false;
+        
+        switch(periodo) {
+          case 'hoy':
+            return fechaCot.toDateString() === hoy.toDateString();
+          case 'semana':
+            return fechaCot >= inicioSemana;
+          case 'mes':
+            return fechaCot >= inicioMes;
+          default:
+            return true;
+        }
+      });
+    }
+
+    function parseFechaMX(fechaStr) {
+      // Formato: "10/2/2026" o "10 feb 2026"
+      if (!fechaStr) return null;
+      const partes = fechaStr.split('/');
+      if (partes.length === 3) {
+        return new Date(partes[2], partes[1] - 1, partes[0]);
+      }
+      return new Date(fechaStr);
+    }
+
+    function init() {
+      actualizarFecha();
+      setInterval(actualizarFecha, 60000);
+      historial = JSON.parse(localStorage.getItem('sc_historial') || '[]');
+      tramites = JSON.parse(localStorage.getItem('sc_tramites') || '[]');
+      operadores = JSON.parse(localStorage.getItem('sc_operadores') || '["Luis Manuel Lopez Celis", "Jose Luis Martinez Gonzalez", "Estanislao Valverde Gonzalez", "Guadalupe Hernandez Jimenez", "Ruben Rodarte Martinez"]');
+      notificaciones = JSON.parse(localStorage.getItem('sc_notificaciones') || '[]');
+      notifMostradas = new Set(JSON.parse(localStorage.getItem('sc_notifMostradas') || '[]'));
+      
+      const su = document.getElementById('selectUnidad'), tu = document.getElementById('tramiteUnidad');
+      su.innerHTML = '<option value="">Seleccionar unidad...</option>';
+      tu.innerHTML = '<option value="">Seleccionar...</option>';
+      UNIDADES.forEach(u => { su.innerHTML += `<option value="${u.clave}">${u.placa} – ${u.modelo}</option>`; tu.innerHTML += `<option value="${u.clave}">${u.placa} - ${u.modelo}</option>`; });
+      
+      const tt = document.getElementById('tramiteTipo');
+      tt.innerHTML = '<option value="">Seleccionar...</option>';
+      TIPOS_TRAMITE.forEach(t => tt.innerHTML += `<option value="${t.id}">${t.nombre}</option>`);
+      
+      renderOperadores(); renderHistorial(); renderTramites(); verificarAlertas(); renderContenedores();
+      
+      // Verificar notificaciones al inicio y cada minuto
+      verificarNotificaciones();
+      setInterval(verificarNotificaciones, 60000);
+      
+      // Cerrar panel al hacer clic fuera
+      document.addEventListener('click', (e) => {
+        const panel = document.getElementById('notifPanel');
+        const btn = document.getElementById('notifBtn');
+        if (!panel.contains(e.target) && !btn.contains(e.target)) {
+          panel.classList.add('hidden');
+        }
+      });
+    }
+
+    // ==========================================
+    // SISTEMA DE NOTIFICACIONES
+    // ==========================================
+    function verificarNotificaciones() {
+      const hoy = new Date();
+      const nuevasNotif = [];
+      
+      tramites.forEach(t => {
+        const dias = getDias(t.fechaVencimiento);
+        const tipo = TIPOS_TRAMITE.find(x => x.id === t.tipo);
+        const unidad = UNIDADES.find(x => x.clave === t.unidad);
+        const notifKey = `${t.id}-${dias}`;
+        
+        // Crear notificaciones según la urgencia
+        if (dias <= 0 && !notifMostradas.has(notifKey + '-vencido')) {
+          nuevasNotif.push({
+            id: Date.now() + Math.random(),
+            key: notifKey + '-vencido',
+            tipo: 'danger',
+            titulo: '🚨 TRÁMITE VENCIDO',
+            mensaje: `${tipo?.nombre} de ${unidad?.placa} (${unidad?.modelo}) está VENCIDO`,
+            detalle: `Venció hace ${Math.abs(dias)} día(s). Requiere atención inmediata.`,
+            tramiteId: t.id,
+            fecha: new Date().toISOString(),
+            leida: false
+          });
+        } else if (dias > 0 && dias <= 3 && !notifMostradas.has(notifKey + '-critico')) {
+          nuevasNotif.push({
+            id: Date.now() + Math.random(),
+            key: notifKey + '-critico',
+            tipo: 'danger',
+            titulo: '⚠️ URGENTE - Vence muy pronto',
+            mensaje: `${tipo?.nombre} de ${unidad?.placa} vence en ${dias} día(s)`,
+            detalle: `Fecha: ${new Date(t.fechaVencimiento).toLocaleDateString('es-MX')}`,
+            tramiteId: t.id,
+            fecha: new Date().toISOString(),
+            leida: false
+          });
+        } else if (dias > 3 && dias <= 7 && !notifMostradas.has(notifKey + '-urgente')) {
+          nuevasNotif.push({
+            id: Date.now() + Math.random(),
+            key: notifKey + '-urgente',
+            tipo: 'warning',
+            titulo: '⏰ Próximo a vencer',
+            mensaje: `${tipo?.nombre} de ${unidad?.placa} vence en ${dias} días`,
+            detalle: `Fecha: ${new Date(t.fechaVencimiento).toLocaleDateString('es-MX')}`,
+            tramiteId: t.id,
+            fecha: new Date().toISOString(),
+            leida: false
+          });
+        } else if (dias > 7 && dias <= (tipo?.diasAlerta || 30) && !notifMostradas.has(notifKey + '-aviso')) {
+          nuevasNotif.push({
+            id: Date.now() + Math.random(),
+            key: notifKey + '-aviso',
+            tipo: 'info',
+            titulo: '📋 Recordatorio',
+            mensaje: `${tipo?.nombre} de ${unidad?.placa} vence en ${dias} días`,
+            detalle: `Fecha: ${new Date(t.fechaVencimiento).toLocaleDateString('es-MX')}`,
+            tramiteId: t.id,
+            fecha: new Date().toISOString(),
+            leida: false
+          });
+        }
+      });
+      
+      // Agregar nuevas notificaciones
+      if (nuevasNotif.length > 0) {
+        nuevasNotif.forEach(n => {
+          notifMostradas.add(n.key);
+          notificaciones.unshift(n);
+          
+          // Mostrar toast para notificaciones urgentes
+          if (n.tipo === 'danger' || n.tipo === 'warning') {
+            mostrarToast(n);
+          }
+        });
+        
+        // Guardar en localStorage
+        localStorage.setItem('sc_notificaciones', JSON.stringify(notificaciones.slice(0, 50)));
+        localStorage.setItem('sc_notifMostradas', JSON.stringify([...notifMostradas]));
+      }
+      
+      actualizarContadorNotif();
+      renderNotificaciones();
+    }
+
+    function actualizarContadorNotif() {
+      const noLeidas = notificaciones.filter(n => !n.leida).length;
+      const countEl = document.getElementById('notifCount');
+      const btnEl = document.getElementById('notifBtn');
+      
+      if (noLeidas > 0) {
+        countEl.textContent = noLeidas > 9 ? '9+' : noLeidas;
+        countEl.classList.remove('hidden');
+        btnEl.classList.add('has-notif');
+      } else {
+        countEl.classList.add('hidden');
+        btnEl.classList.remove('has-notif');
+      }
+    }
+
+    function toggleNotificaciones() {
+      const panel = document.getElementById('notifPanel');
+      panel.classList.toggle('hidden');
+      if (!panel.classList.contains('hidden')) {
+        renderNotificaciones();
+      }
+    }
+
+    function renderNotificaciones() {
+      const body = document.getElementById('notifBody');
+      
+      if (notificaciones.length === 0) {
+        body.innerHTML = `
+          <div class="notif-empty">
+            <div class="notif-empty-icon">🔔</div>
+            <p>No hay notificaciones</p>
+            <p style="font-size: 12px; margin-top: 5px;">Las alertas de trámites aparecerán aquí</p>
+          </div>
+        `;
+        return;
+      }
+      
+      body.innerHTML = notificaciones.slice(0, 20).map(n => {
+        const iconClass = n.tipo === 'danger' ? 'danger' : n.tipo === 'warning' ? 'warning' : 'info';
+        const icon = n.tipo === 'danger' ? '🚨' : n.tipo === 'warning' ? '⚠️' : '📋';
+        const itemClass = n.tipo === 'danger' ? 'urgent' : !n.leida ? 'unread' : '';
+        const tiempo = tiempoTranscurrido(n.fecha);
+        
+        return `
+          <div class="notif-item ${itemClass}" onclick="abrirNotificacion(${n.id})">
+            <div class="notif-icon ${iconClass}">${icon}</div>
+            <div class="notif-content">
+              <div class="notif-title">${n.titulo}</div>
+              <div class="notif-desc">${n.mensaje}</div>
+              <div class="notif-time">${tiempo}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function tiempoTranscurrido(fecha) {
+      const ahora = new Date();
+      const diff = ahora - new Date(fecha);
+      const minutos = Math.floor(diff / 60000);
+      const horas = Math.floor(diff / 3600000);
+      const dias = Math.floor(diff / 86400000);
+      
+      if (minutos < 1) return 'Ahora mismo';
+      if (minutos < 60) return `Hace ${minutos} min`;
+      if (horas < 24) return `Hace ${horas} hora(s)`;
+      return `Hace ${dias} día(s)`;
+    }
+
+    function abrirNotificacion(id) {
+      const notif = notificaciones.find(n => n.id === id);
+      if (notif) {
+        notif.leida = true;
+        localStorage.setItem('sc_notificaciones', JSON.stringify(notificaciones));
+        actualizarContadorNotif();
+        
+        // Ir a la sección de trámites
+        cambiarVista('tramites');
+        toggleNotificaciones();
+        
+        // Si hay un trámite asociado, resaltarlo
+        if (notif.tramiteId) {
+          setTimeout(() => {
+            const badge = document.querySelector(`[onclick="editarTramite(${notif.tramiteId})"]`);
+            if (badge) {
+              badge.style.animation = 'pulse 0.5s 3';
+              badge.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 300);
+        }
+      }
+    }
+
+    function marcarTodasLeidas() {
+      notificaciones.forEach(n => n.leida = true);
+      localStorage.setItem('sc_notificaciones', JSON.stringify(notificaciones));
+      actualizarContadorNotif();
+      renderNotificaciones();
+    }
+
+    function limpiarNotificaciones() {
+      if (confirm('¿Limpiar todas las notificaciones?')) {
+        notificaciones = [];
+        localStorage.setItem('sc_notificaciones', JSON.stringify(notificaciones));
+        actualizarContadorNotif();
+        renderNotificaciones();
+      }
+    }
+
+    function mostrarToast(notif) {
+      const container = document.getElementById('toastContainer');
+      const toastId = 'toast-' + Date.now();
+      
+      const toast = document.createElement('div');
+      toast.id = toastId;
+      toast.className = `toast ${notif.tipo}`;
+      toast.innerHTML = `
+        <div class="toast-icon">${notif.tipo === 'danger' ? '🚨' : '⚠️'}</div>
+        <div class="toast-content">
+          <div class="toast-title">${notif.titulo}</div>
+          <div class="toast-desc">${notif.mensaje}</div>
+        </div>
+        <button class="toast-close" onclick="cerrarToast('${toastId}')">&times;</button>
+      `;
+      
+      container.appendChild(toast);
+      
+      // Reproducir sonido de alerta (si el navegador lo permite)
+      try {
+        const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU' + 'A'.repeat(100));
+        audio.volume = 0.3;
+        // audio.play().catch(() => {}); // Comentado por restricciones de autoplay
+      } catch (e) {}
+      
+      // Auto cerrar después de 8 segundos
+      setTimeout(() => cerrarToast(toastId), 8000);
+    }
+
+    function cerrarToast(id) {
+      const toast = document.getElementById(id);
+      if (toast) {
+        toast.style.animation = 'slideOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+      }
+    }
+
+    function actualizarFecha() { document.getElementById('fechaActual').textContent = '📅 ' + new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+    function cambiarVista(v) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.vista === v));
+      ['vistaCotizar', 'vistaHistorial', 'vistaTramites', 'vistaConfig'].forEach(x => document.getElementById(x).classList.add('hidden'));
+      document.getElementById({ cotizar: 'vistaCotizar', historial: 'vistaHistorial', tramites: 'vistaTramites', config: 'vistaConfig' }[v]).classList.remove('hidden');
+    }
+    function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // Operadores
+    function renderOperadores() {
+      const so = document.getElementById('selectOperador');
+      so.innerHTML = '<option value="">Sin asignar</option>';
+      operadores.forEach(o => so.innerHTML += `<option value="${o}">${o}</option>`);
+      document.getElementById('listaOperadores').innerHTML = operadores.length ? operadores.map((o, i) => `<div class="config-item"><span>👷 ${o}</span><button class="btn btn-danger btn-sm" onclick="eliminarOperador(${i})">🗑️</button></div>`).join('') : '<p style="color:#888;">No hay operadores</p>';
+    }
+    function agregarOperador() { const n = document.getElementById('nuevoOperador').value.trim(); if (n && !operadores.includes(n)) { operadores.push(n); localStorage.setItem('sc_operadores', JSON.stringify(operadores)); document.getElementById('nuevoOperador').value = ''; renderOperadores(); } }
+    function eliminarOperador(i) { if (confirm('¿Eliminar?')) { operadores.splice(i, 1); localStorage.setItem('sc_operadores', JSON.stringify(operadores)); renderOperadores(); } }
+
+    // Cotizador
+    function toggleViajeRedondo() { viajeRedondo = !viajeRedondo; const e = document.getElementById('toggleRedondo'); e.textContent = viajeRedondo ? '↻ Viaje Redondo' : '→ Solo Ida'; e.classList.toggle('active', viajeRedondo); actualizarTotales(); }
+    function actualizarTotales() {
+      const km = parseFloat(document.getElementById('inputKm').value) || 0;
+      const cIda = parseFloat(document.getElementById('inputCasetasIda').value) || 0;
+      const cRegreso = parseFloat(document.getElementById('inputCasetasRegreso').value) || 0;
+      const h = parseFloat(document.getElementById('inputHoras').value) || 0;
+      const m = parseFloat(document.getElementById('inputMinutos').value) || 0;
+      const tiempoTotal = h + (m / 60);
+      
+      document.getElementById('totalKm').textContent = viajeRedondo && km ? `Total: ${(km*2).toLocaleString()} km` : '';
+      
+      // Casetas: suma ida + regreso
+      const totalCasetas = cIda + (viajeRedondo ? cRegreso : 0);
+      document.getElementById('totalCasetas').textContent = totalCasetas ? `Total: $${totalCasetas.toLocaleString()}` : '';
+      
+      if (viajeRedondo && (h || m)) {
+        const totalH = Math.floor(tiempoTotal * 2);
+        const totalM = Math.round(((tiempoTotal * 2) - totalH) * 60);
+        document.getElementById('totalHoras').textContent = `Total: ${totalH}h ${totalM}m`;
+      } else {
+        document.getElementById('totalHoras').textContent = '';
+      }
+    }
+    
+    function getTiempoEnHoras() {
+      const h = parseFloat(document.getElementById('inputHoras').value) || 0;
+      const m = parseFloat(document.getElementById('inputMinutos').value) || 0;
+      return h + (m / 60);
+    }
+    
+    function getCasetasTotal() {
+      const cIda = parseFloat(document.getElementById('inputCasetasIda').value) || 0;
+      const cRegreso = parseFloat(document.getElementById('inputCasetasRegreso').value) || 0;
+      return viajeRedondo ? (cIda + cRegreso) : cIda;
+    }
+    function calcularTotalHorasExtra() {
+      const t = ['Matutino','Nocturno','Sabado','Domingo','Festivo'].reduce((s,x) => s + (parseFloat(document.getElementById('horas'+x).value)||0) * HE_TARIFAS[x.toUpperCase()], 0);
+      document.getElementById('totalHorasExtra').textContent = '$' + t.toLocaleString();
+      return t;
+    }
+    function limpiarHorasExtra() { ['Matutino','Nocturno','Sabado','Domingo','Festivo'].forEach(x => document.getElementById('horas'+x).value = ''); document.getElementById('totalHorasExtra').textContent = '$0'; }
+    function mostrarError(m) { const e = document.getElementById('errorMsg'); e.textContent = m; e.classList.remove('hidden'); setTimeout(() => e.classList.add('hidden'), 5000); }
+
+    function calcularCotizacion() {
+      const km = parseFloat(document.getElementById('inputKm').value) || 0;
+      const casetas = getCasetasTotal();
+      const horas = getTiempoEnHoras();
+      const uClave = document.getElementById('selectUnidad').value;
+      const origen = document.getElementById('inputOrigen').value.trim();
+      const destino = document.getElementById('inputDestino').value.trim();
+      
+      if (!origen || !destino) return mostrarError('Ingresa origen y destino');
+      if (!km) return mostrarError('Ingresa los kilómetros');
+      if (!uClave) return mostrarError('Selecciona una unidad');
+      
+      const u = UNIDADES.find(x => x.clave === uClave);
+      const tipoCliente = document.getElementById('selectTipoCliente').value;
+      const margen = CLIENTES[tipoCliente];
+      const operador = document.getElementById('selectOperador').value;
+      
+      const kmTotal = viajeRedondo ? km * 2 : km;
+      const kmCarga = km, kmVacio = viajeRedondo ? km : 0;
+      const horasTotal = (horas || kmTotal / 60) * (viajeRedondo ? 2 : 1);
+      const dias = Math.max(1, Math.ceil(horasTotal / 8));
+      
+      const litros = (kmCarga / u.rendimiento) + (kmVacio / (u.rendimiento * 1.15));
+      const costoCombustible = litros * COMBUSTIBLE[u.combustible];
+      const casetasTotal = casetas; // Ya incluye ida + regreso desde getCasetasTotal()
+      
+      // Bonos opcionales
+      const bonos = getBonos();
+      let viaticos = 0, bonosBase = 0;
+      if (bonos) {
+        viaticos = (dias * 3 * bonos.comida) + (dias > 1 ? (dias - 1) * BONOS_DEFAULT.HOSPEDAJE : 0);
+        bonosBase = (bonos.sueldo * dias) + (kmCarga * bonos.kmCarga) + (kmVacio * bonos.kmVacio);
+      }
+      
+      // Maniobra
+      const maniobra = calcularManiobra();
+      const maniobrasHoras = parseFloat(document.getElementById('maniobrasHoras').value) || 0;
+      const maniobrasMinutos = parseFloat(document.getElementById('maniobrasMinutos').value) || 0;
+      const maniobraCostoPorHora = parseFloat(document.getElementById('maniobraCosto').value) || 0;
+      
+      const horasExtra = calcularTotalHorasExtra();
+      const depreciacion = u.depreciacion * dias;
+      const gastosFijos = (FIJOS.GPS + FIJOS.RENTA + FIJOS.SEGURO) * dias;
+      
+      const costoTotal = bonosBase + horasExtra + viaticos + costoCombustible + casetasTotal + depreciacion + gastosFijos + maniobra;
+      const precioFinal = costoTotal / (1 - margen);
+      const ganancia = precioFinal - costoTotal;
+      
+      cotizacionActual = {
+        id: Date.now(), fecha: new Date().toLocaleDateString('es-MX'), cliente: document.getElementById('inputCliente').value || 'Sin especificar',
+        operador: operador || 'Sin asignar', origen, destino, viajeRedondo, kmTotal, dias, unidad: u, tipoCliente,
+        combustible: { litros: Math.round(litros * 10) / 10, costo: Math.round(costoCombustible) },
+        casetas: Math.round(casetasTotal), viaticos: Math.round(viaticos), bonosBase: Math.round(bonosBase), horasExtra: Math.round(horasExtra),
+        depreciacion: Math.round(depreciacion), gastosFijos: Math.round(gastosFijos),
+        maniobra: { horas: maniobrasHoras, minutos: maniobrasMinutos, costoPorHora: maniobraCostoPorHora, total: maniobra },
+        incluyeBonos: bonos !== null,
+        costoTotal: Math.round(costoTotal), margen: Math.round(margen * 100), ganancia: Math.round(ganancia),
+        precioFinal: Math.round(precioFinal), precioPorKm: Math.round((precioFinal / kmTotal) * 100) / 100,
+        estado: 'pendiente', fotos: [], notasEntrega: '',
+        contenedores: [...contenedoresTemp],
+        descripcionCarga: document.getElementById('contenedorDescripcion').value.trim()
+      };
+      
+      mostrarResultado(cotizacionActual);
+      historial.unshift(cotizacionActual);
+      localStorage.setItem('sc_historial', JSON.stringify(historial.slice(0, 200)));
+      renderHistorial();
+      
+      // Limpiar contenedores después de guardar
+      contenedoresTemp = [];
+      document.getElementById('contenedorDescripcion').value = '';
+      renderContenedores();
+    }
+
+    function mostrarResultado(c) {
+      document.getElementById('resultPrecio').textContent = '$' + c.precioFinal.toLocaleString();
+      document.getElementById('resultPorKm').textContent = '$' + c.precioPorKm + '/km';
+      document.getElementById('resultRuta').textContent = c.origen + ' ⟷ ' + c.destino;
+      document.getElementById('resultKm').textContent = c.kmTotal.toLocaleString() + ' km • ' + c.dias + ' día(s) • ' + (c.viajeRedondo ? 'Redondo' : 'Solo ida');
+      document.getElementById('resultOperador').textContent = c.operador !== 'Sin asignar' ? '👷 ' + c.operador : '';
+      
+      let desgloseHTML = `
+        <div class="desglose-section">
+          <div class="desglose-title">📋 Costos Operativos</div>
+          <div class="desglose-row"><span>⛽ Combustible (${c.combustible.litros}L)</span><span>$${c.combustible.costo.toLocaleString()}</span></div>
+          <div class="desglose-row"><span>🛣️ Casetas</span><span>$${c.casetas.toLocaleString()}</span></div>`;
+      
+      if (c.incluyeBonos) {
+        desgloseHTML += `
+          <div class="desglose-row"><span>🍽️ Viáticos</span><span>$${c.viaticos.toLocaleString()}</span></div>
+          <div class="desglose-row"><span>👤 Bonos operador</span><span>$${c.bonosBase.toLocaleString()}</span></div>`;
+      }
+      
+      if (c.maniobra && c.maniobra.total > 0) {
+        desgloseHTML += `<div class="desglose-row highlight"><span>🏗️ Maniobra (${c.maniobra.horas}h ${c.maniobra.minutos}m)</span><span>$${c.maniobra.total.toLocaleString()}</span></div>`;
+      }
+      
+      if (c.horasExtra > 0) {
+        desgloseHTML += `<div class="desglose-row highlight"><span>⏰ Horas Extra</span><span>$${c.horasExtra.toLocaleString()}</span></div>`;
+      }
+      
+      desgloseHTML += `
+          <div class="desglose-row"><span>📉 Depreciación unidad</span><span>$${c.depreciacion.toLocaleString()}</span></div>
+          <div class="desglose-row"><span>🏢 Gastos fijos (GPS, renta, seguro)</span><span>$${c.gastosFijos.toLocaleString()}</span></div>
+        </div>
+        <div class="desglose-section" style="padding: 0;">
+          <div class="desglose-row total"><span>💰 COSTO TOTAL</span><span>$${c.costoTotal.toLocaleString()}</span></div>
+        </div>
+        <div class="desglose-section" style="padding: 0;">
+          <div class="desglose-row margen"><span>📊 MARGEN (${c.margen}%)</span><span>+${c.margen}% al cliente</span></div>
+          <div class="desglose-row ganancia"><span>💵 GANANCIA</span><span>+$${c.ganancia.toLocaleString()}</span></div>
+        </div>
+      `;
+      
+      document.getElementById('desglose').innerHTML = desgloseHTML;
+      
+      document.getElementById('resultadoCard').classList.remove('hidden');
+      document.getElementById('cotizarGrid').style.gridTemplateColumns = '1fr 450px';
+      document.getElementById('errorMsg').classList.add('hidden');
+    }
+
+    function limpiarForm() {
+      ['inputOrigen','inputDestino','inputCliente','inputKm','inputCasetasIda','inputCasetasRegreso','inputHoras','inputMinutos'].forEach(x => document.getElementById(x).value = '');
+      document.getElementById('selectUnidad').value = '';
+      document.getElementById('selectOperador').value = '';
+      // Limpiar maniobra
+      document.getElementById('maniobrasHoras').value = '';
+      document.getElementById('maniobrasMinutos').value = '';
+      document.getElementById('maniobraCosto').value = '';
+      document.getElementById('totalManiobra').textContent = '$0';
+      // Limpiar bonos
+      document.getElementById('checkBonos').checked = false;
+      document.getElementById('bonosSection').classList.add('hidden');
+      limpiarHorasExtra(); actualizarTotales();
+      document.getElementById('resultadoCard').classList.add('hidden');
+      document.getElementById('cotizarGrid').style.gridTemplateColumns = '1fr';
+      cotizacionActual = null;
+    }
+
+    // PDF PROFESIONAL CON LOGO
+    function descargarPDF() {
+      if (!cotizacionActual) return alert('No hay cotización para descargar');
+      
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const c = cotizacionActual;
+        let y = 0;
+        
+        // === HEADER CORPORATIVO ===
+        doc.setFillColor(26, 26, 94);
+        doc.rect(0, 0, 210, 42, 'F');
+        
+        // Logo texto
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.text('SupplyChain', 20, 20);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(180, 180, 180);
+        doc.text('MÉXICO', 20, 27);
+        
+        // Número de cotización
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(200, 200, 200);
+        doc.text('COTIZACIÓN', 160, 15);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.text('#' + c.id, 160, 24);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(200, 200, 200);
+        doc.text(c.fecha, 160, 32);
+        
+        y = 52;
+        
+        // === PRECIO DESTACADO ===
+        doc.setFillColor(196, 30, 58);
+        doc.roundedRect(15, y, 180, 30, 3, 3, 'F');
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(255, 255, 255);
+        doc.text('PRECIO FINAL AL CLIENTE', 105, y + 8, { align: 'center' });
+        doc.setFontSize(26);
+        doc.setFont('helvetica', 'bold');
+        doc.text('$' + c.precioFinal.toLocaleString() + ' MXN', 105, y + 21, { align: 'center' });
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text('($' + c.precioPorKm + ' por kilómetro)', 105, y + 28, { align: 'center' });
+        
+        y += 38;
+        
+        // === INFO RUTA ===
+        doc.setFillColor(248, 248, 248);
+        doc.roundedRect(15, y, 180, 24, 2, 2, 'F');
+        doc.setTextColor(26, 26, 94);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(c.origen + '  →  ' + c.destino, 105, y + 10, { align: 'center' });
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(c.kmTotal.toLocaleString() + ' km  •  ' + c.dias + ' día(s)  •  ' + (c.viajeRedondo ? 'Viaje Redondo' : 'Solo Ida'), 105, y + 18, { align: 'center' });
+        
+        y += 32;
+        
+        // === DATOS CLIENTE Y UNIDAD ===
+        doc.setTextColor(26, 26, 94);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Cliente', 20, y);
+        doc.text('Unidad Asignada', 115, y);
+        y += 3;
+        doc.setDrawColor(220, 220, 220);
+        doc.line(20, y, 100, y);
+        doc.line(115, y, 195, y);
+        y += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(50, 50, 50);
+        doc.text(c.cliente, 20, y);
+        doc.text(c.unidad.placa + ' - ' + c.unidad.modelo, 115, y);
+        y += 5;
+        doc.setTextColor(100, 100, 100);
+        doc.setFontSize(8);
+        doc.text('Tipo: ' + c.tipoCliente, 20, y);
+        doc.text(c.unidad.tipo + ' | ' + c.unidad.combustible, 115, y);
+        if (c.operador !== 'Sin asignar') { y += 5; doc.text('Operador: ' + c.operador, 20, y); }
+        
+        y += 10;
+        
+        // === CONTENEDORES / CARGA ===
+        if ((c.contenedores && c.contenedores.length > 0) || c.descripcionCarga) {
+          doc.setTextColor(26, 26, 94);
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Contenido / Carga', 20, y);
+          y += 3;
+          doc.setDrawColor(220, 220, 220);
+          doc.line(20, y, 195, y);
+          y += 6;
+          
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.setTextColor(50, 50, 50);
+          
+          if (c.contenedores && c.contenedores.length > 0) {
+            const contenedoresTexto = c.contenedores.map(cont => cont.cantidad + 'x ' + cont.tipo).join('  •  ');
+            doc.text(contenedoresTexto, 20, y);
+            y += 5;
+          }
+          
+          if (c.descripcionCarga) {
+            doc.setTextColor(100, 100, 100);
+            doc.setFontSize(8);
+            doc.text('Descripción: ' + c.descripcionCarga, 20, y);
+            y += 5;
+          }
+          
+          y += 5;
+        }
+        
+        // === DESGLOSE DE COSTOS ===
+        doc.setTextColor(26, 26, 94);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Desglose de Costos', 20, y);
+        y += 3;
+        doc.setDrawColor(26, 26, 94);
+        doc.line(20, y, 195, y);
+        y += 6;
+        
+        const costos = [
+          ['Combustible (' + c.combustible.litros + ' litros)', c.combustible.costo],
+          ['Casetas / Peajes', c.casetas],
+        ];
+        
+        if (c.incluyeBonos) {
+          costos.push(['Viáticos', c.viaticos]);
+          costos.push(['Bonos operador', c.bonosBase]);
+        }
+        
+        if (c.maniobra && c.maniobra.total > 0) {
+          costos.push(['Maniobra (' + c.maniobra.horas + 'h ' + c.maniobra.minutos + 'm)', c.maniobra.total]);
+        }
+        
+        if (c.horasExtra > 0) costos.push(['Horas Extra', c.horasExtra]);
+        costos.push(['Depreciación de unidad', c.depreciacion], ['Gastos fijos (GPS, renta, seguro)', c.gastosFijos]);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        costos.forEach((item, i) => {
+          if (i % 2 === 0) { doc.setFillColor(248, 250, 252); doc.rect(15, y - 3, 180, 7, 'F'); }
+          doc.setTextColor(60, 60, 60);
+          doc.text(item[0], 20, y);
+          doc.text('$' + item[1].toLocaleString(), 190, y, { align: 'right' });
+          y += 7;
+        });
+        
+        y += 3;
+        
+        // === TOTALES ===
+        doc.setFillColor(26, 26, 94);
+        doc.roundedRect(15, y, 180, 11, 2, 2, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text('Costo Total de Operación', 25, y + 7);
+        doc.text('$' + c.costoTotal.toLocaleString(), 185, y + 7, { align: 'right' });
+        y += 14;
+        
+        // Margen
+        doc.setFillColor(219, 234, 254);
+        doc.roundedRect(15, y, 180, 9, 2, 2, 'F');
+        doc.setTextColor(30, 64, 175);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Margen de Ganancia (' + c.margen + '%)', 25, y + 6);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Se cobra ' + c.margen + '% adicional', 185, y + 6, { align: 'right' });
+        y += 11;
+        
+        // Ganancia
+        doc.setFillColor(220, 252, 231);
+        doc.roundedRect(15, y, 180, 9, 2, 2, 'F');
+        doc.setTextColor(22, 101, 52);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Ganancia Neta', 25, y + 6);
+        doc.text('+$' + c.ganancia.toLocaleString(), 185, y + 6, { align: 'right' });
+        
+        // === PIE DE PÁGINA ===
+        doc.setFillColor(26, 26, 94);
+        doc.rect(0, 282, 210, 15, 'F');
+        doc.setTextColor(200, 200, 200);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Cotización válida por 7 días  •  Precios en Pesos Mexicanos (MXN)  •  Sujeto a disponibilidad', 105, 289, { align: 'center' });
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.text('SupplyChain México', 105, 294, { align: 'center' });
+        
+        doc.save('Cotizacion_' + c.id + '_SupplyChain.pdf');
+        
+      } catch (e) {
+        console.error(e);
+        alert('Error generando PDF. Verifica tu conexión a internet.\n\nError: ' + e.message);
+      }
+    }
+
+    // HISTORIAL
+    function renderHistorial() {
+      const filtroEstado = document.getElementById('filtroEstado').value;
+      const filtroPeriodo = document.getElementById('filtroPeriodo').value;
+      
+      let lista = [...historial];
+      
+      // Filtrar por estado
+      if (filtroEstado) {
+        lista = lista.filter(c => c.estado === filtroEstado);
+      }
+      
+      // Filtrar por período
+      lista = filtrarPorPeriodo(lista, filtroPeriodo);
+      
+      document.getElementById('historialCount').textContent = lista.length + ' cotizaciones';
+      
+      const el = document.getElementById('historialLista');
+      if (!lista.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>No hay cotizaciones</p></div>'; return; }
+      
+      el.innerHTML = lista.map(c => {
+        const ec = { pendiente: 'estado-pendiente', enruta: 'estado-enruta', completado: 'estado-completado' }[c.estado || 'pendiente'];
+        const et = { pendiente: '🟡 Pendiente', enruta: '🔵 En Ruta', completado: '🟢 Completado' }[c.estado || 'pendiente'];
+        return `
+          <div class="historial-item">
+            <div class="historial-header">
+              <div>
+                <span class="estado-badge ${ec}">${et}</span>
+                <div class="historial-cliente">${c.cliente}</div>
+                <div class="historial-meta">#${c.id} • ${c.fecha}${c.operador !== 'Sin asignar' ? ' • 👷 ' + c.operador : ''}</div>
+              </div>
+              <div class="historial-precio">$${c.precioFinal.toLocaleString()}</div>
+            </div>
+            <div class="historial-ruta">${c.origen} ⟷ ${c.destino}<br><span style="font-size:14px;color:#888;">${c.kmTotal.toLocaleString()} km • ${c.dias}d • ${c.unidad.placa}</span></div>
+            ${c.maniobra && c.maniobra.total > 0 ? `<div style="background:#e0f2fe;padding:10px;border-radius:8px;margin:10px 0;"><strong>🏗️ Maniobra:</strong> ${c.maniobra.horas}h ${c.maniobra.minutos}m = $${c.maniobra.total.toLocaleString()}</div>` : ''}
+            ${c.horasExtra > 0 ? `<div style="background:#fffbeb;padding:10px;border-radius:8px;margin:10px 0;"><strong>⏰ Horas Extra:</strong> $${c.horasExtra.toLocaleString()}</div>` : ''}
+            ${c.fotos?.length ? `<div style="margin:10px 0;"><strong>📸 Fotos (${c.fotos.length}):</strong><div class="fotos-grid">${c.fotos.map(f => `<img src="${f}" class="foto-thumb" onclick="ampliarFoto('${f}')">`).join('')}</div>${c.notasEntrega ? `<p style="margin-top:10px;color:#666;"><strong>Notas:</strong> ${c.notasEntrega}</p>` : ''}</div>` : ''}
+            <div style="background:#f0f0f0;padding:12px;border-radius:8px;margin:15px 0;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span>Costo operación:</span><strong>$${c.costoTotal.toLocaleString()}</strong></div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#004085;"><span>Margen (${c.margen}%):</span><strong>+${c.margen}%</strong></div>
+              <div style="display:flex;justify-content:space-between;color:#155724;"><span>Ganancia:</span><strong>+$${c.ganancia.toLocaleString()}</strong></div>
+            </div>
+            <div class="historial-actions">
+              <button class="btn btn-secondary btn-sm" onclick="verCotizacion(${c.id})">👁️ Ver</button>
+              <button class="btn btn-primary btn-sm" onclick="abrirModalEstado(${c.id})">📦 Estado</button>
+              <button class="btn btn-success btn-sm" onclick="abrirModalHorasExtra(${c.id})">⏰ +Bonos</button>
+              <button class="btn btn-secondary btn-sm" onclick="descargarPDFPorId(${c.id})">📄 PDF</button>
+              <button class="btn btn-danger btn-sm" onclick="eliminarCotizacion(${c.id})">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function verCotizacion(id) { cotizacionActual = historial.find(c => c.id === id); if (cotizacionActual) { mostrarResultado(cotizacionActual); cambiarVista('cotizar'); } }
+    function descargarPDFPorId(id) { cotizacionActual = historial.find(c => c.id === id); descargarPDF(); }
+    
+    function eliminarCotizacion(id) {
+      const c = historial.find(x => x.id === id);
+      if (confirm(`¿Estás seguro de eliminar la cotización #${id}?\n\nCliente: ${c.cliente}\nRuta: ${c.origen} → ${c.destino}\nPrecio: $${c.precioFinal.toLocaleString()}\n\nEsta acción no se puede deshacer.`)) {
+        historial = historial.filter(x => x.id !== id);
+        localStorage.setItem('sc_historial', JSON.stringify(historial));
+        renderHistorial();
+      }
+    }
+
+    // Modal Estado
+    function abrirModalEstado(id) {
+      const c = historial.find(x => x.id === id);
+      document.getElementById('estadoId').value = id;
+      document.getElementById('selectEstado').value = c.estado || 'pendiente';
+      document.getElementById('estadoNotas').value = c.notasEntrega || '';
+      fotosTemp = c.fotos ? [...c.fotos] : [];
+      renderFotosPreview();
+      document.getElementById('modalEstado').classList.remove('hidden');
+    }
+    function renderFotosPreview() {
+      document.getElementById('fotosPreview').innerHTML = fotosTemp.map((f, i) => `<div style="position:relative;display:inline-block;"><img src="${f}" class="foto-thumb"><button onclick="fotosTemp.splice(${i},1);renderFotosPreview();" style="position:absolute;top:-5px;right:-5px;background:#c41e3a;color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;">✕</button></div>`).join('');
+    }
+    function agregarFotos(e) { Array.from(e.target.files).forEach(f => { const r = new FileReader(); r.onload = ev => { fotosTemp.push(ev.target.result); renderFotosPreview(); }; r.readAsDataURL(f); }); e.target.value = ''; }
+    function guardarEstado() {
+      const id = parseInt(document.getElementById('estadoId').value);
+      historial = historial.map(c => c.id === id ? { ...c, estado: document.getElementById('selectEstado').value, fotos: [...fotosTemp], notasEntrega: document.getElementById('estadoNotas').value } : c);
+      localStorage.setItem('sc_historial', JSON.stringify(historial));
+      renderHistorial(); cerrarModal('modalEstado');
+    }
+    function ampliarFoto(src) { document.getElementById('fotoAmpliada').src = src; document.getElementById('modalFoto').classList.remove('hidden'); }
+
+    // Modal Horas Extra
+    function abrirModalHorasExtra(id) {
+      const c = historial.find(x => x.id === id);
+      document.getElementById('horasExtraId').value = id;
+      ['Matutino','Nocturno','Sabado','Domingo','Urgencia'].forEach(x => document.getElementById('he'+x).value = '');
+      document.getElementById('modalHorasExtra').classList.remove('hidden');
+    }
+    function guardarHorasExtra() {
+      const id = parseInt(document.getElementById('horasExtraId').value);
+      const he = ['Matutino','Nocturno','Sabado','Domingo','Urgencia'].reduce((s,x) => s + (parseFloat(document.getElementById('he'+x).value)||0) * HE_TARIFAS[x.toUpperCase()], 0);
+      if (he <= 0) return alert('Ingresa al menos una hora extra');
+      
+      historial = historial.map(c => {
+        if (c.id !== id) return c;
+        const nuevoHE = (c.horasExtra || 0) + Math.round(he);
+        const costoTotal = c.costoTotal - (c.horasExtra || 0) + nuevoHE;
+        const precioFinal = Math.round(costoTotal / (1 - c.margen / 100));
+        const ganancia = precioFinal - costoTotal;
+        return { ...c, horasExtra: nuevoHE, costoTotal, precioFinal, ganancia, precioPorKm: Math.round((precioFinal / c.kmTotal) * 100) / 100 };
+      });
+      localStorage.setItem('sc_historial', JSON.stringify(historial));
+      renderHistorial(); cerrarModal('modalHorasExtra');
+      alert('✅ Horas extra agregadas. El precio se ha recalculado.');
+    }
+
+    // Trámites
+    function getDias(f) { return Math.ceil((new Date(f) - new Date()) / 864e5); }
+    function verificarAlertas() {
+      const a = tramites.filter(t => { const d = getDias(t.fechaVencimiento); const tipo = TIPOS_TRAMITE.find(x => x.id === t.tipo); return d <= (tipo?.diasAlerta || 30) && d >= 0; });
+      document.getElementById('alertaBadge').classList.toggle('hidden', !a.length);
+      document.getElementById('alertaCount').textContent = a.length;
+      document.getElementById('tramitesBadge').classList.toggle('hidden', !a.length);
+      document.getElementById('tramitesBadge').textContent = a.length;
+      const s = document.getElementById('alertasSection');
+      if (a.length) {
+        s.classList.remove('hidden');
+        document.getElementById('alertasGrid').innerHTML = a.map(t => { const u = UNIDADES.find(x => x.clave === t.unidad); const tipo = TIPOS_TRAMITE.find(x => x.id === t.tipo); const d = getDias(t.fechaVencimiento); return `<div class="alerta-item" style="border-color:${tipo?.color}"><strong>${u?.placa}</strong><br>${tipo?.nombre}<br><span style="color:${d<=7?'#c41e3a':'#f59e0b'}">${d} días</span></div>`; }).join('');
+      } else s.classList.add('hidden');
+    }
+    
+    function renderCalendarioVisual() {
+      const grid = document.getElementById('calendarioGrid');
+      
+      // Obtener todos los trámites ordenados por fecha
+      const tramitesOrdenados = [...tramites].sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento));
+      
+      if (tramitesOrdenados.length === 0) {
+        grid.innerHTML = '<p style="color: #888; text-align: center; padding: 30px;">No hay trámites registrados. Agrega trámites para verlos aquí.</p>';
+        return;
+      }
+      
+      grid.innerHTML = tramitesOrdenados.map(t => {
+        const u = UNIDADES.find(x => x.clave === t.unidad);
+        const tipo = TIPOS_TRAMITE.find(x => x.id === t.tipo);
+        const dias = getDias(t.fechaVencimiento);
+        const fecha = new Date(t.fechaVencimiento).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+        
+        let cardClass = '';
+        let diasTexto = '';
+        
+        if (dias <= 0) {
+          cardClass = 'vencido';
+          diasTexto = dias === 0 ? 'HOY' : Math.abs(dias);
+        } else if (dias <= 7) {
+          cardClass = 'urgente';
+          diasTexto = dias;
+        } else if (dias <= 30) {
+          cardClass = 'proximo';
+          diasTexto = dias;
+        } else {
+          diasTexto = dias;
+        }
+        
+        return `
+          <div class="calendario-card ${cardClass}" onclick="editarTramite(${t.id})" style="cursor: pointer;">
+            <div class="calendario-header">
+              <span class="calendario-placa">${u?.placa || 'N/A'}</span>
+              <span class="calendario-tipo">${u?.tipo || ''}</span>
+            </div>
+            <div class="calendario-body">
+              <div class="calendario-dias">${diasTexto}</div>
+              <div class="calendario-label">${dias <= 0 ? (dias === 0 ? 'Vence hoy' : 'días vencido') : 'días restantes'}</div>
+              <div class="calendario-fecha">📆 ${fecha}</div>
+              <div class="calendario-tramite">
+                <span class="calendario-dot" style="background: ${tipo?.color || '#888'}"></span>
+                ${tipo?.nombre || 'Trámite'}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function renderTramites() {
+      // Renderizar calendario visual
+      renderCalendarioVisual();
+      
+      // Renderizar tabla
+      document.getElementById('tablaTramites').innerHTML = `<thead><tr><th>Unidad</th>${TIPOS_TRAMITE.map(t => `<th style="text-align:center"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${t.color};margin-right:5px;"></span>${t.nombre}</th>`).join('')}<th></th></tr></thead><tbody>${UNIDADES.map(u => `<tr><td><strong>${u.placa}</strong><br><small style="color:#888">${u.modelo}</small></td>${TIPOS_TRAMITE.map(tipo => { const tr = tramites.find(t => t.unidad === u.clave && t.tipo === tipo.id); if (tr) { const d = getDias(tr.fechaVencimiento); let cl = 'tramite-ok', tx = new Date(tr.fechaVencimiento).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}); if (d <= 0) { cl = 'tramite-vencido'; tx = 'Vencido'; } else if (d <= 7) { cl = 'tramite-urgente'; tx = d + 'd'; } else if (d <= 30) { cl = 'tramite-proximo'; tx = d + 'd'; } return `<td style="text-align:center"><span class="tramite-badge ${cl}" onclick="editarTramite(${tr.id})">${tx}</span></td>`; } return '<td style="text-align:center;color:#ddd">—</td>'; }).join('')}<td style="text-align:center"><button class="btn btn-secondary btn-sm" onclick="abrirModalTramite('${u.clave}')">+</button></td></tr>`).join('')}</tbody>`;
+      verificarAlertas();
+    }
+    function abrirModalTramite(uc = '') { document.getElementById('modalTramiteTitle').textContent = '➕ Nuevo Trámite'; document.getElementById('tramiteId').value = ''; document.getElementById('tramiteUnidad').value = uc; document.getElementById('tramiteTipo').value = ''; document.getElementById('tramiteFecha').value = ''; document.getElementById('tramiteNotas').value = ''; document.getElementById('btnEliminarTramite').classList.add('hidden'); document.getElementById('modalTramite').classList.remove('hidden'); }
+    function editarTramite(id) { const t = tramites.find(x => x.id === id); if (!t) return; document.getElementById('modalTramiteTitle').textContent = '✏️ Editar'; document.getElementById('tramiteId').value = t.id; document.getElementById('tramiteUnidad').value = t.unidad; document.getElementById('tramiteTipo').value = t.tipo; document.getElementById('tramiteFecha').value = t.fechaVencimiento; document.getElementById('tramiteNotas').value = t.notas || ''; document.getElementById('btnEliminarTramite').classList.remove('hidden'); document.getElementById('modalTramite').classList.remove('hidden'); }
+    function guardarTramite(e) { e.preventDefault(); const id = document.getElementById('tramiteId').value; const d = { id: id ? parseInt(id) : Date.now(), unidad: document.getElementById('tramiteUnidad').value, tipo: document.getElementById('tramiteTipo').value, fechaVencimiento: document.getElementById('tramiteFecha').value, notas: document.getElementById('tramiteNotas').value }; if (id) tramites = tramites.map(t => t.id === parseInt(id) ? d : t); else tramites.push(d); localStorage.setItem('sc_tramites', JSON.stringify(tramites)); renderTramites(); cerrarModal('modalTramite'); verificarNotificaciones(); }
+    function eliminarTramite() { const id = document.getElementById('tramiteId').value; if (id && confirm('¿Eliminar?')) { tramites = tramites.filter(t => t.id !== parseInt(id)); localStorage.setItem('sc_tramites', JSON.stringify(tramites)); renderTramites(); cerrarModal('modalTramite'); } }
+    function enviarAlertas() { const email = document.getElementById('emailAlertas').value; if (!email) return alert('Ingresa email'); const a = tramites.filter(t => getDias(t.fechaVencimiento) <= (TIPOS_TRAMITE.find(x => x.id === t.tipo)?.diasAlerta || 30) && getDias(t.fechaVencimiento) >= 0); const msg = a.map(t => `• ${UNIDADES.find(x => x.clave === t.unidad)?.placa}: ${TIPOS_TRAMITE.find(x => x.id === t.tipo)?.nombre} - ${getDias(t.fechaVencimiento)}d`).join('%0A'); window.location.href = `mailto:${email}?subject=${encodeURIComponent('⚠️ Alerta Trámites - SupplyChain')}&body=Trámites próximos:%0A%0A${msg}%0A%0A--SupplyChain México`; }
+
+    // Export/Import
+    function exportarDatos() { const d = { historial, tramites, operadores, v: '5.0', fecha: new Date().toISOString() }; const b = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = `SupplyChain_Backup_${new Date().toISOString().split('T')[0]}.json`; l.click(); }
+    function importarDatos(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { const d = JSON.parse(ev.target.result); if (d.historial) { historial = d.historial; localStorage.setItem('sc_historial', JSON.stringify(historial)); } if (d.tramites) { tramites = d.tramites; localStorage.setItem('sc_tramites', JSON.stringify(tramites)); } if (d.operadores) { operadores = d.operadores; localStorage.setItem('sc_operadores', JSON.stringify(operadores)); } renderHistorial(); renderTramites(); renderOperadores(); alert('✅ Importado'); } catch (err) { alert('Error: ' + err.message); } }; r.readAsText(f); e.target.value = ''; }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+/* ── Tokens de diseño ─────────────────────────────────────────────────────── */
+:root {
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04';
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Colores corporativos */
+  --brand-navy:    #1e3a5f;
+  --brand-red:     #dc3545;
+  --brand-green:   #28a745;
+  --brand-amber:   #ffc107;
+
+  /* Light theme */
+  --page-bg:       #f5f7fa;
+  --card-bg:       #ffffff;
+  --card-border:   #e8edf2;
+  --card-shadow:   0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --sidebar-bg:    #ffffff;
+  --header-bg:     #ffffff;
+  --text-primary:  #1e2d3d;
+  --text-muted:    #64748b;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--page-bg); }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* Nunito para headings también — misma familia que el logo "SupplyChain" */
+h1, h2, h3, .font-display { font-family: 'Nunito', sans-serif; letter-spacing: -0.01em; font-weight: 800; }
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d9e0; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #9eaab8; }
+
+/* ── Animaciones ──────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-up  { animation: fadeUp  0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-in  { animation: fadeIn  0.3s ease both; }
+.animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.30s; }
+
+/* ── Login: marco animado azul + naranja ────────────────────────────────── */
+@keyframes login-frame-flow {
+  0%   { background-position:   0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position:   0% 50%; }
+}
+@keyframes login-frame-pulse {
+  0%, 100% { transform: scale(1);   opacity: 0.9; }
+  50%      { transform: scale(1.5); opacity: 0.4; }
+}
+
+.login-frame {
+  background: linear-gradient(
+    115deg,
+    #1e3a5f 0%,
+    #1e3a5f 25%,
+    #c8373c 40%,
+    #e25560 50%,
+    #c8373c 60%,
+    #1e3a5f 75%,
+    #1e3a5f 100%
+  );
+  background-size: 300% 300%;
+  animation: login-frame-flow 9s ease-in-out infinite;
+}
+
+.login-frame-dot {
+  position: absolute;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #e25560, #c8373c 60%, transparent 70%);
+  box-shadow: 0 0 16px 4px rgba(200,55,60,0.55);
+  animation: login-frame-pulse 2.6s ease-in-out infinite;
+}
+
+/* ── Card estándar (light mode) ──────────────────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  border-radius: 12px;
+}
+.card-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card-hover:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  transform: translateY(-1px);
+}
+
+/* ── KPI número ───────────────────────────────────────────────────────────── */
+.kpi-number {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+/* ── Focus visible ────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--brand-navy);
+  outline-offset: 2px;
+}
+
+/* ── Print ────────────────────────────────────────────────────────────────── */
+@media print {
+  input, textarea, select {
+    -webkit-appearance: none;
+    appearance: none;
+    border-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "uuid": "c9fea9b8-2ef0-4b23-9d81-4369d43ab84e",
+    "mime": "text/javascript",
+    "size": 109931,
+    "preview": "/**\n * @license React\n * react.development.js\n *\n * Copyright (c) Facebook, Inc. and its affiliates.\n *\n * This source c"
+  },
+  {
+    "uuid": "d7ff062a-99be-4449-b779-62d995749619",
+    "mime": "text/javascript",
+    "size": 1080227,
+    "preview": "/**\n * @license React\n * react-dom.development.js\n *\n * Copyright (c) Facebook, Inc. and its affiliates.\n *\n * This sour"
+  },
+  {
+    "uuid": "35713955-1132-4d63-b1bc-d06f4e6b4457",
+    "mime": "text/javascript",
+    "size": 3137752,
+    "preview": "!function(e,t){\"object\"==typeof exports&&\"undefined\"!=typeof module?t(exports):\"function\"==typeof define&&define.amd?def"
+  },
+  {
+    "uuid": "21970e29-7fc4-447f-996c-43d50fda8062",
+    "mime": "application/javascript",
+    "size": 21132,
+    "preview": "// CEDIS Lerma — Occupancy Dashboard\n// Computes per-location occupancy metrics and renders the \"Ocupación\" tab.\n//\n// D"
+  },
+  {
+    "uuid": "fd3233eb-24a5-4920-a219-185e87cb0375",
+    "mime": "application/javascript",
+    "size": 48855,
+    "preview": "// CEDIS Lerma - Layout visual interactivo\n// Bodega 1\n\nconst { useState, useEffect, useMemo, useRef } = React;\n\n// ===="
+  },
+  {
+    "uuid": "63399248-c4fb-417e-8517-6843b43db7ef",
+    "mime": "font/woff2",
+    "size": 25844,
+    "preview": ""
+  },
+  {
+    "uuid": "2402d282-a356-4f81-baac-eba0e72cb2f7",
+    "mime": "font/woff2",
+    "size": 18744,
+    "preview": ""
+  },
+  {
+    "uuid": "fe6308f1-f533-4e34-87f6-0f9e9dfdda32",
+    "mime": "font/woff2",
+    "size": 11272,
+    "preview": ""
+  },
+  {
+    "uuid": "64f62f58-278a-47a6-8369-316d794e1cde",
+    "mime": "font/woff2",
+    "size": 19044,
+    "preview": ""
+  },
+  {
+    "uuid": "f28d17ff-ebbb-42bc-a3c6-fa7a95b0a1e0",
+    "mime": "font/woff2",
+    "size": 10280,
+    "preview": ""
+  },
+  {
+    "uuid": "115e9a8c-35da-4889-93ef-284fc1b4216f",
+    "mime": "font/woff2",
+    "size": 85272,
+    "preview": ""
+  },
+  {
+    "uuid": "9ee92609-917a-45ae-aff0-4e4648504990",
+    "mime": "font/woff2",
+    "size": 48432,
+    "preview": ""
+  },
+  {
+    "uuid": "7e2c4862-8008-4335-96d6-ca71bcd530f5",
+    "mime": "font/woff2",
+    "size": 1664,
+    "preview": ""
+  },
+  {
+    "uuid": "4e15a77d-be54-4c14-bc2c-5c6f71bc0085",
+    "mime": "font/woff2",
+    "size": 8892,
+    "preview": ""
+  },
+  {
+    "uuid": "5c2e957b-2238-4671-8a3b-e05c92854bab",
+    "mime": "font/woff2",
+    "size": 6800,
+    "preview": ""
+  },
+  {
+    "uuid": "d23f2c48-6760-47d7-a0d5-bddeb8405361",
+    "mime": "font/woff2",
+    "size": 5872,
+    "preview": ""
+  },
+  {
+    "uuid": "cdc19ff4-3dc7-4e67-9363-b039fa7a5e18",
+    "mime": "font/woff2",
+    "size": 11596,
+    "preview": ""
+  },
+  {
+    "uuid": "37f1eccd-0855-42b9-a3be-a3135e47be76",
+    "mime": "font/woff2",
+    "size": 31340,
+    "preview": ""
+  }
+]
