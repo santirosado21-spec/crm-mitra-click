@@ -1,6 +1,9 @@
-import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3 } from 'lucide-react'
+import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X } from 'lucide-react'
+import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
+import { useSidebar } from '../../context/SidebarContext'
+import { canAccessPath } from '../../config/permissions'
 
 interface Link {
   to: string
@@ -70,22 +73,50 @@ const MODULE_CONFIG: Record<Exclude<ModuleKey, 'home'>, { label: string; links: 
 export function Sidebar() {
   const { pathname } = useLocation()
   const { user } = useAuthContext()
+  const { open, close } = useSidebar()
   const currentModule = detectModule(pathname)
+
+  // Auto-cerrar el drawer en móvil al cambiar de ruta
+  useEffect(() => { close() }, [pathname, close])
 
   // On home page, no sidebar
   if (currentModule === 'home') return null
 
   const { label, links } = MODULE_CONFIG[currentModule]
+  const visibleLinks = links.filter(link => canAccessPath(user?.role, link.to))
   const isAdmin = user?.role === 'admin'
   const showAdminTasks = currentModule === 'tasks' && isAdmin
 
   return (
-    <aside
-      className="w-[220px] shrink-0 flex flex-col border-r"
-      style={{ background: 'var(--sidebar-bg)', borderColor: 'var(--card-border)' }}
-      role="navigation"
-      aria-label="Navegación principal"
-    >
+    <>
+      {/* Backdrop solo en móvil cuando está abierto */}
+      {open && (
+        <div
+          className="lg:hidden fixed inset-0 z-30 bg-black/40 animate-fade-in"
+          onClick={close}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`
+          fixed lg:static z-40 top-0 bottom-0 left-0 w-[220px] shrink-0 flex flex-col border-r
+          transition-transform duration-200 ease-out
+          ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+        style={{ background: 'var(--sidebar-bg)', borderColor: 'var(--card-border)' }}
+        role="navigation"
+        aria-label="Navegación principal"
+      >
+        {/* Botón cerrar — solo móvil */}
+        <button
+          type="button"
+          onClick={close}
+          className="lg:hidden absolute top-3 right-3 p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
+          aria-label="Cerrar menú"
+        >
+          <X size={18} />
+        </button>
       <nav className="flex-1 flex flex-col gap-4 p-3 pt-5 overflow-y-auto">
         {/* "Back to home" — forces module switch via the main menu */}
         <NavLink
@@ -104,7 +135,7 @@ export function Sidebar() {
             {label}
           </p>
           <div className="flex flex-col gap-0.5">
-            {links.map(({ to, label: linkLabel, icon: Icon }) => (
+            {visibleLinks.map(({ to, label: linkLabel, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -193,5 +224,6 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   )
 }

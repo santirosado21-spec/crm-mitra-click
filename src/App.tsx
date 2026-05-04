@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { SidebarProvider } from './context/SidebarContext'
 import { ToastProvider } from './hooks/useToast'
 import { ProtectedRoute } from './components/common/ProtectedRoute'
 import { Login } from './pages/auth/Login'
@@ -32,12 +33,16 @@ import { TaskDetail } from './pages/tasks/TaskDetail'
 import { TaskTemplates } from './pages/tasks/TaskTemplates'
 import { TeamSettings } from './pages/tasks/admin/TeamSettings'
 import { Reports } from './pages/tasks/admin/Reports'
+import { WelcomeTour } from './components/features/WelcomeTour'
+import { ALMACEN_ROLES, TASK_ROLES, TMS_ROLES, WMS_ROLES } from './config/permissions'
 
 function App() {
   return (
     <ToastProvider>
     <AuthProvider>
       <BrowserRouter>
+      <SidebarProvider>
+        <WelcomeTour />
         <Routes>
           <Route path="/" element={
             <ProtectedRoute><HomePage /></ProtectedRoute>
@@ -46,89 +51,89 @@ function App() {
 
           {/* WMS */}
           <Route path="/wms" element={
-            <ProtectedRoute><WMSHome /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><WMSHome /></ProtectedRoute>
           } />
           <Route path="/wms/storage-bridge" element={
-            <ProtectedRoute><StorageBridgePage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><StorageBridgePage /></ProtectedRoute>
           } />
           <Route path="/wms/cfdi-generator" element={
-            <ProtectedRoute><CFDIGeneratorPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><CFDIGeneratorPage /></ProtectedRoute>
           } />
           <Route path="/wms/emisor-config" element={
-            <ProtectedRoute><EmisorConfigPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><EmisorConfigPage /></ProtectedRoute>
           } />
 
           {/* Almacén */}
           <Route path="/almacen" element={
-            <ProtectedRoute><AlmacenPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={ALMACEN_ROLES}><AlmacenPage /></ProtectedRoute>
           } />
 
           {/* TMS */}
           <Route path="/tms" element={
-            <ProtectedRoute><TMSHome /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TMS_ROLES}><TMSHome /></ProtectedRoute>
           } />
           <Route path="/tms/dashboard" element={
-            <ProtectedRoute><TMSDashboard /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TMS_ROLES}><TMSDashboard /></ProtectedRoute>
           } />
           <Route path="/tms/vehiculos" element={
-            <ProtectedRoute><VehiculosPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TMS_ROLES}><VehiculosPage /></ProtectedRoute>
           } />
           <Route path="/tms/operadores" element={
-            <ProtectedRoute><OperadoresPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TMS_ROLES}><OperadoresPage /></ProtectedRoute>
           } />
           <Route path="/tms/viajes" element={
-            <ProtectedRoute><ViajesPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TMS_ROLES}><ViajesPage /></ProtectedRoute>
           } />
           <Route path="/tms/costos" element={
-            <ProtectedRoute><CostosTransportePage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TMS_ROLES}><CostosTransportePage /></ProtectedRoute>
           } />
           <Route path="/cotizador" element={
-            <ProtectedRoute><CotizadorPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TMS_ROLES}><CotizadorPage /></ProtectedRoute>
           } />
           <Route path="/tramites" element={
-            <ProtectedRoute><TramitesPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TMS_ROLES}><TramitesPage /></ProtectedRoute>
           } />
 
           {/* Clientes */}
           <Route path="/clients" element={
-            <ProtectedRoute><ClientsList /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><ClientsList /></ProtectedRoute>
           } />
           <Route path="/clients/:id" element={
-            <ProtectedRoute><ClientDetail /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><ClientDetail /></ProtectedRoute>
           } />
 
           {/* WMS Billing */}
           <Route path="/proformas" element={
-            <ProtectedRoute><ProformasPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><ProformasPage /></ProtectedRoute>
           } />
           <Route path="/rc" element={
-            <ProtectedRoute><RCPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><RCPage /></ProtectedRoute>
           } />
           <Route path="/tarifarios" element={
-            <ProtectedRoute><TarifariosPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><TarifariosPage /></ProtectedRoute>
           } />
           <Route path="/servicios" element={
-            <ProtectedRoute><ServiciosPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><ServiciosPage /></ProtectedRoute>
           } />
           <Route path="/sac/validador" element={
-            <ProtectedRoute><ValidadorSKUPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><ValidadorSKUPage /></ProtectedRoute>
           } />
           <Route path="/sac/receipt-generator" element={
-            <ProtectedRoute><ReceiptGeneratorPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={WMS_ROLES}><ReceiptGeneratorPage /></ProtectedRoute>
           } />
 
           {/* Task Tracker */}
           <Route path="/tasks" element={
-            <ProtectedRoute><TaskInbox /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TASK_ROLES}><TaskInbox /></ProtectedRoute>
           } />
           <Route path="/tasks/calendar" element={
-            <ProtectedRoute><TaskCalendar /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TASK_ROLES}><TaskCalendar /></ProtectedRoute>
           } />
           <Route path="/tasks/new" element={
-            <ProtectedRoute><TaskCreate /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TASK_ROLES}><TaskCreate /></ProtectedRoute>
           } />
           <Route path="/tasks/templates" element={
-            <ProtectedRoute><TaskTemplates /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={TASK_ROLES}><TaskTemplates /></ProtectedRoute>
           } />
           <Route path="/tasks/admin/team" element={
             <ProtectedRoute allowedRoles={['admin']}><TeamSettings /></ProtectedRoute>
@@ -142,6 +147,7 @@ function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+      </SidebarProvider>
       </BrowserRouter>
     </AuthProvider>
     </ToastProvider>

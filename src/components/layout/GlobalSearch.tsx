@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Search, Users, Package } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useClientCatalog } from '../../hooks/useClientCatalog'
+import { useAuthContext } from '../../context/AuthContext'
+import { canAccessPath } from '../../config/permissions'
 
 type Result = { type: 'client' | 'tool'; label: string; sub?: string; to: string }
 
@@ -26,6 +28,7 @@ const TOOL_RESULTS: Result[] = [
 export function GlobalSearch() {
   const navigate = useNavigate()
   const { clientes } = useClientCatalog()
+  const { user } = useAuthContext()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Result[]>([])
   const [open, setOpen] = useState(false)
@@ -40,8 +43,8 @@ export function GlobalSearch() {
       sub: c.codigo ? `Código: ${c.codigo}` : undefined,
       to: c.id ? `/clients/${c.id}` : '/clients',
     }))
-    return [...clientResults, ...TOOL_RESULTS]
-  }, [clientes])
+    return [...clientResults, ...TOOL_RESULTS].filter(result => canAccessPath(user?.role, result.to))
+  }, [clientes, user?.role])
 
   // Close on outside click
   useEffect(() => {

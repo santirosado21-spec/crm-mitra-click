@@ -84,7 +84,7 @@ export interface UserWorkSchedule {
 export interface TeamMember {
   user_email:  string
   user_name:   string | null
-  role:        'admin' | 'almacen' | 'servicio_cliente' | 'cobranza' | 'transporte'
+  role:        'admin' | 'almacen' | 'servicio_cliente' | 'cobranza'
   active:      boolean
   created_at:  string
 }

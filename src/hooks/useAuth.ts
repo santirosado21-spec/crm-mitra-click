@@ -10,6 +10,19 @@ export interface LocalUser {
 
 const NOT_AUTHORIZED = 'NOT_AUTHORIZED'
 
+function normalizeRole(role: unknown): UserRole {
+  if (role === 'transportes') return 'transporte'
+  if (role === 'sac') return 'servicio_cliente'
+  if (
+    role === 'admin' ||
+    role === 'almacen' ||
+    role === 'servicio_cliente' ||
+    role === 'cobranza' ||
+    role === 'transporte'
+  ) return role
+  return 'almacen'
+}
+
 /**
  * Hook de autenticación.
  *   - Backend: Supabase Auth (email + password).
@@ -36,15 +49,13 @@ export function useAuth() {
     return {
       email: data.user_email,
       name:  (data.user_name ?? data.user_email.split('@')[0]) as string,
-      role:  (data.role ?? 'almacen') as UserRole,
+      role:  normalizeRole(data.role),
     }
   }
 
   // ── Carga inicial + listener de cambios de sesión ────────────────────────
   useEffect(() => {
     mountedRef.current = true
-    let unsub: (() => void) | undefined
-
     ;(async () => {
       const { data } = await supabase.auth.getSession()
       const sessionEmail = data.session?.user?.email
@@ -75,7 +86,7 @@ export function useAuth() {
         }
       }, 0)
     })
-    unsub = () => sub.subscription.unsubscribe()
+    const unsub = () => sub.subscription.unsubscribe()
 
     return () => {
       mountedRef.current = false

@@ -155,12 +155,12 @@ export function Login() {
 
       {/* Panel Derecho - Hero image con marco animado pegado a la imagen */}
       <div className="hidden lg:flex lg:w-[55%] relative bg-white items-center justify-center p-6">
-        <div className="login-frame p-1.5 rounded-2xl shadow-md inline-block">
+        <div className="login-frame p-1.5 rounded-2xl shadow-md inline-block max-w-[68%] max-h-[calc(100vh-14rem)] overflow-hidden">
           <div className="bg-white rounded-xl overflow-hidden flex">
             <img
               src="/login-hero.png"
               alt="Supply Chain México · Logística Inteligente sin fronteras"
-              className="block max-w-full max-h-[calc(100vh-5rem)] w-auto h-auto object-contain select-none"
+              className="block max-w-full max-h-[calc(100vh-15rem)] w-auto h-auto object-contain select-none"
               draggable={false}
             />
           </div>

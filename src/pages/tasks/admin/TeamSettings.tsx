@@ -6,15 +6,9 @@ import { Spinner } from '../../../components/ui/Spinner'
 import { supabase } from '../../../lib/supabase'
 import type { TeamMember, UserWorkSchedule } from '../../../types/tasks'
 import { DAY_OF_WEEK_LABEL } from '../../../types/tasks'
+import { ROLE_LABEL } from '../../../config/permissions'
 
 type Role = TeamMember['role']
-
-const ROLE_LABEL: Record<Role, string> = {
-  admin:             'Administrador',
-  almacen:           'Almacén',
-  servicio_cliente:  'Servicio al Cliente',
-  cobranza:          'Cobranza',
-}
 
 interface TeamRow {
   email:     string
@@ -40,6 +34,7 @@ export function TeamSettings() {
     admin:             { dows: [1,2,3,4,5], start: '09:00', end: '18:00' },
     servicio_cliente:  { dows: [1,2,3,4,5], start: '09:00', end: '18:00' },
     cobranza:          { dows: [1,2,3,4,5], start: '09:00', end: '18:00' },
+    transporte:        { dows: [1,2,3,4,5], start: '08:30', end: '18:30' },
     almacen:           { dows: [1,2,3,4],   start: '08:30', end: '18:30' },
   }
   // Días editables por rol en el row card. Sólo almacén ve sáb/dom.
@@ -47,6 +42,7 @@ export function TeamSettings() {
     admin:             [1,2,3,4,5],
     servicio_cliente:  [1,2,3,4,5],
     cobranza:          [1,2,3,4,5],
+    transporte:        [0,1,2,3,4,5,6],
     almacen:           [0,1,2,3,4,5,6],
   }
 

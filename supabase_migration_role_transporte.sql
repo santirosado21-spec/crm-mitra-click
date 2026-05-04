@@ -1,0 +1,9 @@
+-- Permite crear usuarios del área de Transportes en team_members.role.
+-- Ejecutar una vez en Supabase SQL Editor si tu tabla aún tiene el CHECK anterior.
+
+ALTER TABLE team_members
+  DROP CONSTRAINT IF EXISTS team_members_role_check;
+
+ALTER TABLE team_members
+  ADD CONSTRAINT team_members_role_check
+  CHECK (role IN ('admin','almacen','servicio_cliente','cobranza','transporte'));

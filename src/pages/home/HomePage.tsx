@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { Package, Truck, Warehouse, ArrowRight, ClipboardList } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
+import { useAuthContext } from '../../context/AuthContext'
+import { canAccessModule, type AppModule } from '../../config/permissions'
 
 interface ModuleCard {
-  id: string
+  id: AppModule
   title: string
   subtitle: string
   description: string
@@ -16,6 +18,7 @@ interface ModuleCard {
 
 export function HomePage() {
   const navigate = useNavigate()
+  const { user } = useAuthContext()
 
   const modules: ModuleCard[] = [
     {
@@ -81,7 +84,7 @@ export function HomePage() {
 
           {/* Module cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {modules.map(m => {
+            {modules.filter(m => canAccessModule(user?.role, m.id)).map(m => {
               const Icon = m.icon
               return (
                 <button
