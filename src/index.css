@@ -48,14 +48,35 @@ button { font-family: inherit; cursor: pointer; }
 :where([class*="bg-blue-900"]) {
   color: #ffffff;
 }
-/* Mismo principio para inline styles con bg navy */
+/* Mismo principio para inline styles con bg navy.
+   IMPORTANTE: cubrimos los 3 patrones más comunes:
+     - hex literal:       style={{ background: '#1e3a5f' }}
+     - CSS variable:      style={{ background: 'var(--brand-navy)' }}
+     - background-color:  style={{ backgroundColor: '#1e3a5f' }} */
 :where([style*="background:#1e3a5f"]),
 :where([style*="background: #1e3a5f"]),
 :where([style*="background-color:#1e3a5f"]),
 :where([style*="background-color: #1e3a5f"]),
 :where([style*="background:#1f3864"]),
-:where([style*="background: #1f3864"]) {
+:where([style*="background: #1f3864"]),
+:where([style*="brand-navy"]),
+:where([style*="brand_navy"]),
+:where([style*="background:var(--brand"]),
+:where([style*="background: var(--brand"]),
+:where([style*="background-color:var(--brand"]),
+:where([style*="background-color: var(--brand"]) {
   color: #ffffff;
+}
+
+/* Garantiza que descendientes (icons SVG, spans sin clase de color, etc.)
+   hereden el blanco. Tailwind text-* o text-gray-* explícito en un hijo
+   gana por especificidad mayor — esta regla es solo para los hijos sin
+   color propio. */
+:where([class*="bg-[#1e3a5f]"]):not([class*="/10"]):not([class*="/20"]):not([class*="/5"]) :where(svg, span:not([class*="text-"])),
+:where([style*="brand-navy"]) :where(svg, span:not([class*="text-"])),
+:where([style*="background:#1e3a5f"]) :where(svg, span:not([class*="text-"])),
+:where([style*="background: #1e3a5f"]) :where(svg, span:not([class*="text-"])) {
+  color: inherit;
 }
 
 /* iOS: usar viewport dinámico (sin contar URL bar) y scroll suave en flex */
