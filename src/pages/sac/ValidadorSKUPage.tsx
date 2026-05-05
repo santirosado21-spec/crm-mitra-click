@@ -20,9 +20,19 @@ interface SKUResult {
   sku: string
   required: number
   stock: number | null
-  status: 'ok' | 'insufficient' | 'missing'
+  status: 'ok' | 'insufficient' | 'missing' | 'partial'
+  matchType: 'exact' | 'partial' | 'none'
   matchedSKUs: string[]
+  candidateDecisions: Record<string, boolean | null>
 }
+
+interface InventoryMatch {
+  stock: number | null
+  matchedSKUs: string[]
+  matchType: SKUResult['matchType']
+}
+
+const MAX_PARTIAL_CANDIDATES = 75
 
 /* ─── Prefix matching helpers ─────────────────────────────────────── */
 function sharedPrefixSegments(a: string, b: string): number {
@@ -36,13 +46,16 @@ function sharedPrefixSegments(a: string, b: string): number {
   return count
 }
 
-function findInventoryMatch(sku: string, inventory: Record<string, number>, invKeys: string[]): { stock: number | null; matchedSKUs: string[] } {
+function findInventoryMatch(sku: string, inventory: Record<string, number>, invKeys: string[]): InventoryMatch {
   if (inventory[sku] !== undefined) {
-    return { stock: inventory[sku], matchedSKUs: [sku] }
+    return { stock: inventory[sku], matchedSKUs: [sku], matchType: 'exact' }
   }
   const startsWithMatches = invKeys.filter(k => k.startsWith(sku))
   if (startsWithMatches.length > 0) {
-    return { stock: startsWithMatches.reduce((sum, k) => sum + (inventory[k] || 0), 0), matchedSKUs: startsWithMatches }
+    const candidates = startsWithMatches
+      .sort((a, b) => a.length - b.length || a.localeCompare(b))
+      .slice(0, MAX_PARTIAL_CANDIDATES)
+    return { stock: null, matchedSKUs: candidates, matchType: 'partial' }
   }
   const ptSegments = sku.split('-')
   const minShared = Math.min(2, ptSegments.length)
@@ -56,9 +69,26 @@ function findInventoryMatch(sku: string, inventory: Record<string, number>, invK
     }
   }
   if (bestMatches.length > 0) {
-    return { stock: bestMatches.reduce((sum, k) => sum + (inventory[k] || 0), 0), matchedSKUs: bestMatches }
+    const candidates = bestMatches
+      .sort((a, b) => a.length - b.length || a.localeCompare(b))
+      .slice(0, MAX_PARTIAL_CANDIDATES)
+    return { stock: null, matchedSKUs: candidates, matchType: 'partial' }
   }
-  return { stock: null, matchedSKUs: [] }
+  return { stock: null, matchedSKUs: [], matchType: 'none' }
+}
+
+function buildCandidateDecisions(candidates: string[]): SKUResult['candidateDecisions'] {
+  return candidates.reduce<SKUResult['candidateDecisions']>((acc, candidate) => {
+    acc[candidate] = null
+    return acc
+  }, {})
+}
+
+function getApprovedPartialStock(result: SKUResult, inventory: Record<string, number> | null): number | null {
+  if (result.matchType !== 'partial' || !inventory) return result.stock
+  const approvedSKUs = result.matchedSKUs.filter(sku => result.candidateDecisions[sku] === true)
+  if (approvedSKUs.length === 0) return null
+  return approvedSKUs.reduce((sum, sku) => sum + (inventory[sku] || 0), 0)
 }
 
 /* ─── SKU normalization (mirrors Python logic) ─────────────────────── */
@@ -294,12 +324,16 @@ function downloadResults(results: SKUResult[], ptName: string) {
   const rows = results.map(r => ({
     'SKU (Pick Ticket)': r.sku,
     'Cantidad Requerida': r.required,
-    'Cantidad en Stock': r.stock === null ? 'No aparece en sistema' : r.stock,
+    'Cantidad en Stock': r.stock === null ? (r.matchType === 'partial' ? 'Pendiente de depurar' : 'No aparece en sistema') : r.stock,
     'SKU Inventario': r.matchedSKUs.length > 0 ? r.matchedSKUs.join(', ') : '-',
-    'Estado': r.status === 'ok' ? 'OK' : r.status === 'insufficient' ? 'Stock insuficiente' : 'No encontrado',
+    'Candidatos aprobados': r.matchedSKUs.filter(sku => r.candidateDecisions[sku] === true).join(', ') || '-',
+    'Candidatos rechazados': r.matchedSKUs.filter(sku => r.candidateDecisions[sku] === false).join(', ') || '-',
+    'Estado': r.matchType === 'partial'
+      ? (r.stock === null ? 'Coincidencia parcial - revisar terminacion' : r.status === 'ok' ? 'Coincidencia parcial depurada - OK' : 'Coincidencia parcial depurada - stock insuficiente')
+      : r.status === 'ok' ? 'OK' : r.status === 'insufficient' ? 'Stock insuficiente' : 'No encontrado',
   }))
   const ws = XLSX.utils.json_to_sheet(rows)
-  ws['!cols'] = [{ wch: 25 }, { wch: 18 }, { wch: 20 }, { wch: 30 }, { wch: 18 }]
+  ws['!cols'] = [{ wch: 25 }, { wch: 18 }, { wch: 24 }, { wch: 36 }, { wch: 36 }, { wch: 36 }, { wch: 32 }]
   XLSX.utils.book_append_sheet(wb, ws, 'Validación SKUs')
   XLSX.writeFile(wb, `Resultado_SKUs_${ptName.replace(/\.[^.]+$/, '')}.xlsx`)
 }
@@ -319,6 +353,7 @@ export function ValidadorSKUPage() {
   const [customers, setCustomers] = useState<ExtensivCustomer[]>([])
   const [selectedCustomer, setSelectedCustomer] = useState<number | ''>('')
   const [inventoryCache, setInventoryCache] = useState<Record<string, number> | null>(null)
+  const [activeInventory, setActiveInventory] = useState<Record<string, number> | null>(null)
   const [invCount, setInvCount] = useState(0)
   const ptRef = useRef<HTMLInputElement>(null)
   const invRef = useRef<HTMLInputElement>(null)
@@ -355,6 +390,7 @@ export function ValidadorSKUPage() {
   const handleCustomerChange = (id: number | '') => {
     setSelectedCustomer(id)
     setResults([])
+    setActiveInventory(null)
     if (id) fetchInventory(id)
     else { setInventoryCache(null); setInvCount(0) }
   }
@@ -372,6 +408,7 @@ export function ValidadorSKUPage() {
     setProcessing(true)
     setError('')
     setResults([])
+    setActiveInventory(null)
 
     try {
       // 1. Extract SKUs from Pick Ticket
@@ -399,17 +436,23 @@ export function ValidadorSKUPage() {
       } else {
         inventory = {}
       }
+      setActiveInventory(inventory)
 
-      // 3. Cross-reference (prefix + shared-segment matching)
+      // 3. Cross-reference: exact SKUs are validated; prefix/shared-segment matches require manual cleanup.
       const invKeys = Object.keys(inventory)
       const res: SKUResult[] = Object.entries(skusRequired).map(([sku, required]) => {
         const match = findInventoryMatch(sku, inventory, invKeys)
         let status: SKUResult['status'] = 'missing'
-        if (match.stock !== null) status = match.stock >= required ? 'ok' : 'insufficient'
-        return { sku, required, stock: match.stock, status, matchedSKUs: match.matchedSKUs }
+        if (match.matchType === 'partial') {
+          status = 'partial'
+        } else if (match.stock !== null) {
+          status = match.stock >= required ? 'ok' : 'insufficient'
+        }
+        const candidateDecisions = buildCandidateDecisions(match.matchedSKUs)
+        return { sku, required, stock: match.stock, status, matchType: match.matchType, matchedSKUs: match.matchedSKUs, candidateDecisions }
       })
 
-      const order = { missing: 0, insufficient: 1, ok: 2 }
+      const order = { missing: 0, partial: 1, insufficient: 2, ok: 3 }
       res.sort((a, b) => order[a.status] - order[b.status])
       setResults(res)
     } catch (e) {
@@ -423,6 +466,7 @@ export function ValidadorSKUPage() {
     setPtFile(null)
     setInvFile(null)
     setResults([])
+    setActiveInventory(null)
     setError('')
     setSearch('')
     if (ptRef.current) ptRef.current.value = ''
@@ -432,8 +476,23 @@ export function ValidadorSKUPage() {
   const stats = {
     total: results.length,
     ok: results.filter(r => r.status === 'ok').length,
+    partial: results.filter(r => r.status === 'partial').length,
     insufficient: results.filter(r => r.status === 'insufficient').length,
     missing: results.filter(r => r.status === 'missing').length,
+  }
+
+  const handleCandidateDecision = (sku: string, candidate: string, approved: boolean) => {
+    setResults(prev => prev.map(result => {
+      if (result.sku !== sku || result.matchType !== 'partial') return result
+      const candidateDecisions = { ...result.candidateDecisions, [candidate]: approved }
+      const nextResult = { ...result, candidateDecisions }
+      const reviewedStock = getApprovedPartialStock(nextResult, activeInventory)
+      const allReviewed = nextResult.matchedSKUs.every(candidateSku => candidateDecisions[candidateSku] !== null)
+      const nextStatus: SKUResult['status'] = reviewedStock === null
+        ? (allReviewed ? 'missing' : 'partial')
+        : reviewedStock >= nextResult.required ? 'ok' : 'insufficient'
+      return { ...nextResult, stock: reviewedStock, status: allReviewed || reviewedStock !== null ? nextStatus : 'partial' }
+    }))
   }
 
   const filtered = search
@@ -625,14 +684,18 @@ export function ValidadorSKUPage() {
           {results.length > 0 && (
             <>
               {/* KPIs */}
-              <div className="grid grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-5 gap-4 mb-4">
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
                   <p className="text-2xl font-bold text-[#1e3a5f]" style={{ fontFamily: 'Nunito, sans-serif' }}>{stats.total}</p>
                   <p className="text-xs text-gray-400 mt-1">SKUs totales</p>
                 </div>
                 <div className="bg-white rounded-xl border border-green-100 shadow-sm p-4 text-center">
                   <p className="text-2xl font-bold text-green-600" style={{ fontFamily: 'Nunito, sans-serif' }}>{stats.ok}</p>
-                  <p className="text-xs text-gray-400 mt-1">Disponibles</p>
+                  <p className="text-xs text-gray-400 mt-1">Exactos disponibles</p>
+                </div>
+                <div className="bg-white rounded-xl border border-yellow-100 shadow-sm p-4 text-center">
+                  <p className="text-2xl font-bold text-yellow-600" style={{ fontFamily: 'Nunito, sans-serif' }}>{stats.partial}</p>
+                  <p className="text-xs text-gray-400 mt-1">Coincidencia parcial</p>
                 </div>
                 <div className="bg-white rounded-xl border border-amber-100 shadow-sm p-4 text-center">
                   <p className="text-2xl font-bold text-amber-600" style={{ fontFamily: 'Nunito, sans-serif' }}>{stats.insufficient}</p>
@@ -675,19 +738,80 @@ export function ValidadorSKUPage() {
                       const matchDisplay = r.matchedSKUs.length > 0
                         ? r.matchedSKUs.filter(m => m !== r.sku).join(', ') || '(exacto)'
                         : '-'
+                      const rowClass = r.matchType === 'partial'
+                        ? 'border-b border-yellow-100 bg-yellow-50/40 hover:bg-yellow-50/70 transition-colors'
+                        : 'border-b border-gray-50 hover:bg-gray-50/50 transition-colors'
                       return (
-                      <tr key={r.sku} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                      <tr key={r.sku} className={rowClass}>
                         <td className="px-4 py-3 font-mono text-xs font-semibold text-gray-800">{r.sku}</td>
                         <td className="px-4 py-3 text-right text-gray-600">{r.required}</td>
                         <td className={`px-4 py-3 text-right font-semibold ${
                           r.status === 'ok' ? 'text-green-600' :
+                          r.matchType === 'partial' ? 'text-yellow-700' :
                           r.status === 'insufficient' ? 'text-amber-600' : 'text-red-600'
                         }`}>
-                          {r.stock === null ? 'No encontrado' : r.stock.toLocaleString()}
+                          {r.stock === null ? (r.matchType === 'partial' ? 'Pendiente' : 'No encontrado') : r.stock.toLocaleString()}
+                          {r.matchType === 'partial' && r.stock !== null && (
+                            <div className="text-[10px] font-medium text-yellow-700/80">depurado</div>
+                          )}
                         </td>
-                        <td className="px-4 py-3 font-mono text-[11px] text-gray-500">{matchDisplay}</td>
+                        <td className="px-4 py-3">
+                          {r.matchType === 'partial' ? (
+                            <div className="space-y-2">
+                              <div className="text-[11px] font-semibold text-yellow-800">
+                                Empieza igual, termina diferente
+                              </div>
+                              {r.matchedSKUs.map(candidate => {
+                                const decision = r.candidateDecisions[candidate]
+                                return (
+                                  <div key={candidate} className="flex items-center justify-between gap-2 rounded-md border border-yellow-200 bg-white px-2 py-1.5">
+                                    <div className="min-w-0">
+                                      <div className="font-mono text-[11px] text-gray-700 truncate">{candidate}</div>
+                                      <div className="text-[10px] text-gray-400">
+                                        Stock: {(activeInventory?.[candidate] ?? 0).toLocaleString()}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        title="Sí sirve para este surtido"
+                                        onClick={() => handleCandidateDecision(r.sku, candidate, true)}
+                                        className={`h-7 w-7 rounded-full border flex items-center justify-center transition-colors ${
+                                          decision === true ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-green-200 text-green-600 hover:bg-green-50'
+                                        }`}
+                                      >
+                                        <CheckCircle2 size={15} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        title="No sirve para este surtido"
+                                        onClick={() => handleCandidateDecision(r.sku, candidate, false)}
+                                        className={`h-7 w-7 rounded-full border flex items-center justify-center transition-colors ${
+                                          decision === false ? 'bg-red-600 border-red-600 text-white' : 'bg-white border-red-200 text-red-600 hover:bg-red-50'
+                                        }`}
+                                      >
+                                        <XCircle size={15} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          ) : (
+                            <span className="font-mono text-[11px] text-gray-500">{matchDisplay}</span>
+                          )}
+                        </td>
                         <td className="px-4 py-3 text-center">
-                          {r.status === 'ok' ? (
+                          {r.matchType === 'partial' ? (
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold ${
+                              r.stock === null ? 'bg-yellow-100 text-yellow-800' :
+                              r.status === 'ok' ? 'bg-green-50 text-green-700' :
+                              'bg-amber-50 text-amber-700'
+                            }`}>
+                              {r.stock === null ? <AlertTriangle size={12} /> : r.status === 'ok' ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
+                              {r.stock === null ? 'Revisar' : r.status === 'ok' ? 'OK depurado' : 'Insuficiente'}
+                            </span>
+                          ) : r.status === 'ok' ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-50 text-green-700 text-[11px] font-semibold">
                               <CheckCircle2 size={12} /> OK
                             </span>
