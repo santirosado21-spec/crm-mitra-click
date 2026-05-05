@@ -502,11 +502,11 @@ export function ValidadorSKUPage() {
   const canValidate = ptFile && (inventoryCache !== null || invFile !== null) && !processing && !fetchingInv
 
   return (
-    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
       <Header />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-auto p-6">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24 sm:p-6 sm:pb-10 touch-pan-y">
           <div className="mb-6">
             <h1 className="text-xl font-bold text-[#1e3a5f]">Validador de SKUs</h1>
             <p className="text-xs text-gray-400 mt-0.5">
@@ -514,7 +514,7 @@ export function ValidadorSKUPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
             {/* LEFT: Client + Inventory source */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
               <label className="text-xs font-semibold text-gray-600 block">Fuente de Inventario</label>
@@ -586,9 +586,9 @@ export function ValidadorSKUPage() {
                   onChange={e => { if (e.target.files?.[0]) setInvFile(e.target.files[0]) }}
                 />
                 {invFile ? (
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex min-w-0 items-center justify-center gap-2">
                     <FileSpreadsheet size={16} className="text-green-600" />
-                    <span className="text-sm font-medium text-green-700">{invFile.name}</span>
+                    <span className="min-w-0 truncate text-sm font-medium text-green-700">{invFile.name}</span>
                     <button onClick={e => { e.stopPropagation(); setInvFile(null); if (invRef.current) invRef.current.value = '' }}
                       className="ml-2 text-gray-400 hover:text-red-500"><XCircle size={14} /></button>
                   </div>
@@ -625,9 +625,9 @@ export function ValidadorSKUPage() {
                   onChange={e => { if (e.target.files?.[0]) setPtFile(e.target.files[0]) }}
                 />
                 {ptFile ? (
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex min-w-0 items-center justify-center gap-2">
                     <FileSpreadsheet size={18} className="text-green-600" />
-                    <span className="text-sm font-medium text-green-700">{ptFile.name}</span>
+                    <span className="min-w-0 truncate text-sm font-medium text-green-700">{ptFile.name}</span>
                     <button onClick={e => { e.stopPropagation(); setPtFile(null); if (ptRef.current) ptRef.current.value = '' }}
                       className="ml-2 text-gray-400 hover:text-red-500"><XCircle size={14} /></button>
                   </div>
@@ -643,7 +643,7 @@ export function ValidadorSKUPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 mb-6">
+          <div className="flex flex-wrap gap-3 mb-6">
             <button
               onClick={handleValidate}
               disabled={!canValidate}
@@ -684,7 +684,7 @@ export function ValidadorSKUPage() {
           {results.length > 0 && (
             <>
               {/* KPIs */}
-              <div className="grid grid-cols-5 gap-4 mb-4">
+              <div className="grid grid-cols-2 gap-3 mb-4 sm:grid-cols-3 xl:grid-cols-5 xl:gap-4">
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
                   <p className="text-2xl font-bold text-[#1e3a5f]" style={{ fontFamily: 'Nunito, sans-serif' }}>{stats.total}</p>
                   <p className="text-xs text-gray-400 mt-1">SKUs totales</p>
@@ -722,8 +722,8 @@ export function ValidadorSKUPage() {
               </div>
 
               {/* Table */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="max-w-full overflow-x-auto rounded-xl border border-gray-100 bg-white shadow-sm">
+                <table className="min-w-[980px] w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50/60">
                       <th className="text-left px-4 py-3 font-semibold text-gray-600">SKU (Pick Ticket)</th>
