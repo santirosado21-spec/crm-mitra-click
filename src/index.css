@@ -79,6 +79,30 @@ button { font-family: inherit; cursor: pointer; }
   color: inherit;
 }
 
+/* Capa de seguridad final: si algún elemento con bg navy aún muestra texto
+   oscuro (Tailwind text-gray-* heredado de un wrapper externo, etc.), le
+   forzamos blanco con !important. Solo aplica al elemento directo, no a
+   hijos con text-* explícito (esos ya tienen color propio).
+   Especificidad alta vía atributo selector sin :where(). */
+[class*="bg-[#1e3a5f]"]:not([class*="/10"]):not([class*="/20"]):not([class*="/5"]),
+[style*="brand-navy"],
+[style*="background:#1e3a5f"],
+[style*="background: #1e3a5f"],
+[style*="background-color:#1e3a5f"],
+[style*="background-color: #1e3a5f"] {
+  color: #ffffff !important;
+}
+
+/* Excepción: si el elemento trae text-gray-* o text-rose-* etc. explícito
+   en su class, respetamos esa elección — el !important de arriba aplica solo
+   cuando NO hay text-* en la propia className. */
+[class*="bg-[#1e3a5f]"][class*="text-gray-"]:not([class*="/10"]),
+[class*="bg-[#1e3a5f]"][class*="text-rose-"]:not([class*="/10"]),
+[class*="bg-[#1e3a5f]"][class*="text-emerald-"]:not([class*="/10"]),
+[class*="bg-[#1e3a5f]"][class*="text-amber-"]:not([class*="/10"]) {
+  color: revert !important;
+}
+
 /* iOS: usar viewport dinámico (sin contar URL bar) y scroll suave en flex */
 @supports (height: 100dvh) {
   .h-screen { height: 100dvh; }
