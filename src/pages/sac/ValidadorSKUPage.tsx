@@ -24,6 +24,7 @@ interface SKUResult {
   matchType: 'exact' | 'partial' | 'none'
   matchedSKUs: string[]
   candidateDecisions: Record<string, boolean | null>
+  adjusted: boolean
 }
 
 interface InventoryMatch {
@@ -89,6 +90,19 @@ function getApprovedPartialStock(result: SKUResult, inventory: Record<string, nu
   const approvedSKUs = result.matchedSKUs.filter(sku => result.candidateDecisions[sku] === true)
   if (approvedSKUs.length === 0) return null
   return approvedSKUs.reduce((sum, sku) => sum + (inventory[sku] || 0), 0)
+}
+
+function isPartialReviewComplete(result: SKUResult): boolean {
+  return result.matchType !== 'partial' || result.matchedSKUs.every(sku => result.candidateDecisions[sku] !== null)
+}
+
+function adjustPartialResult(result: SKUResult, inventory: Record<string, number> | null): SKUResult {
+  if (result.matchType !== 'partial') return result
+  const stock = getApprovedPartialStock(result, inventory)
+  const status: SKUResult['status'] = stock === null
+    ? 'missing'
+    : stock >= result.required ? 'ok' : 'insufficient'
+  return { ...result, stock, status, adjusted: true }
 }
 
 /* ─── SKU normalization (mirrors Python logic) ─────────────────────── */
@@ -324,12 +338,12 @@ function downloadResults(results: SKUResult[], ptName: string) {
   const rows = results.map(r => ({
     'SKU (Pick Ticket)': r.sku,
     'Cantidad Requerida': r.required,
-    'Cantidad en Stock': r.stock === null ? (r.matchType === 'partial' ? 'Pendiente de depurar' : 'No aparece en sistema') : r.stock,
+    'Cantidad en Stock': r.stock === null ? (r.matchType === 'partial' && !r.adjusted ? 'Pendiente de ajustar' : 'No aparece en sistema') : r.stock,
     'SKU Inventario': r.matchedSKUs.length > 0 ? r.matchedSKUs.join(', ') : '-',
     'Candidatos aprobados': r.matchedSKUs.filter(sku => r.candidateDecisions[sku] === true).join(', ') || '-',
     'Candidatos rechazados': r.matchedSKUs.filter(sku => r.candidateDecisions[sku] === false).join(', ') || '-',
     'Estado': r.matchType === 'partial'
-      ? (r.stock === null ? 'Coincidencia parcial - revisar terminacion' : r.status === 'ok' ? 'Coincidencia parcial depurada - OK' : 'Coincidencia parcial depurada - stock insuficiente')
+      ? (!r.adjusted ? 'Coincidencia parcial - pendiente de ajustar' : r.status === 'ok' ? 'Coincidencia parcial ajustada - OK' : r.status === 'insufficient' ? 'Coincidencia parcial ajustada - stock insuficiente' : 'Coincidencia parcial ajustada - sin candidatos aprobados')
       : r.status === 'ok' ? 'OK' : r.status === 'insufficient' ? 'Stock insuficiente' : 'No encontrado',
   }))
   const ws = XLSX.utils.json_to_sheet(rows)
@@ -449,7 +463,7 @@ export function ValidadorSKUPage() {
           status = match.stock >= required ? 'ok' : 'insufficient'
         }
         const candidateDecisions = buildCandidateDecisions(match.matchedSKUs)
-        return { sku, required, stock: match.stock, status, matchType: match.matchType, matchedSKUs: match.matchedSKUs, candidateDecisions }
+        return { sku, required, stock: match.stock, status, matchType: match.matchType, matchedSKUs: match.matchedSKUs, candidateDecisions, adjusted: match.matchType !== 'partial' }
       })
 
       const order = { missing: 0, partial: 1, insufficient: 2, ok: 3 }
@@ -485,14 +499,20 @@ export function ValidadorSKUPage() {
     setResults(prev => prev.map(result => {
       if (result.sku !== sku || result.matchType !== 'partial') return result
       const candidateDecisions = { ...result.candidateDecisions, [candidate]: approved }
-      const nextResult = { ...result, candidateDecisions }
-      const reviewedStock = getApprovedPartialStock(nextResult, activeInventory)
-      const allReviewed = nextResult.matchedSKUs.every(candidateSku => candidateDecisions[candidateSku] !== null)
-      const nextStatus: SKUResult['status'] = reviewedStock === null
-        ? (allReviewed ? 'missing' : 'partial')
-        : reviewedStock >= nextResult.required ? 'ok' : 'insufficient'
-      return { ...nextResult, stock: reviewedStock, status: allReviewed || reviewedStock !== null ? nextStatus : 'partial' }
+      return { ...result, candidateDecisions, stock: null, status: 'partial', adjusted: false }
     }))
+  }
+
+  const partialResults = results.filter(r => r.matchType === 'partial')
+  const pendingPartialCount = partialResults.filter(r => !isPartialReviewComplete(r)).length
+  const canAdjustResults = partialResults.length > 0 && pendingPartialCount === 0
+
+  const handleAdjustResults = () => {
+    const order = { missing: 0, partial: 1, insufficient: 2, ok: 3 }
+    setResults(prev => prev
+      .map(result => adjustPartialResult(result, activeInventory))
+      .sort((a, b) => order[a.status] - order[b.status])
+    )
   }
 
   const filtered = search
@@ -663,6 +683,16 @@ export function ValidadorSKUPage() {
                 >
                   <Download size={16} /> Descargar Excel
                 </button>
+                {partialResults.length > 0 && (
+                  <button
+                    onClick={handleAdjustResults}
+                    disabled={!canAdjustResults}
+                    className="h-10 px-4 rounded-lg bg-yellow-500 text-sm font-semibold text-white flex items-center gap-2 hover:bg-yellow-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    title={canAdjustResults ? 'Ajustar resultado con los candidatos aprobados' : 'Confirma o declina todos los SKUs en duda antes de ajustar'}
+                  >
+                    <CheckCircle2 size={16} /> Ajustar resultados
+                  </button>
+                )}
                 <button
                   onClick={handleReset}
                   className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 flex items-center gap-2 hover:bg-gray-50 transition-colors"
@@ -677,6 +707,13 @@ export function ValidadorSKUPage() {
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 flex items-center gap-2">
               <AlertTriangle size={16} className="shrink-0" /> {error}
+            </div>
+          )}
+
+          {partialResults.length > 0 && pendingPartialCount > 0 && (
+            <div className="mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 flex items-center gap-2">
+              <AlertTriangle size={16} className="shrink-0" />
+              Confirma o declina todos los SKUs en duda para habilitar Ajustar resultados.
             </div>
           )}
 
@@ -750,9 +787,9 @@ export function ValidadorSKUPage() {
                           r.matchType === 'partial' ? 'text-yellow-700' :
                           r.status === 'insufficient' ? 'text-amber-600' : 'text-red-600'
                         }`}>
-                          {r.stock === null ? (r.matchType === 'partial' ? 'Pendiente' : 'No encontrado') : r.stock.toLocaleString()}
-                          {r.matchType === 'partial' && r.stock !== null && (
-                            <div className="text-[10px] font-medium text-yellow-700/80">depurado</div>
+                          {r.stock === null ? (r.matchType === 'partial' && !r.adjusted ? 'Pendiente' : 'No encontrado') : r.stock.toLocaleString()}
+                          {r.matchType === 'partial' && r.adjusted && (
+                            <div className="text-[10px] font-medium text-yellow-700/80">ajustado</div>
                           )}
                         </td>
                         <td className="px-4 py-3">
@@ -804,12 +841,13 @@ export function ValidadorSKUPage() {
                         <td className="px-4 py-3 text-center">
                           {r.matchType === 'partial' ? (
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold ${
-                              r.stock === null ? 'bg-yellow-100 text-yellow-800' :
+                              !r.adjusted ? 'bg-yellow-100 text-yellow-800' :
                               r.status === 'ok' ? 'bg-green-50 text-green-700' :
-                              'bg-amber-50 text-amber-700'
+                              r.status === 'insufficient' ? 'bg-amber-50 text-amber-700' :
+                              'bg-red-50 text-red-600'
                             }`}>
-                              {r.stock === null ? <AlertTriangle size={12} /> : r.status === 'ok' ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
-                              {r.stock === null ? 'Revisar' : r.status === 'ok' ? 'OK depurado' : 'Insuficiente'}
+                              {!r.adjusted ? <AlertTriangle size={12} /> : r.status === 'ok' ? <CheckCircle2 size={12} /> : r.status === 'missing' ? <XCircle size={12} /> : <AlertTriangle size={12} />}
+                              {!r.adjusted ? 'Pendiente ajuste' : r.status === 'ok' ? 'OK ajustado' : r.status === 'missing' ? 'No aprobado' : 'Insuficiente'}
                             </span>
                           ) : r.status === 'ok' ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-50 text-green-700 text-[11px] font-semibold">
