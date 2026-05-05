@@ -32,6 +32,32 @@ body { margin: 0; min-width: 320px; min-height: 100dvh; background: var(--page-b
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 
+/* ── Texto blanco automático en fondos azul/navy (mobile + web) ──────────── */
+/* Garantiza visibilidad: cualquier elemento con bg navy hereda texto blanco
+   por default. Tailwind text-* utilities ganan por mayor especificidad
+   gracias a :where(). No afecta a variantes con opacidad (bg-[#1e3a5f]/10)
+   ni a backgrounds claros. */
+:where([class*="bg-[#1e3a5f]"]):not([class*="/10"]):not([class*="/20"]):not([class*="/5"]),
+:where([class*="bg-[#16304d]"]),
+:where([class*="bg-[#1f3864]"]):not([class*="/10"]):not([class*="/20"]):not([class*="/5"]),
+:where([class*="bg-[#0f172a]"]),
+:where([class*="bg-[#16304d]"]),
+:where([class*="bg-blue-600"]),
+:where([class*="bg-blue-700"]),
+:where([class*="bg-blue-800"]),
+:where([class*="bg-blue-900"]) {
+  color: #ffffff;
+}
+/* Mismo principio para inline styles con bg navy */
+:where([style*="background:#1e3a5f"]),
+:where([style*="background: #1e3a5f"]),
+:where([style*="background-color:#1e3a5f"]),
+:where([style*="background-color: #1e3a5f"]),
+:where([style*="background:#1f3864"]),
+:where([style*="background: #1f3864"]) {
+  color: #ffffff;
+}
+
 /* iOS: usar viewport dinámico (sin contar URL bar) y scroll suave en flex */
 @supports (height: 100dvh) {
   .h-screen { height: 100dvh; }
