@@ -511,3 +511,232 @@ export async function getExtensivInventoryByLocationAndCustomer(
   return result
 }
 
+/* ─── Sprint B · Transaction picker ────────────────────────────────────────
+ * Funciones para que ExtensivOperationPicker liste transactions (orders +
+ * receivers) de un cliente y obtenga el detalle completo de uno seleccionado.
+ * Reusa el proxy existente. NO toca credenciales. */
+
+export type ExtensivTransactionType = 'order' | 'receipt'
+
+export interface ExtensivTransactionListItem {
+  type:         ExtensivTransactionType
+  id:           string                // string para mezclar order/receipt en una lista
+  numericId:    number
+  reference:    string                // referenceNum o poNum
+  poNum:        string
+  creationDate: string
+  status:       string
+  isClosed:     boolean
+  units:        number
+  weight:       number
+  shipTo?:      string                // solo orders
+}
+
+/**
+ * Lista combinada de transactions (orders + receivers) para un cliente.
+ * Por default trae los últimos 60 días, ordenados por fecha desc.
+ */
+export async function listExtensivTransactions(
+  customerId: number,
+  opts?: { fromDays?: number; search?: string },
+): Promise<ExtensivTransactionListItem[]> {
+  const days = opts?.fromDays ?? 60
+  const to   = new Date()
+  const from = new Date(to.getTime() - days * 86_400_000)
+  const fromStr = from.toISOString().slice(0, 10)
+  const toStr   = to.toISOString().slice(0, 10)
+
+  const [orders, receivers] = await Promise.all([
+    getExtensivOrdersByCustomer(customerId, fromStr, toStr).catch(() => [] as ExtensivOrderDetail[]),
+    getExtensivReceiversByCustomer(customerId, fromStr, toStr).catch(() => [] as ExtensivReceiverDetail[]),
+  ])
+
+  const items: ExtensivTransactionListItem[] = [
+    ...orders.map<ExtensivTransactionListItem>(o => ({
+      type:         'order',
+      id:           `order:${o.orderId}`,
+      numericId:    o.orderId,
+      reference:    o.referenceNum || o.poNum || `ORD-${o.orderId}`,
+      poNum:        o.poNum,
+      creationDate: o.creationDate,
+      status:       o.status,
+      isClosed:     o.isClosed,
+      units:        o.numUnits1,
+      weight:       o.totalWeight,
+      shipTo:       o.routingInfo?.shipTo,
+    })),
+    ...receivers.map<ExtensivTransactionListItem>(r => ({
+      type:         'receipt',
+      id:           `receipt:${r.receiverId}`,
+      numericId:    r.receiverId,
+      reference:    r.referenceNum || r.poNum || `RCV-${r.receiverId}`,
+      poNum:        r.poNum,
+      creationDate: r.creationDate,
+      status:       r.status,
+      isClosed:     r.isClosed,
+      units:        r.numUnits1,
+      weight:       r.totalWeight,
+    })),
+  ]
+
+  // Filtro de búsqueda local (referencia, PO, ID)
+  const q = opts?.search?.trim().toLowerCase()
+  const filtered = q
+    ? items.filter(i =>
+        i.reference.toLowerCase().includes(q) ||
+        i.poNum.toLowerCase().includes(q)     ||
+        String(i.numericId).includes(q)
+      )
+    : items
+
+  return filtered.sort((a, b) => b.creationDate.localeCompare(a.creationDate))
+}
+
+export interface ExtensivOrderFullDetail {
+  orderId:       number
+  referenceNum:  string
+  poNum:         string
+  creationDate:  string
+  status:        string
+  customerId:    number
+  customerName:  string
+  facilityId:    number
+  facilityName:  string
+  shipTo?:       { companyName?: string; city?: string; state?: string; addr1?: string; addr2?: string; zip?: string; country?: string }
+  carrier?:      string
+  numUnits1:     number
+  totalWeight:   number
+  items:         Array<{ sku: string; qty: number; description?: string; weight?: number }>
+  raw:           unknown                 // payload completo para guardar en operations.extensiv_raw
+}
+
+/** Trae el detalle completo de UN order. */
+export async function getExtensivOrderDetail(orderId: number): Promise<ExtensivOrderFullDetail> {
+  const ITEM_REL = 'http://api.3plCentral.com/rels/orders/item'
+  const data = await callProxy<{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [k: string]: any
+  }>({
+    method: 'GET',
+    path:   `/orders/${orderId}`,
+    query:  { detail: 'All' },
+  })
+
+  const ro     = data.readOnly ?? {}
+  const items  = (data._embedded?.[ITEM_REL] ?? []) as Array<{
+    itemIdentifier?: { sku?: string }
+    sku?:            string
+    qty?:            number
+    description?:    string
+    weightImperial?: number
+  }>
+  const ship = data.routingInfo?.shipTo
+
+  return {
+    orderId:      ro.orderId ?? orderId,
+    referenceNum: data.referenceNum ?? '',
+    poNum:        data.poNum ?? '',
+    creationDate: ro.creationDate ?? '',
+    status:       ro.isClosed ? 'Closed' : 'Open',
+    customerId:   ro.customerIdentifier?.id ?? 0,
+    customerName: ro.customerIdentifier?.name ?? '',
+    facilityId:   ro.facilityIdentifier?.id ?? 0,
+    facilityName: ro.facilityIdentifier?.name ?? '',
+    shipTo:       ship ? {
+      companyName: ship.companyName,
+      city:        ship.city,
+      state:       ship.state,
+      addr1:       ship.addr1,
+      addr2:       ship.addr2,
+      zip:         ship.zip,
+      country:     ship.country,
+    } : undefined,
+    carrier:      data.routingInfo?.carrier ?? '',
+    numUnits1:    ro.numUnits1 ?? 0,
+    totalWeight:  data.totalWeight ?? 0,
+    items: items.map(it => ({
+      sku:         it.itemIdentifier?.sku ?? it.sku ?? '',
+      qty:         it.qty ?? 0,
+      description: it.description ?? '',
+      weight:      it.weightImperial ?? 0,
+    })),
+    raw: data,
+  }
+}
+
+export interface ExtensivReceiverFullDetail {
+  receiverId:    number
+  referenceNum:  string
+  poNum:         string
+  creationDate:  string
+  status:        string
+  customerId:    number
+  customerName:  string
+  facilityId:    number
+  facilityName:  string
+  numUnits1:     number
+  totalWeight:   number
+  items:         Array<{ sku: string; qty: number; description?: string; weight?: number }>
+  raw:           unknown
+}
+
+/** Trae el detalle completo de UN receiver (inbound). */
+export async function getExtensivReceiverDetail(receiverId: number): Promise<ExtensivReceiverFullDetail> {
+  const ITEM_REL = 'http://api.3plCentral.com/rels/inventory/receiveritem'
+  const data = await callProxy<{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [k: string]: any
+  }>({
+    method: 'GET',
+    path:   `/inventory/receivers/${receiverId}`,
+    query:  { detail: 'All' },
+  })
+
+  const ro     = data.readOnly ?? {}
+  const items  = (data._embedded?.[ITEM_REL] ?? []) as Array<{
+    itemIdentifier?: { sku?: string }
+    sku?:            string
+    qty?:            number
+    description?:    string
+    weightImperial?: number
+  }>
+
+  return {
+    receiverId:   ro.receiverId ?? receiverId,
+    referenceNum: data.referenceNum ?? '',
+    poNum:        data.poNum ?? '',
+    creationDate: ro.creationDate ?? '',
+    status:       ro.isClosed ? 'Closed' : 'Open',
+    customerId:   ro.customerIdentifier?.id ?? 0,
+    customerName: ro.customerIdentifier?.name ?? '',
+    facilityId:   ro.facilityIdentifier?.id ?? 0,
+    facilityName: ro.facilityIdentifier?.name ?? '',
+    numUnits1:    ro.numUnits1 ?? 0,
+    totalWeight:  data.totalWeight ?? 0,
+    items: items.map(it => ({
+      sku:         it.itemIdentifier?.sku ?? it.sku ?? '',
+      qty:         it.qty ?? 0,
+      description: it.description ?? '',
+      weight:      it.weightImperial ?? 0,
+    })),
+    raw: data,
+  }
+}
+
+/** Resultado normalizado del picker (ya sea desde selector, PT parse o manual). */
+export interface ExtensivPickResult {
+  type:                  ExtensivTransactionType | 'manual'
+  customerId:            number | null
+  customerName:          string | null
+  transactionId:         string | null      // numericId stringificado
+  reference:             string | null
+  poNum:                 string | null
+  creationDate:          string | null
+  shipToCity?:           string
+  shipToState?:          string
+  carrier?:              string
+  units?:                number
+  weight?:               number
+  items?:                Array<{ sku: string; qty: number; description?: string }>
+  raw?:                  unknown
+}

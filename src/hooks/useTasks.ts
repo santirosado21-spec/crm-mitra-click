@@ -30,6 +30,12 @@ export interface CreateTaskInput {
   assignee_email:  string
   scheduled_start: string
   scheduled_end:   string
+  // Sprint B · Vínculo a Extensiv (todos opcionales — se llena por el picker)
+  extensiv_transaction_type?: 'order' | 'receipt' | 'adjustment' | 'manual' | null
+  extensiv_transaction_id?:   string | null
+  extensiv_customer_id?:      number | null
+  extensiv_reference?:        string | null
+  extensiv_raw?:              unknown
 }
 
 export function useTasks() {
@@ -85,6 +91,12 @@ export function useTasks() {
       p_assignee_email:  input.assignee_email,
       p_scheduled_start: input.scheduled_start,
       p_scheduled_end:   input.scheduled_end,
+      // Sprint B · campos Extensiv opcionales
+      p_extensiv_transaction_type: input.extensiv_transaction_type ?? null,
+      p_extensiv_transaction_id:   input.extensiv_transaction_id   ?? null,
+      p_extensiv_customer_id:      input.extensiv_customer_id      ?? null,
+      p_extensiv_reference:        input.extensiv_reference        ?? null,
+      p_extensiv_raw:              input.extensiv_raw              ?? null,
     })
     if (error) throw new Error(error.message)
     return data as Task

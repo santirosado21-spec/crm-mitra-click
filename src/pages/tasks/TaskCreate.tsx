@@ -10,6 +10,8 @@ import { useAuthContext } from '../../context/AuthContext'
 import { useToast } from '../../hooks/useToast'
 import { supabase } from '../../lib/supabase'
 import type { TaskCategory } from '../../types/tasks'
+import { ExtensivOperationPicker } from '../../components/features/ExtensivOperationPicker'
+import type { ExtensivPickResult } from '../../lib/extensiv'
 
 interface TeamMember { email: string; name: string | null }
 
@@ -34,6 +36,7 @@ export function TaskCreate() {
   const [duration, setDuration]           = useState<number>(60)
   const [scheduledStart, setScheduledStart] = useState<Date | null>(null)
   const [scheduledEnd, setScheduledEnd]     = useState<Date | null>(null)
+  const [extensivPick, setExtensivPick]     = useState<ExtensivPickResult | null>(null)
 
   useEffect(() => {
     getClients()
@@ -70,6 +73,12 @@ export function TaskCreate() {
         assignee_email:  assigneeEmail,
         scheduled_start: scheduledStart.toISOString(),
         scheduled_end:   scheduledEnd.toISOString(),
+        // Sprint B · Extensiv (opcional)
+        extensiv_transaction_type: extensivPick?.type ?? null,
+        extensiv_transaction_id:   extensivPick?.transactionId ?? null,
+        extensiv_customer_id:      extensivPick?.customerId ?? null,
+        extensiv_reference:        extensivPick?.reference ?? null,
+        extensiv_raw:              extensivPick?.raw ?? null,
       })
       toast.success('Tarea propuesta', `Se le notificará a ${assigneeEmail}.`)
       navigate(`/tasks/${t.id}`)
@@ -167,6 +176,28 @@ export function TaskCreate() {
                   <option value="">— interno (no facturable) —</option>
                   {clients.map(c => <option key={c.id} value={c.id}>{c.codigo ? `${c.codigo} · ` : ''}{c.name}</option>)}
                 </select>
+              </div>
+
+              {/* Operación (Extensiv / PT / Manual) */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                  Operación
+                  <span className="text-[10px] font-normal text-gray-400 ml-1">(opcional)</span>
+                </label>
+                <ExtensivOperationPicker
+                  value={extensivPick}
+                  onChange={setExtensivPick}
+                />
+                {/* Auto-llenar título cuando el picker selecciona algo */}
+                {extensivPick?.reference && !title.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => setTitle(`${extensivPick.type === 'order' ? 'Procesar order' : extensivPick.type === 'receipt' ? 'Recibir' : 'Operación'} ${extensivPick.reference}`)}
+                    className="mt-2 text-[11px] text-[#1e3a5f] font-semibold hover:underline"
+                  >
+                    Usar referencia como título de tarea
+                  </button>
+                )}
               </div>
 
               <div>
