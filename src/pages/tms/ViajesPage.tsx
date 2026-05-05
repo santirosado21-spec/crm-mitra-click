@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react'
-import { Plus, Search, Edit3, Trash2, Route } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Plus, Search, Edit3, Trash2, Route, Send, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { useViajes } from '../../hooks/useViajes'
 import { useVehiculos } from '../../hooks/useVehiculos'
 import { useOperadores } from '../../hooks/useOperadores'
+import { useAuthContext } from '../../context/AuthContext'
+import { useToast } from '../../hooks/useToast'
 import { supabase } from '../../lib/supabase'
 import { ViajeForm, type ViajeFormData } from './components/ViajeForm'
 import { ViajeStatusCell } from './components/ViajeStatusCell'
 import type { Viaje, ViajeEstado } from '../../types/tms'
+import { pushChargeToExtensiv, getChargeStatusForSources, type ChargeStatus } from '../../lib/extensivBilling'
 
 const fmtMoney = (n: number) => `$${n.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
 const fmtDate = (d: string | null) => {
@@ -18,6 +21,8 @@ const fmtDate = (d: string | null) => {
 }
 
 export function ViajesPage() {
+  const { user } = useAuthContext()
+  const toast = useToast()
   const [estadoF, setEstadoF] = useState<ViajeEstado | ''>('')
   const [busqueda, setBusqueda] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -27,20 +32,52 @@ export function ViajesPage() {
   const { vehiculos } = useVehiculos()
   const { operadores } = useOperadores()
 
+  // Sprint C · estado de charges Extensiv por viaje
+  const [chargeStatus, setChargeStatus] = useState<Map<string, ChargeStatus[]>>(new Map())
+  const [pushingId, setPushingId]       = useState<string | null>(null)
+  const canBill = user?.role === 'admin' || user?.role === 'cobranza'
+
+  // Lookup operations + extensiv_customer_id por operacion_id
+  const [opExtensivMap, setOpExtensivMap] = useState<Record<string, { ref: string; customerId: number | null; transactionId: string | null }>>({})
+
+  useEffect(() => {
+    const opIds = viajes.filter(v => v.operacion_id).map(v => v.operacion_id!)
+    if (opIds.length === 0) return
+    supabase
+      .from('operations')
+      .select('id, referencia, extensiv_customer_id, extensiv_transaction_id')
+      .in('id', opIds)
+      .then(({ data }) => {
+        if (!data) return
+        const map: typeof opExtensivMap = {}
+        for (const o of data as Array<{ id: string; referencia: string; extensiv_customer_id: number | null; extensiv_transaction_id: string | null }>) {
+          map[o.id] = {
+            ref:           o.referencia,
+            customerId:    o.extensiv_customer_id,
+            transactionId: o.extensiv_transaction_id,
+          }
+        }
+        setOpExtensivMap(map)
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viajes])
+
+  // Refrescar charge status cuando cambian los viajes
+  useEffect(() => {
+    if (!canBill || viajes.length === 0) return
+    const ids = viajes.map(v => v.id)
+    getChargeStatusForSources('viajes', ids).then(setChargeStatus).catch(() => {})
+  }, [viajes, canBill])
+
   // Lookup maps
   const vehiculoMap = Object.fromEntries(vehiculos.map(v => [v.id, v]))
   const operadorMap = Object.fromEntries(operadores.map(o => [o.id, o]))
 
-  // Fetch operation references for display
-  const [opRefMap, setOpRefMap] = useState<Record<string, string>>({})
-  useEffect(() => {
-    const opIds = viajes.filter(v => v.operacion_id).map(v => v.operacion_id!)
-    if (opIds.length === 0) return
-    supabase.from('operations').select('id, referencia').in('id', opIds)
-      .then(({ data }) => {
-        if (data) setOpRefMap(Object.fromEntries(data.map(o => [o.id, o.referencia])))
-      })
-  }, [viajes])
+  // opRefMap derivado del map enriquecido de Extensiv (compat con código existente)
+  const opRefMap = useMemo(
+    () => Object.fromEntries(Object.entries(opExtensivMap).map(([id, data]) => [id, data.ref])),
+    [opExtensivMap],
+  )
 
   const filtered = busqueda
     ? viajes.filter(v => {
@@ -49,6 +86,53 @@ export function ViajesPage() {
         return v.origen.toLowerCase().includes(q) || v.destino.toLowerCase().includes(q) || ref.toLowerCase().includes(q)
       })
     : viajes
+
+  // Push manual de charge a Extensiv para un viaje completado
+  async function handlePushExtensiv(v: Viaje) {
+    const opData = v.operacion_id ? opExtensivMap[v.operacion_id] : undefined
+    if (!opData?.customerId) {
+      toast.error('Sin cliente Extensiv', 'La operación de este viaje no tiene extensiv_customer_id. Edita la operación primero.')
+      return
+    }
+    if (v.estado !== 'completado') {
+      toast.error('Viaje no completado', 'Solo se pueden cobrar viajes en estado "completado".')
+      return
+    }
+    if (!v.ingreso_cliente || v.ingreso_cliente <= 0) {
+      toast.error('Sin precio cliente', 'El viaje no tiene ingreso_cliente registrado.')
+      return
+    }
+
+    setPushingId(v.id)
+    try {
+      const isProveedor = !!v.proveedor_nombre
+      const result = await pushChargeToExtensiv({
+        sourceTable:     'viajes',
+        sourceId:        v.id,
+        customerId:      opData.customerId,
+        chargeType:      isProveedor ? 'FLETE_EXTERNO' : 'FLETE_INTERNO',
+        amount:          v.ingreso_cliente,
+        description:     `Flete ${v.origen} → ${v.destino}${opData.ref ? ' · ' + opData.ref : ''}`,
+        referenceNumber: opData.ref || v.id.slice(0, 8),
+        shipmentId:      opData.transactionId ?? undefined,
+      })
+
+      if (result.ok) {
+        toast.success('Charge enviado a Extensiv', `chargeId: ${result.extensivChargeId ?? '—'}`)
+      } else {
+        toast.error('No se pudo enviar', result.error ?? 'Error desconocido')
+      }
+
+      // Refrescar status local
+      const ids = viajes.map(x => x.id)
+      const fresh = await getChargeStatusForSources('viajes', ids)
+      setChargeStatus(fresh)
+    } catch (e) {
+      toast.error('Error al pushear charge', e instanceof Error ? e.message : 'Error desconocido')
+    } finally {
+      setPushingId(null)
+    }
+  }
 
   const handleSave = async (data: ViajeFormData) => {
     try {
@@ -207,6 +291,43 @@ export function ViajesPage() {
                       <td className="px-4 py-3 text-xs text-gray-500">{fmtDate(v.fecha_programada)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
+                          {/* Sprint C · Extensiv Billing — solo si viaje completado y user puede facturar */}
+                          {canBill && v.estado === 'completado' && (() => {
+                            const charges = chargeStatus.get(v.id) ?? []
+                            const sent    = charges.find(c => c.status === 'sent')
+                            const failed  = charges.find(c => c.status === 'failed')
+                            const isPushing = pushingId === v.id
+
+                            if (sent) {
+                              return (
+                                <span
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700"
+                                  title={`Enviado a Extensiv · chargeId ${sent.extensiv_charge_id}\n${new Date(sent.sent_at ?? '').toLocaleString('es-MX')}`}
+                                >
+                                  <CheckCircle2 size={12} /> Cobrado
+                                </span>
+                              )
+                            }
+                            return (
+                              <button
+                                onClick={() => handlePushExtensiv(v)}
+                                disabled={isPushing}
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50 ${
+                                  failed
+                                    ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                                    : 'bg-[#1e3a5f] text-white hover:opacity-90'
+                                }`}
+                                title={failed ? `Reintento (último error: ${failed.error_message})` : 'Enviar charge a Extensiv Billing'}
+                              >
+                                {isPushing
+                                  ? <Loader2 className="animate-spin" size={11} />
+                                  : failed ? <AlertCircle size={11} /> : <Send size={11} />
+                                }
+                                {failed ? 'Reintento' : 'Cobrar'}
+                              </button>
+                            )
+                          })()}
+
                           <button onClick={() => { setEditTarget(v); setShowForm(true) }}
                             className="p-1.5 rounded hover:bg-blue-50 text-gray-400 hover:text-[#1e3a5f] transition-colors" title="Editar">
                             <Edit3 size={14} />
