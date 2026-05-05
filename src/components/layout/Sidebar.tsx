@@ -100,9 +100,8 @@ export function Sidebar() {
 
       <aside
         className={`
-          fixed lg:static z-40 top-0 bottom-0 left-0 w-[220px] shrink-0 flex flex-col border-r
-          transition-transform duration-200 ease-out
-          ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${open ? 'fixed inset-y-0 left-0 z-40 flex' : 'hidden lg:flex lg:static'}
+          w-[220px] shrink-0 flex-col border-r
         `}
         style={{ background: 'var(--sidebar-bg)', borderColor: 'var(--card-border)' }}
         role="navigation"
