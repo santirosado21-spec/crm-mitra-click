@@ -1,4 +1,4 @@
-import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X } from 'lucide-react'
+import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
@@ -47,8 +47,9 @@ const TASKS_LINKS: Link[] = [
 ]
 
 const TASKS_ADMIN_LINKS: Link[] = [
-  { to: '/tasks/admin/team',       label: 'Equipo y horarios', icon: UserCog },
-  { to: '/tasks/admin/reports',    label: 'Reportes operativos', icon: BarChart3 },
+  { to: '/tasks/admin/team',              label: 'Equipo y horarios',   icon: UserCog },
+  { to: '/tasks/admin/reports',           label: 'Reportes operativos', icon: BarChart3 },
+  { to: '/tasks/admin/extensiv-billing',  label: 'Extensiv Billing',    icon: Receipt },
 ]
 
 type ModuleKey = 'home' | 'wms' | 'tms' | 'almacen' | 'tasks'
@@ -84,8 +85,14 @@ export function Sidebar() {
 
   const { label, links } = MODULE_CONFIG[currentModule]
   const visibleLinks = links.filter(link => canAccessPath(user?.role, link.to))
-  const isAdmin = user?.role === 'admin'
-  const showAdminTasks = currentModule === 'tasks' && isAdmin
+  const isAdmin    = user?.role === 'admin'
+  const isCobranza = user?.role === 'cobranza'
+  // En el módulo tasks, mostramos sección admin a admin (todos los links)
+  // o a cobranza (solo Extensiv Billing).
+  const showAdminTasks = currentModule === 'tasks' && (isAdmin || isCobranza)
+  const visibleAdminLinks = TASKS_ADMIN_LINKS.filter(l =>
+    isAdmin || l.to === '/tasks/admin/extensiv-billing'
+  )
 
   return (
     <>
@@ -176,7 +183,7 @@ export function Sidebar() {
               Administración
             </p>
             <div className="flex flex-col gap-0.5">
-              {TASKS_ADMIN_LINKS.map(({ to, label: linkLabel, icon: Icon }) => (
+              {visibleAdminLinks.map(({ to, label: linkLabel, icon: Icon }) => (
                 <NavLink
                   key={to}
                   to={to}

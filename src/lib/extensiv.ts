@@ -740,3 +740,100 @@ export interface ExtensivPickResult {
   items?:                Array<{ sku: string; qty: number; description?: string }>
   raw?:                  unknown
 }
+
+/* ─── Sprint D · Invoices (Billing Wizard) ─────────────────────────────────
+ * Las invoices de Extensiv agrupan los charges no facturados de un período.
+ * El módulo actual de Billing Wizard expone GET /invoices y POST /invoices.
+ *
+ * NOTA: el shape exacto del payload de Extensiv puede variar según versión.
+ * Usamos `unknown` en raw y exponemos los campos comunes; cuando un cliente
+ * real lo pruebe, ajustamos al shape exacto que vuelva. */
+
+export interface ExtensivInvoiceSummary {
+  invoiceId:     string
+  invoiceNumber: string
+  customerId:    number
+  customerName:  string
+  invoiceDate:   string                  // ISO YYYY-MM-DD
+  periodFrom:    string | null
+  periodTo:      string | null
+  totalAmount:   number
+  status:        string                  // 'Draft' | 'Issued' | 'Paid' | etc
+  raw:           unknown
+}
+
+/** Lista invoices de un cliente Extensiv en un rango de fechas. */
+export async function getExtensivInvoices(
+  customerId: number,
+  fromDate:   string,
+  toDate:     string,
+): Promise<ExtensivInvoiceSummary[]> {
+  const data = await callProxy<{
+    totalResults?: number
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _embedded?: Record<string, any[]>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [k: string]: any
+  }>({
+    method: 'GET',
+    path:   '/invoices',
+    query:  {
+      pgsiz: 200,
+      pgnum: 1,
+      rql:   `customerId==${customerId};invoiceDate=ge=${fromDate};invoiceDate=le=${toDate}T23:59:59`,
+    },
+  })
+
+  // Extensiv puede devolver _embedded con varios rels — tomamos el primero
+  // que sea array.
+  const list: unknown[] = (() => {
+    const emb = data._embedded ?? {}
+    for (const v of Object.values(emb)) {
+      if (Array.isArray(v)) return v
+    }
+    return []
+  })()
+
+  return list.map((inv): ExtensivInvoiceSummary => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const i = inv as any
+    return {
+      invoiceId:     String(i.invoiceId ?? i.id ?? ''),
+      invoiceNumber: String(i.invoiceNumber ?? i.invoiceNum ?? ''),
+      customerId:    Number(i.customerId ?? i.customerIdentifier?.id ?? customerId),
+      customerName:  String(i.customerName ?? i.customerIdentifier?.name ?? ''),
+      invoiceDate:   String(i.invoiceDate ?? i.creationDate ?? '').slice(0, 10),
+      periodFrom:    i.periodFrom ?? i.dateFrom ?? null,
+      periodTo:      i.periodTo ?? i.dateTo ?? null,
+      totalAmount:   Number(i.totalAmount ?? i.amount ?? 0),
+      status:        String(i.status ?? i.state ?? 'Unknown'),
+      raw:           inv,
+    }
+  })
+}
+
+/** Genera una invoice mensual en Extensiv agrupando los charges del período.
+ *  Acción NO reversible — la UI debe mostrar modal de confirmación. */
+export async function createExtensivInvoice(
+  customerId: number,
+  fromDate:   string,
+  toDate:     string,
+): Promise<{ invoiceId: string; raw: unknown }> {
+  const data = await callProxy<{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [k: string]: any
+  }>({
+    method: 'POST',
+    path:   '/invoices',
+    body: {
+      customerId,
+      dateFrom: fromDate,
+      dateTo:   toDate,
+    },
+  })
+
+  return {
+    invoiceId: String(data.invoiceId ?? data.id ?? ''),
+    raw:       data,
+  }
+}
