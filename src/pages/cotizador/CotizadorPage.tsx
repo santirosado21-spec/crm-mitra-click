@@ -598,12 +598,12 @@ export function CotizadorPage() {
       className={`${inp} ${extra}`} />
 
   return (
-    <div className="flex flex-col min-h-dvh bg-gray-50">
+    <div className="flex flex-col h-dvh bg-gray-50">
       <div className="cotiz-no-print"><Header /></div>
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         <div className="cotiz-no-print"><Sidebar /></div>
 
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 p-3 sm:p-6 pb-24">
           {/* ── Header ── */}
           <div className="cotiz-no-print flex items-start justify-between mb-6 flex-wrap gap-4">
             <div>

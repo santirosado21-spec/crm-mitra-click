@@ -50,38 +50,43 @@ export function AlmacenPage() {
     ? new Date(lastFetch.getTime() + 7 * 24 * 60 * 60 * 1000)
     : null
 
+  const [mobileClientsOpen, setMobileClientsOpen] = useState(false)
+
   return (
-    <div className="flex flex-col min-h-dvh" style={{ background: '#f5f7fa' }}>
-      {/* Top bar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3 shrink-0 flex-wrap">
+    <div className="flex flex-col min-h-dvh h-dvh overflow-hidden" style={{ background: '#f5f7fa' }}>
+      {/* Top bar — compacto en móvil, scroll horizontal si no caben los controles */}
+      <div className="bg-white border-b border-gray-200 px-2 sm:px-4 py-1.5 sm:py-2 flex items-center gap-2 sm:gap-3 shrink-0 overflow-x-auto whitespace-nowrap">
         <img
           src="/hd-logo.png"
           alt="Supply Chain MX"
-          className="h-20 w-auto object-contain cursor-pointer"
+          className="h-10 sm:h-20 w-auto object-contain cursor-pointer shrink-0"
           onClick={() => navigate('/')}
         />
-        <div className="w-px h-8 bg-gray-200" />
+        <div className="hidden sm:block w-px h-8 bg-gray-200 shrink-0" />
 
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-[#1f3864] transition-colors px-2 py-1.5 rounded hover:bg-gray-50"
+          className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-[#1f3864] transition-colors px-2 py-1.5 rounded hover:bg-gray-50 shrink-0"
         >
-          <ArrowLeft size={14} /> Volver al inicio
+          <ArrowLeft size={14} /> <span className="hidden sm:inline">Volver al inicio</span>
         </button>
 
-        <div className="w-px h-5 bg-gray-200" />
+        <div className="hidden sm:block w-px h-5 bg-gray-200 shrink-0" />
 
-        <span className="text-xs font-bold text-[#1f3864]">Almacén — CEDIS Lerma · Bodega 1</span>
+        <span className="text-[10px] sm:text-xs font-bold text-[#1f3864] shrink-0">
+          <span className="sm:hidden">CEDIS Lerma</span>
+          <span className="hidden sm:inline">Almacén — CEDIS Lerma · Bodega 1</span>
+        </span>
 
-        <div className="w-px h-5 bg-gray-200" />
+        <div className="hidden sm:block w-px h-5 bg-gray-200 shrink-0" />
 
         {/* Client filter dropdown */}
-        <label className="flex items-center gap-1.5 text-[11px]">
-          <span className="text-gray-500 font-semibold">Cliente:</span>
+        <label className="flex items-center gap-1.5 text-[11px] shrink-0">
+          <span className="hidden sm:inline text-gray-500 font-semibold">Cliente:</span>
           <select
             value={clientFilter ?? ''}
             onChange={e => setClientFilter(e.target.value ? Number(e.target.value) : null)}
-            className="h-7 px-2 rounded border border-gray-200 text-[11px] bg-white focus:outline-none focus:ring-2 focus:ring-[#1f3864]/20 max-w-[220px]"
+            className="h-7 px-2 rounded border border-gray-200 text-[11px] bg-white focus:outline-none focus:ring-2 focus:ring-[#1f3864]/20 max-w-[160px] sm:max-w-[220px]"
           >
             <option value="">Todos los clientes</option>
             {clients.map(c => (
@@ -117,16 +122,16 @@ export function AlmacenPage() {
         <button
           onClick={fetchNow}
           disabled={status === 'loading'}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1f3864] text-white text-xs font-semibold hover:bg-[#16304d] transition-colors disabled:opacity-60"
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg bg-[#1f3864] text-white text-xs font-semibold hover:bg-[#16304d] transition-colors disabled:opacity-60 shrink-0"
         >
           <RefreshCw size={12} className={status === 'loading' ? 'animate-spin' : ''} />
-          {status === 'loading' ? 'Cargando...' : 'Actualizar ahora'}
+          <span className="hidden sm:inline">{status === 'loading' ? 'Cargando...' : 'Actualizar ahora'}</span>
         </button>
       </div>
 
       {/* Main content: iframe + side panel */}
-      <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 relative" style={{ background: '#f5f7fa' }}>
+      <div className="flex-1 flex overflow-hidden relative">
+        <div className="flex-1 relative overflow-auto touch-pan-x touch-pan-y" style={{ background: '#f5f7fa', WebkitOverflowScrolling: 'touch' }}>
           {!iframeLoaded && (
             <div
               className="absolute inset-0 flex items-center justify-center z-10"
@@ -142,32 +147,78 @@ export function AlmacenPage() {
             ref={iframeRef}
             src="/cedis-layout/index.html"
             title="Layout CEDIS Lerma"
-            className="w-full h-full border-0 transition-opacity duration-300"
+            className="border-0 transition-opacity duration-300 w-full h-full lg:w-full lg:h-full"
             style={{
               background: '#f5f7fa',
               opacity: iframeLoaded ? 1 : 0,
+              minWidth: '900px',
+              minHeight: '600px',
             }}
             onLoad={() => setTimeout(() => setIframeLoaded(true), 400)}
           />
         </div>
-        <ClientsPanel
-          clients={clients}
-          status={status}
-          selectedId={clientFilter}
-          onSelect={setClientFilter}
-        />
+
+        {/* Sidebar de clientes — desktop inline / móvil bottom-sheet */}
+        <div className="hidden lg:block">
+          <ClientsPanel
+            clients={clients}
+            status={status}
+            selectedId={clientFilter}
+            onSelect={setClientFilter}
+          />
+        </div>
+
+        {/* FAB móvil para abrir panel de clientes */}
+        <button
+          type="button"
+          onClick={() => setMobileClientsOpen(true)}
+          className="lg:hidden fixed bottom-4 right-4 z-30 inline-flex items-center gap-2 px-4 py-3 rounded-full bg-[#1f3864] text-white text-xs font-semibold shadow-xl active:scale-[0.98]"
+        >
+          <Users size={14} /> Clientes ({clients.length})
+        </button>
+
+        {/* Bottom sheet móvil */}
+        {mobileClientsOpen && (
+          <div className="lg:hidden fixed inset-0 z-40 flex flex-col">
+            <div className="flex-1 bg-black/40 animate-fade-in" onClick={() => setMobileClientsOpen(false)} />
+            <div className="bg-white border-t border-gray-200 max-h-[70vh] flex flex-col rounded-t-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Users size={14} className="text-[#1f3864]" />
+                  <h2 className="text-sm font-bold text-gray-800">Clientes en el CEDIS</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileClientsOpen(false)}
+                  className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+                  aria-label="Cerrar"
+                >
+                  ✕
+                </button>
+              </div>
+              <ClientsPanel
+                clients={clients}
+                status={status}
+                selectedId={clientFilter}
+                onSelect={(id) => { setClientFilter(id); setMobileClientsOpen(false) }}
+                forceMobile
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 function ClientsPanel({
-  clients, status, selectedId, onSelect,
+  clients, status, selectedId, onSelect, forceMobile,
 }: {
   clients: ClientSummary[]
   status: WarehouseStatus
   selectedId: number | null
   onSelect: (id: number | null) => void
+  forceMobile?: boolean
 }) {
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [search, setSearch] = useState('')
@@ -177,7 +228,7 @@ function ClientsPanel({
     ? clients.filter(c => c.customerName.toLowerCase().includes(search.toLowerCase()))
     : clients
 
-  if (collapsed) {
+  if (collapsed && !forceMobile) {
     return (
       <div className="w-10 bg-white border-l border-gray-200 flex flex-col items-center py-3 shrink-0">
         <button
@@ -192,16 +243,21 @@ function ClientsPanel({
   }
 
   return (
-    <aside className="w-80 bg-white border-l border-gray-200 flex flex-col shrink-0">
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Users size={14} className="text-[#1f3864]" />
-          <h2 className="text-xs font-bold text-gray-800">Clientes en el CEDIS</h2>
+    <aside className={forceMobile
+      ? 'flex-1 flex flex-col bg-white'
+      : 'w-80 bg-white border-l border-gray-200 flex flex-col shrink-0'
+    }>
+      {!forceMobile && (
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users size={14} className="text-[#1f3864]" />
+            <h2 className="text-xs font-bold text-gray-800">Clientes en el CEDIS</h2>
+          </div>
+          <button onClick={() => setCollapsed(true)} className="p-1 rounded hover:bg-gray-100 text-gray-400" title="Ocultar">
+            <ChevronDown size={12} className="rotate-90" />
+          </button>
         </div>
-        <button onClick={() => setCollapsed(true)} className="p-1 rounded hover:bg-gray-100 text-gray-400" title="Ocultar">
-          <ChevronDown size={12} className="rotate-90" />
-        </button>
-      </div>
+      )}
 
       <div className="px-4 py-2 border-b border-gray-100">
         <div className="relative">
