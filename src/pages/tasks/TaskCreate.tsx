@@ -55,7 +55,18 @@ export function TaskCreate() {
     })
   }, [getClients])
 
-  const canSubmit = title.trim() && assigneeEmail && scheduledStart && scheduledEnd && !submitting
+  // Sprint E · Roles operativos (SAC, almacén, transporte) deben ligar la
+  // tarea a un Transaction Extensiv o explicitar modo manual. Admin y
+  // cobranza pueden saltarlo.
+  const requiresExtensivPick =
+    user?.role === 'servicio_cliente' ||
+    user?.role === 'almacen' ||
+    user?.role === 'transporte'
+  const extensivPickIsValid =
+    !!extensivPick && (extensivPick.type === 'manual' || !!extensivPick.transactionId)
+  const extensivOk = !requiresExtensivPick || extensivPickIsValid
+
+  const canSubmit = title.trim() && assigneeEmail && scheduledStart && scheduledEnd && extensivOk && !submitting
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -182,12 +193,22 @@ export function TaskCreate() {
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                   Operación
-                  <span className="text-[10px] font-normal text-gray-400 ml-1">(opcional)</span>
+                  {requiresExtensivPick
+                    ? <span className="text-rose-500 ml-1">*</span>
+                    : <span className="text-[10px] font-normal text-gray-400 ml-1">(opcional)</span>
+                  }
                 </label>
                 <ExtensivOperationPicker
                   value={extensivPick}
                   onChange={setExtensivPick}
+                  fromDays={7}
+                  className={requiresExtensivPick && !extensivPickIsValid ? 'ring-2 ring-rose-200' : ''}
                 />
+                {requiresExtensivPick && !extensivPickIsValid && (
+                  <p className="mt-1.5 text-[11px] text-rose-600">
+                    Tu rol requiere ligar la tarea a un Transaction de Extensiv (o marcar modo Manual si es operación interna).
+                  </p>
+                )}
                 {/* Auto-llenar título cuando el picker selecciona algo */}
                 {extensivPick?.reference && !title.trim() && (
                   <button

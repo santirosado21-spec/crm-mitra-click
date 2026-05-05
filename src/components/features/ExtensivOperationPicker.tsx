@@ -17,6 +17,7 @@ interface Props {
   value:           ExtensivPickResult | null
   onChange:        (result: ExtensivPickResult | null) => void
   defaultCustomer?: number
+  fromDays?:        number          // Sprint E · default 7 días (última semana)
   className?:      string
 }
 
@@ -28,7 +29,7 @@ interface Props {
  *
  * Output normalizado: ExtensivPickResult.
  */
-export function ExtensivOperationPicker({ value, onChange, defaultCustomer, className }: Props) {
+export function ExtensivOperationPicker({ value, onChange, defaultCustomer, fromDays = 7, className }: Props) {
   const [mode, setMode] = useState<Mode>(value?.type === 'manual' ? 'manual' : 'extensiv')
 
   return (
@@ -42,7 +43,7 @@ export function ExtensivOperationPicker({ value, onChange, defaultCustomer, clas
 
       {/* Cuerpo según modo */}
       <div className="p-4">
-        {mode === 'extensiv' && <ExtensivMode value={value} onChange={onChange} defaultCustomer={defaultCustomer} />}
+        {mode === 'extensiv' && <ExtensivMode value={value} onChange={onChange} defaultCustomer={defaultCustomer} fromDays={fromDays} />}
         {mode === 'pt'       && <PTMode       value={value} onChange={onChange} defaultCustomer={defaultCustomer} />}
         {mode === 'manual'   && <ManualMode   value={value} onChange={onChange} />}
       </div>
@@ -97,13 +98,14 @@ function ModeTab({ active, onClick, icon: Icon, label }: {
 }
 
 // ── Modo A: Selector Extensiv ──────────────────────────────────────────────
-function ExtensivMode({ value, onChange, defaultCustomer }: Props) {
+function ExtensivMode({ value, onChange, defaultCustomer, fromDays = 7 }: Props) {
   const [customers, setCustomers]       = useState<ExtensivCustomer[]>([])
   const [loadingCustomers, setLC]        = useState(false)
   const [customerId, setCustomerId]      = useState<number | null>(value?.customerId ?? defaultCustomer ?? null)
   const [transactions, setTransactions]  = useState<ExtensivTransactionListItem[]>([])
   const [loadingTxn, setLT]              = useState(false)
   const [search, setSearch]              = useState('')
+  const [days, setDays]                  = useState<number>(fromDays)
   const [hydrating, setHydrating]        = useState(false)
   const [error, setError]                = useState<string | null>(null)
 
@@ -116,15 +118,15 @@ function ExtensivMode({ value, onChange, defaultCustomer }: Props) {
       .finally(() => setLC(false))
   }, [])
 
-  // Cuando cambia cliente, recarga transactions
+  // Cuando cambia cliente o rango, recarga transactions
   useEffect(() => {
     if (!customerId) { setTransactions([]); return }
     setLT(true); setError(null)
-    listExtensivTransactions(customerId, { fromDays: 60 })
+    listExtensivTransactions(customerId, { fromDays: days })
       .then(setTransactions)
       .catch(e => setError(e instanceof Error ? e.message : 'Error cargando transactions'))
       .finally(() => setLT(false))
-  }, [customerId])
+  }, [customerId, days])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -202,13 +204,26 @@ function ExtensivMode({ value, onChange, defaultCustomer }: Props) {
         </select>
       </div>
 
-      {/* Buscador + lista de transactions */}
+      {/* Buscador + selector rango + lista de transactions */}
       {customerId && (
         <>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
-              Transaction (últimos 60 días)
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                Transaction · últimos {days} días
+              </label>
+              <select
+                value={days}
+                onChange={e => setDays(Number(e.target.value))}
+                className="text-[10px] border border-gray-200 rounded px-1.5 py-0.5 bg-white text-gray-600 focus:border-[#1e3a5f] focus:outline-none"
+                title="Cambiar rango de búsqueda"
+              >
+                <option value={7}>7 días</option>
+                <option value={14}>14 días</option>
+                <option value={30}>30 días</option>
+                <option value={60}>60 días</option>
+              </select>
+            </div>
             <div className="relative">
               <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -230,7 +245,7 @@ function ExtensivMode({ value, onChange, defaultCustomer }: Props) {
           {!loadingTxn && filtered.length === 0 && (
             <p className="text-center text-xs text-gray-400 py-6">
               {transactions.length === 0
-                ? 'Sin transactions en los últimos 60 días para este cliente'
+                ? `Sin transactions en los últimos ${days} días para este cliente`
                 : 'Sin coincidencias para tu búsqueda'}
             </p>
           )}
