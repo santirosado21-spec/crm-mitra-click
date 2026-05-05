@@ -51,7 +51,7 @@ export function AlmacenPage() {
     : null
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: '#f5f7fa' }}>
+    <div className="flex flex-col min-h-dvh" style={{ background: '#f5f7fa' }}>
       {/* Top bar */}
       <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3 shrink-0 flex-wrap">
         <img

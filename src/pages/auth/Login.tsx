@@ -35,8 +35,8 @@ export function Login() {
   }
 
   return (
-    <div className="bg-[#1e3a5f] relative h-screen w-full p-3 sm:p-5 overflow-hidden font-sans selection:bg-[#1e3a5f] selection:text-white" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
-    <div className="h-full w-full flex bg-white rounded-2xl overflow-hidden shadow-2xl">
+    <div className="bg-[#1e3a5f] relative min-h-dvh w-full p-3 sm:p-5 overflow-y-auto font-sans selection:bg-[#1e3a5f] selection:text-white" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
+    <div className="min-h-[calc(100dvh-1.5rem)] sm:min-h-[calc(100dvh-2.5rem)] w-full flex bg-white rounded-2xl overflow-hidden shadow-2xl">
       {/* Panel Izquierdo - Login Form */}
       <div className="w-full lg:w-[45%] flex flex-col justify-center items-center px-8 sm:px-12 lg:px-16 py-6 overflow-y-auto">
         <div className="w-full max-w-[380px] flex flex-col">

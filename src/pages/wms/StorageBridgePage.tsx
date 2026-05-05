@@ -47,7 +47,7 @@ export function StorageBridgePage() {
   const years = [today.getFullYear() - 1, today.getFullYear(), today.getFullYear() + 1]
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

@@ -68,7 +68,7 @@ export function HomePage() {
   ]
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg, #f5f7fa)' }}>
+    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg, #f5f7fa)' }}>
       <Header />
       <main className="flex-1 overflow-auto">
         <div className="max-w-6xl mx-auto px-6 py-10">

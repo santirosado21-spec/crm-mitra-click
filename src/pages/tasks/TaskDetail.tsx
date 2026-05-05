@@ -107,7 +107,7 @@ export function TaskDetail() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg)' }}>
+      <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
         <Header />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
@@ -121,7 +121,7 @@ export function TaskDetail() {
 
   if (error || !task) {
     return (
-      <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg)' }}>
+      <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
         <Header />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
@@ -138,7 +138,7 @@ export function TaskDetail() {
   const end = new Date(task.scheduled_end)
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

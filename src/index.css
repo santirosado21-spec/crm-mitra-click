@@ -27,8 +27,8 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-html, body { height: 100%; }
-body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--page-bg); }
+html, body, #root { min-height: 100%; }
+body { margin: 0; min-width: 320px; min-height: 100dvh; background: var(--page-bg); }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 
@@ -37,6 +37,10 @@ button { font-family: inherit; cursor: pointer; }
   .h-screen { height: 100dvh; }
 }
 .flex > main, .flex > .flex-1 { min-height: 0; }
+.overflow-auto, .overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
 
 /* Nunito para headings también — misma familia que el logo "SupplyChain" */
 h1, h2, h3, .font-display { font-family: 'Nunito', sans-serif; letter-spacing: -0.01em; font-weight: 800; }

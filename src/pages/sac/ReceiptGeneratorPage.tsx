@@ -71,7 +71,7 @@ export function ReceiptGeneratorPage() {
   const canExport = !!ref.trim() && items.some(i => i.sku && Number(i.qty) > 0)
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

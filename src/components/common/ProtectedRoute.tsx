@@ -14,7 +14,7 @@ export function ProtectedRoute({ children, allowedRoles }: Props) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400 gap-2">
+      <div className="min-min-h-dvh flex items-center justify-center text-gray-400 gap-2">
         <Spinner size={24} /> Cargando...
       </div>
     )
@@ -24,7 +24,7 @@ export function ProtectedRoute({ children, allowedRoles }: Props) {
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 text-center px-4">
+      <div className="min-min-h-dvh flex flex-col items-center justify-center gap-3 text-center px-4">
         <p className="text-5xl font-bold text-gray-200">403</p>
         <p className="text-lg font-semibold text-gray-700">Acceso denegado</p>
         <p className="text-sm text-gray-400 max-w-xs">

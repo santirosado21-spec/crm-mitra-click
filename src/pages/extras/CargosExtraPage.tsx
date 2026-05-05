@@ -92,7 +92,7 @@ export function CargosExtraPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

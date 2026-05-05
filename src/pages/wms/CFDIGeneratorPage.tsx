@@ -153,7 +153,7 @@ export function CFDIGeneratorPage() {
 
   if (loadingConfig) {
     return (
-      <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg)' }}>
+      <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
         <Header />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
@@ -168,7 +168,7 @@ export function CFDIGeneratorPage() {
   const missingEmisor = !emisor || !emisor.rfc || emisor.rfc === 'XAXX010101000'
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

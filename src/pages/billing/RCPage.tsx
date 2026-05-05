@@ -293,7 +293,7 @@ export function RCPage() {
   const hasExtensivId = !!extensivId
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
       <div className="print:hidden">
         <Header />
       </div>

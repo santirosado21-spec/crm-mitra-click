@@ -46,8 +46,8 @@ export function WelcomeTour() {
   }
 
   return (
-    <div className="fixed inset-0 z-[200] bg-[#0f172a]/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden animate-scale-in">
+    <div className="fixed inset-0 z-[200] bg-[#0f172a]/50 backdrop-blur-sm flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-none sm:max-h-[calc(100dvh-2rem)] overflow-y-auto animate-scale-in my-3 sm:my-0">
         <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-[#dc3545] mb-1">
