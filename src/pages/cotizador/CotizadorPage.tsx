@@ -11,7 +11,7 @@ import { useAuthContext } from '../../context/AuthContext'
 import { useClientCatalog } from '../../hooks/useClientCatalog'
 import {
   UNIDADES as UNIDADES_FALLBACK, TIPOS_CLIENTE, BONOS_DEFAULT, HE_TARIFAS,
-  OPERADORES_DEFAULT, GLOBALMAP_URL,
+  OPERADORES_DEFAULT, MANIOBRISTAS_DEFAULT, GLOBALMAP_URL,
   type Unidad,
 } from './cotizadorConstants'
 import { useVehiculos } from '../../hooks/useVehiculos'
@@ -214,9 +214,14 @@ async function generarPDF(c: CotizadorResult) {
   if (c.incluyeBonos) {
     costos.push(['Viáticos', c.viaticos])
     costos.push(['Bonos operador', c.bonosBase])
+  } else if (c.viaticos > 0) {
+    costos.push(['Viáticos extras', c.viaticos])
   }
   if (c.maniobra > 0) {
-    costos.push(['Maniobra (' + c.maniobraDetalle.horas + 'h ' + c.maniobraDetalle.minutos + 'm)', c.maniobra])
+    const labelManiobra = c.maniobrista
+      ? `Maniobra · ${c.maniobrista} (${c.maniobraDetalle.horas}h ${c.maniobraDetalle.minutos}m)`
+      : `Maniobra (${c.maniobraDetalle.horas}h ${c.maniobraDetalle.minutos}m)`
+    costos.push([labelManiobra, c.maniobra])
   }
   if (c.horasExtra > 0) costos.push(['Días Especiales', c.horasExtra])
   costos.push(['Depreciación de unidad', c.depreciacion])
@@ -350,9 +355,28 @@ function ResultPanel({ result, onAddToBitacora, onReset }: {
         <div className="px-4 py-2 divide-y divide-gray-50">
           <DR label={`⛽ Combustible (${result.litros}L)`} value={mxn(result.costoCombustible)} />
           <DR label="🛣️ Casetas" value={mxn(result.casetas)} />
-          {result.incluyeBonos && result.viaticos > 0 && <DR label="🍽️ Viáticos" value={mxn(result.viaticos)} />}
+          {result.viaticos > 0 && (
+            <DR
+              label={
+                (result.viaticosExtras ?? 0) > 0
+                  ? `🍽️ Viáticos (incluye ${mxn(result.viaticosExtras ?? 0)} extras)`
+                  : '🍽️ Viáticos'
+              }
+              value={mxn(result.viaticos)}
+            />
+          )}
           {result.incluyeBonos && result.bonosBase > 0 && <DR label="👤 Bonos operador" value={mxn(result.bonosBase)} />}
-          {result.maniobra > 0 && <DR label={`🏗️ Maniobra (${result.maniobraDetalle.horas}h ${result.maniobraDetalle.minutos}m)`} value={mxn(result.maniobra)} highlight />}
+          {result.maniobra > 0 && (
+            <DR
+              label={
+                result.maniobrista
+                  ? `🏗️ Maniobra · ${result.maniobrista} (${result.maniobraDetalle.horas}h ${result.maniobraDetalle.minutos}m)`
+                  : `🏗️ Maniobra (${result.maniobraDetalle.horas}h ${result.maniobraDetalle.minutos}m)`
+              }
+              value={mxn(result.maniobra)}
+              highlight
+            />
+          )}
           {result.horasExtra > 0 && <DR label="⏰ Días especiales" value={mxn(result.horasExtra)} highlight />}
           <DR label="📉 Depreciación" value={mxn(result.depreciacion)} sub />
           <DR label="🏢 Gastos fijos (GPS · Renta · Seguro)" value={mxn(result.gastosFijos)} sub />
@@ -471,6 +495,10 @@ export function CotizadorPage() {
   const [mHoras, setMHoras] = useState<number>(0)
   const [mMinutos, setMMinutos] = useState<number>(0)
   const [mCosto, setMCosto] = useState<number>(150)
+  const [maniobrista, setManiobrista] = useState<string>('')
+
+  // Viáticos extras (ad-hoc, además de los calculados por bonos)
+  const [viaticosExtras, setViaticosExtras] = useState<number>(0)
 
   // Bonos
   const [incluyeBonos, setIncluyeBonos] = useState(false)
@@ -561,6 +589,8 @@ export function CotizadorPage() {
       unidad, tipoCliente, operador, cliente,
       contenedores, descripcionCarga,
       maniobrasHoras: mHoras, maniobrasMinutos: mMinutos, maniobraCosto: mCosto,
+      maniobrista: maniobrista || undefined,
+      viaticosExtras,
       incluyeBonos, bonoSueldo, bonoKmCarga, bonoKmVacio, bonoComida,
       dMatutino, dNocturno, dSabado, dDomingo, dFestivo,
     })
@@ -571,7 +601,7 @@ export function CotizadorPage() {
     viajeRedondo, modoMultiparadas, paradas, kmRegreso, casetasRegresoMulti,
     horasRegreso, minutosRegreso, unidadClave, tipoCliente, operador, cliente,
     contenedores, descripcionCarga, totalKm,
-    mHoras, mMinutos, mCosto, incluyeBonos,
+    mHoras, mMinutos, mCosto, maniobrista, viaticosExtras, incluyeBonos,
     bonoSueldo, bonoKmCarga, bonoKmVacio, bonoComida,
     dMatutino, dNocturno, dSabado, dDomingo, dFestivo,
   ])
@@ -608,9 +638,9 @@ export function CotizadorPage() {
     setModoMultiparadas(false); setParadas([]); setKmRegreso(0)
     setCasetasRegresoMulti(0); setHorasRegreso(0); setMinutosRegreso(0)
     setContenedores([]); setContCantidad(0); setContTipo(''); setDescripcionCarga('')
-    setMHoras(0); setMMinutos(0); setDMatutino(0); setDNocturno(0)
+    setMHoras(0); setMMinutos(0); setManiobrista(''); setDMatutino(0); setDNocturno(0)
     setDSabado(0); setDDomingo(0); setDFestivo(0)
-    setIncluyeBonos(false)
+    setIncluyeBonos(false); setViaticosExtras(0)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -927,10 +957,25 @@ export function CotizadorPage() {
                     </p>
                   </div>
                 </div>
+                {(mHoras + mMinutos) > 0 && (
+                  <div className="mt-3">
+                    <label className={lbl}>Maniobrista asignado</label>
+                    <select
+                      value={maniobrista}
+                      onChange={e => setManiobrista(e.target.value)}
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10 outline-none"
+                    >
+                      <option value="">— Sin maniobrista asignado —</option>
+                      {MANIOBRISTAS_DEFAULT.map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </Collapsible>
 
               {/* 5. Bonos operador */}
-              <Collapsible title="Bonos al Operador (opcional)" icon="💰">
+              <Collapsible title="Bonos al Operador / Viáticos (opcional)" icon="💰">
                 <label className="flex items-center gap-2 cursor-pointer mb-4">
                   <input type="checkbox" checked={incluyeBonos} onChange={e => setIncluyeBonos(e.target.checked)}
                     className="w-4 h-4 accent-[#1e3a5f]" />
@@ -944,6 +989,13 @@ export function CotizadorPage() {
                     <div><label className={lbl}>Bono km vacío ($/km)</label>{numInp(bonoKmVacio, setBonoKmVacio)}</div>
                   </div>
                 )}
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <label className={lbl}>Viáticos extras ($) — peajes adicionales, propinas, imprevistos</label>
+                  {numInp(viaticosExtras, setViaticosExtras)}
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    Se suman a los viáticos calculados por bonos. Útil para gastos ad-hoc no contemplados.
+                  </p>
+                </div>
               </Collapsible>
 
               {/* 6. Días especiales */}

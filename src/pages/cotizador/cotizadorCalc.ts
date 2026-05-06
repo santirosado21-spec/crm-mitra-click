@@ -60,6 +60,7 @@ export interface CotizadorInput {
   maniobrasHoras:   number
   maniobrasMinutos: number
   maniobraCosto:    number      // $/hr
+  maniobrista?:     string      // nombre del maniobrista asignado
 
   // Optional: bonos operador
   incluyeBonos:  boolean
@@ -67,6 +68,9 @@ export interface CotizadorInput {
   bonoKmCarga:   number
   bonoKmVacio:   number
   bonoComida:    number
+
+  // Optional: viáticos extras (ad-hoc, sumados a los calculados por bonos)
+  viaticosExtras?: number
 
   // Optional: días especiales (number of days each type)
   dMatutino: number
@@ -101,8 +105,10 @@ export interface CotizadorResult {
   gastosFijos:       number
   maniobra:          number
   maniobraDetalle:   { horas: number; minutos: number; costoPorHora: number }
+  maniobrista?:      string                                       // nombre asignado
   horasExtra:        number
-  viaticos:          number
+  viaticos:          number                                       // total (auto + extras)
+  viaticosExtras?:   number                                       // ad-hoc capturados a mano
   bonosBase:         number
   costoTotal:        number
 
@@ -196,7 +202,10 @@ export function calcularFlete(inp: CotizadorInput): CotizadorResult {
     viaticos  = (dias * 3 * inp.bonoComida) + (dias > 1 ? (dias - 1) * BONOS_DEFAULT.HOSPEDAJE : 0)
     bonosBase = (inp.bonoSueldo * dias) + (kmCarga * inp.bonoKmCarga) + (kmVacio * inp.bonoKmVacio)
   }
-  viaticos  = Math.round(viaticos)
+  // Viáticos extras ad-hoc se SUMAN sobre lo calculado (peajes adicionales,
+  // gastos imprevistos, propinas en paso fronterizo, etc.)
+  const viaticosExtras = Math.max(0, inp.viaticosExtras ?? 0)
+  viaticos  = Math.round(viaticos + viaticosExtras)
   bonosBase = Math.round(bonosBase)
 
   // ── maniobra ────────────────────────────────────────────────────────────────
@@ -244,8 +253,10 @@ export function calcularFlete(inp: CotizadorInput): CotizadorResult {
     gastosFijos,
     maniobra,
     maniobraDetalle: { horas: inp.maniobrasHoras, minutos: inp.maniobrasMinutos, costoPorHora: inp.maniobraCosto },
+    maniobrista:    inp.maniobrista,
     horasExtra,
     viaticos,
+    viaticosExtras,
     bonosBase,
     costoTotal:   Math.round(costoTotal),
     contenedores:     inp.contenedores,

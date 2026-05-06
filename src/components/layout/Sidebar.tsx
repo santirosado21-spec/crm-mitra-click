@@ -1,4 +1,4 @@
-import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History } from 'lucide-react'
+import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
@@ -49,6 +49,7 @@ const TASKS_LINKS: Link[] = [
 const TASKS_ADMIN_LINKS: Link[] = [
   { to: '/tasks/admin/team',              label: 'Equipo y horarios',   icon: UserCog },
   { to: '/tasks/admin/reports',           label: 'Reportes operativos', icon: BarChart3 },
+  { to: '/admin/executive-report',        label: 'Reporte ejecutivo',   icon: FileSpreadsheet },
   { to: '/tasks/admin/audit-log',         label: 'Auditoría',           icon: History },
   { to: '/tasks/admin/extensiv-billing',  label: 'Extensiv Billing',    icon: Receipt },
 ]
@@ -58,7 +59,7 @@ type ModuleKey = 'home' | 'wms' | 'tms' | 'almacen' | 'tasks'
 function detectModule(pathname: string): ModuleKey {
   if (pathname === '/')                                                          return 'home'
   if (pathname === '/almacen')                                                   return 'almacen'
-  if (pathname.startsWith('/tasks'))                                             return 'tasks'
+  if (pathname.startsWith('/tasks') || pathname.startsWith('/admin'))            return 'tasks'
   if (pathname.startsWith('/tms') || pathname === '/cotizador' || pathname === '/tramites')
     return 'tms'
   // Default: WMS (/, /wms, /sac/*, /rc, /proformas, /clients, etc.)

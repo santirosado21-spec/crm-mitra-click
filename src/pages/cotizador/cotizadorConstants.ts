@@ -71,13 +71,18 @@ export const FIJOS = {
 }
 export const FIJOS_DIA = FIJOS.GPS + FIJOS.RENTA + FIJOS.SEGURO  // 184.43 / día
 
-// Operadores de flota (iniciales — se editan desde config)
+// Operadores de flota (4 — manejan unidad)
 export const OPERADORES_DEFAULT = [
-  'Luis Manuel Lopez Celis',
-  'Jose Luis Martinez Gonzalez',
-  'Estanislao Valverde Gonzalez',
-  'Guadalupe Hernandez Jimenez',
   'Ruben Rodarte Martinez',
+  'Estanislao Valverde Gonzalez',
+  'Jose Luis Martinez Gonzalez',
+  'Luis Manuel Lopez Celis',
+]
+
+// Maniobristas (2 — carga/descarga, no manejan unidad)
+export const MANIOBRISTAS_DEFAULT = [
+  'Guadalupe Hernandez Jimenez',
+  'Roberto Jimenez',
 ]
 
 // Link a GlobalMap para calcular rutas reales
