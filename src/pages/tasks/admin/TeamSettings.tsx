@@ -4,6 +4,7 @@ import { Header } from '../../../components/layout/Header'
 import { Sidebar } from '../../../components/layout/Sidebar'
 import { Spinner } from '../../../components/ui/Spinner'
 import { supabase } from '../../../lib/supabase'
+import { useToast } from '../../../hooks/useToast'
 import type { TeamMember, UserWorkSchedule } from '../../../types/tasks'
 import { DAY_OF_WEEK_LABEL } from '../../../types/tasks'
 import { ROLE_LABEL } from '../../../config/permissions'
@@ -19,6 +20,7 @@ interface TeamRow {
 }
 
 export function TeamSettings() {
+  const toast = useToast()
   const [rows, setRows] = useState<TeamRow[]>([])
   const [loading, setLoading] = useState(true)
   const [savingEmail, setSavingEmail] = useState<string | null>(null)
@@ -80,12 +82,13 @@ export function TeamSettings() {
     setSavingEmail('__new__')
     try {
       const email = newEmail.trim().toLowerCase()
-      await supabase.from('team_members').upsert({
+      const { error: errMember } = await supabase.from('team_members').upsert({
         user_email: email,
         user_name: newName.trim() || null,
         role: newRole,
         active: true,
       })
+      if (errMember) throw errMember
       // Crear horario default según rol, salvo que sea "sin horario fijo"
       // (operadores / maniobristas).
       if (!newNoFixedSchedule) {
@@ -93,7 +96,7 @@ export function TeamSettings() {
           .from('user_work_schedule').select('day_of_week').eq('user_email', email)
         if ((existing ?? []).length === 0) {
           const def = DEFAULT_SCHEDULE[newRole]
-          await supabase.from('user_work_schedule').insert(
+          const { error: errSched } = await supabase.from('user_work_schedule').insert(
             def.dows.map(d => ({
               user_email: email,
               day_of_week: d,
@@ -101,63 +104,85 @@ export function TeamSettings() {
               end_time:   def.end,
             }))
           )
+          if (errSched) throw errSched
         }
       }
       setNewEmail(''); setNewName(''); setNewRole('almacen'); setNewNoFixedSchedule(false)
       setShowAddForm(false)
+      toast.success('Miembro agregado', email)
       await reload()
+    } catch (e) {
+      toast.error('No se pudo agregar el miembro', e instanceof Error ? e.message : 'Error desconocido')
     } finally { setSavingEmail(null) }
   }
 
   const updateName = async (row: TeamRow, name: string) => {
     setSavingEmail(row.email)
     try {
-      await supabase.from('team_members').upsert({
+      const { error: err } = await supabase.from('team_members').upsert({
         user_email: row.email,
         user_name: name.trim() || null,
         role: row.role,
         active: row.active,
       })
+      if (err) throw err
       await reload()
+    } catch (e) {
+      toast.error('No se pudo actualizar el nombre', e instanceof Error ? e.message : 'Error desconocido')
     } finally { setSavingEmail(null) }
   }
 
   const updateRole = async (row: TeamRow, role: Role) => {
     setSavingEmail(row.email)
     try {
-      await supabase.from('team_members').upsert({
+      const { error: err } = await supabase.from('team_members').upsert({
         user_email: row.email,
         user_name: row.name,
         role,
         active: row.active,
       })
+      if (err) throw err
+      toast.success('Rol actualizado', `${row.email} → ${ROLE_LABEL[role]}`)
       await reload()
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Error desconocido'
+      const hint = /check.*role|violates.*check/i.test(msg)
+        ? 'El rol no está permitido por el CHECK constraint en team_members. Aplica supabase_migration_role_transporte.sql en Supabase.'
+        : msg
+      toast.error('No se pudo cambiar el rol', hint)
     } finally { setSavingEmail(null) }
   }
 
   const toggleActive = async (row: TeamRow) => {
     setSavingEmail(row.email)
     try {
-      await supabase.from('team_members').upsert({
+      const { error: err } = await supabase.from('team_members').upsert({
         user_email: row.email,
         user_name: row.name,
         role: row.role,
         active: !row.active,
       })
+      if (err) throw err
       await reload()
+    } catch (e) {
+      toast.error('No se pudo cambiar el estado', e instanceof Error ? e.message : 'Error desconocido')
     } finally { setSavingEmail(null) }
   }
 
   const updateSchedule = async (email: string, dow: number, start: string, end: string) => {
     setSavingEmail(email)
     try {
-      await supabase.from('user_work_schedule').delete().eq('user_email', email).eq('day_of_week', dow)
+      const { error: errDel } = await supabase.from('user_work_schedule').delete().eq('user_email', email).eq('day_of_week', dow)
+      if (errDel) throw errDel
       if (start && end && end > start) {
-        await supabase.from('user_work_schedule').insert({
+        const { error: errIns } = await supabase.from('user_work_schedule').insert({
           user_email: email, day_of_week: dow, start_time: start, end_time: end,
         })
+        if (errIns) throw errIns
       }
       await reload()
+    } catch (e) {
+      toast.error('No se pudo guardar el horario', e instanceof Error ? e.message : 'Error desconocido')
     } finally { setSavingEmail(null) }
   }
 
