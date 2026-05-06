@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Save, Loader2, UserCog, Trash2 } from 'lucide-react'
+import { Plus, Save, Loader2, UserCog, Trash2, EyeOff, Eye } from 'lucide-react'
 import { Header } from '../../../components/layout/Header'
 import { Sidebar } from '../../../components/layout/Sidebar'
 import { Spinner } from '../../../components/ui/Spinner'
@@ -190,6 +190,38 @@ export function TeamSettings() {
     } finally { setSavingEmail(null) }
   }
 
+  const deleteMember = async (row: TeamRow) => {
+    const ok = confirm(
+      `¿Eliminar a ${row.name ?? row.email} permanentemente?\n\n` +
+      `Se borra el registro de team_members y todos sus horarios laborales. ` +
+      `Esto NO elimina la cuenta de Supabase Auth — solo el acceso a esta app.`
+    )
+    if (!ok) return
+    const prevRows = rows
+    setRows(prev => prev.filter(r => r.email !== row.email))   // optimista
+    setSavingEmail(row.email)
+    try {
+      const { error: err } = await supabase.rpc('team_member_delete', { p_email: row.email })
+      if (err) {
+        const msg = err.message ?? 'Error desconocido'
+        if (/AUTH_REQUIRED/.test(msg))   throw new Error('Sesión expirada. Vuelve a iniciar sesión.')
+        if (/SELF_DELETE/.test(msg))     throw new Error('No puedes borrar tu propia cuenta.')
+        if (/NOT_ADMIN/.test(msg)) {
+          const m = msg.match(/NOT_ADMIN:\s*(.*)/)
+          throw new Error(m ? m[1] : 'Solo administradores pueden borrar usuarios.')
+        }
+        if (/function team_member_delete.*does not exist/i.test(msg)) {
+          throw new Error('Falta aplicar supabase_migration_team_member_rpc.sql en Supabase.')
+        }
+        throw new Error(msg)
+      }
+      toast.success('Usuario eliminado', row.email)
+    } catch (e) {
+      setRows(prevRows)                                        // revertir
+      toast.error('No se pudo eliminar', e instanceof Error ? e.message : 'Error desconocido')
+    } finally { setSavingEmail(null) }
+  }
+
   const updateSchedule = async (email: string, dow: number, start: string, end: string) => {
     setSavingEmail(email)
     try {
@@ -287,6 +319,7 @@ export function TeamSettings() {
                   onName={(n) => updateName(row, n)}
                   onRole={(r) => updateRole(row, r)}
                   onToggleActive={() => toggleActive(row)}
+                  onDelete={() => deleteMember(row)}
                   onSchedule={(d, s, e) => updateSchedule(row.email, d, s, e)}
                 />
               ))}
@@ -298,13 +331,14 @@ export function TeamSettings() {
   )
 }
 
-function TeamRowCard({ row, editableDays, saving, onName, onRole, onToggleActive, onSchedule }: {
+function TeamRowCard({ row, editableDays, saving, onName, onRole, onToggleActive, onDelete, onSchedule }: {
   row: TeamRow
   editableDays: number[]
   saving: boolean
   onName: (name: string) => void
   onRole: (role: Role) => void
   onToggleActive: () => void
+  onDelete: () => void
   onSchedule: (dow: number, start: string, end: string) => void
 }) {
   const [name, setName] = useState<string>(row.name ?? '')
@@ -353,11 +387,20 @@ function TeamRowCard({ row, editableDays, saving, onName, onRole, onToggleActive
             disabled={saving}
             className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
               row.active
-                ? 'border-rose-200 text-rose-600 hover:bg-rose-50'
+                ? 'border-amber-200 text-amber-700 hover:bg-amber-50'
                 : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
             }`}
           >
-            <Trash2 size={12} /> {row.active ? 'Desactivar' : 'Reactivar'}
+            {row.active ? <EyeOff size={12} /> : <Eye size={12} />} {row.active ? 'Desactivar' : 'Reactivar'}
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={saving}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
+            title="Eliminar permanentemente de team_members + horarios"
+          >
+            <Trash2 size={12} /> Eliminar
           </button>
         </div>
       </div>

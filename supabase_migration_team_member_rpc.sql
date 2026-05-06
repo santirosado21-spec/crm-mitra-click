@@ -76,3 +76,55 @@ GRANT  EXECUTE ON FUNCTION team_member_set_role(TEXT, TEXT, TEXT, BOOLEAN) TO au
 
 COMMENT ON FUNCTION team_member_set_role IS
   'Cambia rol/nombre/activo de un miembro del equipo. SECURITY DEFINER con check explícito de admin (o bootstrap si no hay admins).';
+
+
+-- ============================================================================
+-- RPC team_member_delete
+-- Borrado físico de un miembro del equipo. Solo admins.
+-- También limpia user_work_schedule del mismo email para evitar huérfanos.
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION team_member_delete(p_email TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_caller_email TEXT;
+  v_target_email TEXT;
+BEGIN
+  v_caller_email := lower(coalesce(auth.jwt() ->> 'email', ''));
+  v_target_email := lower(p_email);
+
+  IF v_caller_email = '' THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED: Debes iniciar sesión.';
+  END IF;
+
+  -- El caller debe ser admin activo.
+  IF NOT EXISTS (
+    SELECT 1 FROM team_members
+    WHERE lower(user_email) = v_caller_email
+      AND role = 'admin'
+      AND active = true
+  ) THEN
+    RAISE EXCEPTION 'NOT_ADMIN: Tu cuenta (%) no tiene rol admin activo.', v_caller_email;
+  END IF;
+
+  -- Bloquear que un admin se borre a sí mismo (evita auto-locking).
+  IF v_target_email = v_caller_email THEN
+    RAISE EXCEPTION 'SELF_DELETE: No puedes borrar tu propia cuenta.';
+  END IF;
+
+  -- Borrar horarios primero (FK suave por email — no hay constraint pero igual limpiamos).
+  DELETE FROM user_work_schedule WHERE lower(user_email) = v_target_email;
+
+  -- Borrar miembro.
+  DELETE FROM team_members WHERE lower(user_email) = v_target_email;
+END $$;
+
+REVOKE ALL    ON FUNCTION team_member_delete(TEXT) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION team_member_delete(TEXT) TO authenticated;
+
+COMMENT ON FUNCTION team_member_delete IS
+  'Borrado físico de un miembro del equipo (incluye su horario laboral). Solo admins activos. Bloquea autoborrado.';
