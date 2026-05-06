@@ -65,11 +65,11 @@ export function Reports() {
   const maxMinutes     = Math.max(...rows.map(r => Number(r.total_minutes) || 0), 1)
 
   return (
-    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
       <Header />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-auto p-4 sm:p-6">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24 sm:p-6 sm:pb-10 touch-pan-y">
           <div className="mb-4">
             <h1 className="text-xl font-bold text-[#1e3a5f] inline-flex items-center gap-2">
               <BarChart3 size={20} /> Reportes operativos
