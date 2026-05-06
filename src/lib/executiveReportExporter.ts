@@ -4,6 +4,8 @@ import type { Viaje } from '../types/tms/tms'
 import type { Operation } from '../types'
 import type { Task } from '../types/tasks'
 import type { TaskAuditEntry } from '../types/tasks'
+import type { GuiaPaqueteria } from '../types/guias'
+import { PAQUETERIA_LABEL } from '../types/guias'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Reporte ejecutivo — workbook multi-hoja con KPIs, viajes, operaciones,
@@ -25,6 +27,7 @@ export interface ExecutiveData {
   operations:  Operation[]
   tasks:       Task[]
   audit:       TaskAuditEntry[]
+  guias:       GuiaPaqueteria[]
 }
 
 export interface ExecutiveKPIs {
@@ -39,6 +42,10 @@ export interface ExecutiveKPIs {
   numCanceladas:    number
   numAceptaciones:  number
   numRechazos:      number
+  numGuias:         number
+  costoGuias:       number
+  precioGuias:      number
+  margenGuias:      number
   topClientes:      { cliente: string; ingreso: number; viajes: number }[]
   topProveedores:   { proveedor: string; costo: number; viajes: number }[]
 }
@@ -51,7 +58,7 @@ export async function fetchExecutiveData(range: ExecutiveRange): Promise<Executi
   const fromIso = `${range.from}T00:00:00`
   const toIso   = `${range.to}T23:59:59`
 
-  const [viajesRes, opsRes, tasksRes, auditRes] = await Promise.all([
+  const [viajesRes, opsRes, tasksRes, auditRes, guiasRes] = await Promise.all([
     supabase
       .from('viajes')
       .select('*')
@@ -77,12 +84,20 @@ export async function fetchExecutiveData(range: ExecutiveRange): Promise<Executi
       .lte('audit_at', toIso)
       .order('audit_at', { ascending: false })
       .limit(2000),
+    supabase
+      .from('guias_paqueteria')
+      .select('*')
+      .gte('fecha', range.from)
+      .lte('fecha', range.to)
+      .order('fecha', { ascending: false }),
   ])
 
   if (viajesRes.error) throw viajesRes.error
   if (opsRes.error)    throw opsRes.error
   if (tasksRes.error)  throw tasksRes.error
   if (auditRes.error)  throw auditRes.error
+  // guias may fail silently if migration not applied yet — use empty array as fallback
+  const guias = guiasRes.error ? [] : ((guiasRes.data ?? []) as GuiaPaqueteria[])
 
   return {
     range,
@@ -90,6 +105,7 @@ export async function fetchExecutiveData(range: ExecutiveRange): Promise<Executi
     operations: (opsRes.data ?? []) as Operation[],
     tasks:      (tasksRes.data ?? []) as Task[],
     audit:      (auditRes.data ?? []) as TaskAuditEntry[],
+    guias,
   }
 }
 
@@ -142,6 +158,11 @@ export function computeKPIs(data: ExecutiveData): ExecutiveKPIs {
   const numAceptaciones = audit.filter(a => a.action_category === 'accepted').length
   const numRechazos     = audit.filter(a => a.action_category === 'rejected').length
 
+  const guias = data.guias ?? []
+  const costoGuias  = guias.reduce((s, g) => s + Number(g.costo  || 0), 0)
+  const precioGuias = guias.reduce((s, g) => s + Number(g.precio || 0), 0)
+  const margenGuias = precioGuias - costoGuias
+
   return {
     numViajes:        viajes.length,
     ingresoTotal,
@@ -154,6 +175,10 @@ export function computeKPIs(data: ExecutiveData): ExecutiveKPIs {
     numCanceladas:    tasks.filter(t => t.status === 'cancelada').length,
     numAceptaciones,
     numRechazos,
+    numGuias:         guias.length,
+    costoGuias,
+    precioGuias,
+    margenGuias,
     topClientes,
     topProveedores,
   }
@@ -186,6 +211,12 @@ export function buildExecutiveWorkbook(data: ExecutiveData): XLSX.WorkBook {
     ['Tareas canceladas',            k.numCanceladas],
     ['Aceptaciones (audit)',         k.numAceptaciones],
     ['Rechazos (audit)',             k.numRechazos],
+    [],
+    ['KPIs DE GUÍAS PAQUETERÍA (SAC)'],
+    ['Guías emitidas',               k.numGuias],
+    ['Costo total guías',            mxn(k.costoGuias)],
+    ['Precio total guías',           mxn(k.precioGuias)],
+    ['Margen guías',                 mxn(k.margenGuias)],
     [],
     ['TOP 3 CLIENTES POR INGRESO'],
     ['Cliente', 'Ingreso', 'Viajes'],
@@ -317,7 +348,32 @@ export function buildExecutiveWorkbook(data: ExecutiveData): XLSX.WorkBook {
   wsPend['!cols'] = [{ wch: 16 }, { wch: 14 }, { wch: 38 }, { wch: 26 }, { wch: 18 }, { wch: 14 }]
   XLSX.utils.book_append_sheet(wb, wsPend, 'Pendientes')
 
-  // ── Hoja 6: Auditoría ──────────────────────────────────────────────────────
+  // ── Hoja 6: Guías paquetería ───────────────────────────────────────────────
+  const guiasHeader = [
+    'Fecha', 'Paquetería', 'Tracking', 'Cliente', 'Costo', 'Precio', 'Margen', 'Origen', 'Referencia', 'Notas',
+  ]
+  const guiasRows = data.guias.map(g => [
+    g.fecha,
+    PAQUETERIA_LABEL[g.paqueteria] ?? g.paqueteria,
+    g.tracking_number,
+    g.cliente_codigo ?? '',
+    Number(g.costo),
+    Number(g.precio),
+    Number(g.margen),
+    g.origen === 'extensiv' ? 'Extensiv' : 'Manual',
+    g.origen === 'extensiv'
+      ? `${g.extensiv_transaction_type}:${g.extensiv_transaction_id ?? ''}`
+      : (g.manual_reference ?? ''),
+    g.notas ?? '',
+  ])
+  const wsGuias = XLSX.utils.aoa_to_sheet([guiasHeader, ...guiasRows])
+  wsGuias['!cols'] = [
+    { wch: 12 }, { wch: 12 }, { wch: 22 }, { wch: 16 }, { wch: 12 }, { wch: 12 },
+    { wch: 12 }, { wch: 10 }, { wch: 28 }, { wch: 28 },
+  ]
+  XLSX.utils.book_append_sheet(wb, wsGuias, 'Guías paquetería')
+
+  // ── Hoja 7: Auditoría ──────────────────────────────────────────────────────
   const auditHeader = ['Timestamp', 'Actor', 'Email', 'Acción', 'Categoría', 'Tarea', 'Status actual']
   const auditRows = data.audit.map(a => [
     a.audit_at,

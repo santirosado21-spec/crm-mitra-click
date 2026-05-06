@@ -1,4 +1,4 @@
-import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet } from 'lucide-react'
+import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet, Package } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
@@ -19,6 +19,8 @@ const WMS_LINKS: Link[] = [
   { to: '/wms',                    label: 'Herramientas de WMS', icon: Warehouse },
   { to: '/sac/validador',          label: 'Validador SKU',        icon: ScanBarcode },
   { to: '/sac/receipt-generator',  label: 'Generador Receipt',    icon: FileInput },
+  { to: '/sac/carta-instruccion',  label: 'Carta Instrucción',    icon: FileText },
+  { to: '/sac/guias-paqueteria',   label: 'Guías paquetería',     icon: Package },
   { to: '/rc',                     label: 'Rendición RC',         icon: FileCheck },
   { to: '/proformas',              label: 'Proformas',            icon: FileText },
   { to: '/wms/cfdi-generator',     label: 'Generador CFDI',       icon: FileCode },
@@ -33,6 +35,7 @@ const TMS_LINKS: Link[] = [
   { to: '/tms/viajes',     label: 'Viajes',               icon: Route },
   { to: '/tms/costos',     label: 'Costos',               icon: PieChart },
   { to: '/cotizador',      label: 'Cotizador',            icon: Calculator },
+  { to: '/tms/carta-porte',label: 'Carta Porte',          icon: FileCheck },
   { to: '/tramites',       label: 'Trámites',             icon: CalendarClock },
 ]
 

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ScanBarcode, FileCheck, FileText, Users, ArrowRight, FileInput, DollarSign, RefreshCw, AlertTriangle, TrendingUp, Package, Wifi, FileCode } from 'lucide-react'
+import { ArrowLeft, ScanBarcode, FileCheck, FileText, Users, ArrowRight, FileInput, RefreshCw, AlertTriangle, TrendingUp, Package, Wifi, FileCode, ClipboardList } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { useWMSOperationsData } from '../../hooks/useWMSOperationsData'
@@ -25,6 +25,13 @@ const tools: Tool[] = [
     title: 'Generador Receipt',
     description: 'Genera el Excel Receipt_Import_Template para Extensiv desde un PT (PDF o Excel).',
     icon: FileInput,
+    category: 'sac',
+  },
+  {
+    to: '/sac/carta-instruccion',
+    title: 'Cartas de instrucción',
+    description: 'Genera instrucciones operativas para Transportes con ruta, mercancía, contactos y documentos.',
+    icon: ClipboardList,
     category: 'sac',
   },
   {

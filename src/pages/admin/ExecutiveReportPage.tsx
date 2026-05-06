@@ -166,6 +166,10 @@ export function ExecutiveReportPage() {
                 <KPI title="Tareas creadas"  value={String(kpis.numTareasCreadas)} color="#0ea5e9" />
                 <KPI title="Aceptaciones"    value={String(kpis.numAceptaciones)}  color="#28a745" />
                 <KPI title="Rechazos"        value={String(kpis.numRechazos)}      color="#dc3545" />
+                <KPI title="Guías paquetería" value={String(kpis.numGuias)}        color="#1e3a5f" />
+                <KPI title="Costo guías"     value={mxn(kpis.costoGuias)}          color="#dc3545" />
+                <KPI title="Precio guías"    value={mxn(kpis.precioGuias)}         color="#28a745" />
+                <KPI title="Margen guías"    value={mxn(kpis.margenGuias)}         color="#7c3aed" />
               </div>
 
               {/* Top clientes / proveedores */}
