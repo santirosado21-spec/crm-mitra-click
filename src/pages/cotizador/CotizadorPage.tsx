@@ -29,6 +29,12 @@ function loadOperadores(): string[] {
   catch { return OPERADORES_DEFAULT }
 }
 
+const uniqueNames = (names: string[]) =>
+  Array.from(new Set(names.map(n => n.trim()).filter(Boolean)))
+
+const isManiobristaNombre = (nombre: string, notas?: string | null) =>
+  /maniobrista/i.test(notas ?? '') || MANIOBRISTAS_DEFAULT.some(m => m.toLowerCase() === nombre.toLowerCase())
+
 // ── Shared styles ─────────────────────────────────────────────────────────────
 const inp = 'w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:border-[#1e3a5f] focus:bg-white focus:ring-1 focus:ring-[#1e3a5f]/20 transition-colors'
 const lbl = 'block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5'
@@ -448,7 +454,7 @@ function ResultPanel({ result, onAddToBitacora, onReset }: {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export function CotizadorPage() {
   const { user } = useAuthContext()
-  const { clientes: CLIENTES_BITACORA } = useClientCatalog()
+  const { clientes: clientesCatalogo, loading: loadingClientes } = useClientCatalog()
   const { createViaje } = useViajes()
   const { vehiculos: dbVehiculos } = useVehiculos({ esPropio: true })
   const { operadores: dbOperadores } = useOperadores({ esPropio: true })
@@ -458,10 +464,16 @@ export function CotizadorPage() {
     ? dbVehiculos.map(v => ({ clave: v.clave, placa: v.placa, modelo: v.modelo, tipo: v.tipo, combustible: v.combustible === 'Diesel' ? 'Diésel' as const : 'Gasolina' as const, rendimiento: v.rendimiento, depreciacion: v.depreciacion }))
     : [...UNIDADES_FALLBACK]
 
-  // Use Supabase operators if available, fallback to localStorage/hardcoded
-  const operadores = dbOperadores.length > 0
-    ? dbOperadores.map(o => o.nombre)
-    : loadOperadores()
+  const operadores = uniqueNames([
+    ...OPERADORES_DEFAULT,
+    ...(dbOperadores.length > 0
+      ? dbOperadores.filter(o => !isManiobristaNombre(o.nombre, o.notas)).map(o => o.nombre)
+      : loadOperadores()),
+  ])
+  const maniobristas = uniqueNames([
+    ...MANIOBRISTAS_DEFAULT,
+    ...dbOperadores.filter(o => isManiobristaNombre(o.nombre, o.notas)).map(o => o.nombre),
+  ])
 
   // ── Form state ──────────────────────────────────────────────────────────────
   const [origen, setOrigen] = useState('')
@@ -610,6 +622,16 @@ export function CotizadorPage() {
   // ── Crear viaje desde cotización ─────────────────────────────────────────────
   const handleAddToBitacora = useCallback(async () => {
     if (!result) throw new Error('Primero calcula una cotización.')
+    const notas = [
+      `Cotización #${result.id}`,
+      result.cliente ? `Cliente: ${result.cliente}` : null,
+      result.operador ? `Operador: ${result.operador}` : null,
+      result.maniobrista ? `Maniobrista: ${result.maniobrista}` : null,
+      `${result.dias} día(s)`,
+      `${result.unidad.modelo} (${result.unidad.placa})`,
+      result.descripcionCarga ? `Carga: ${result.descripcionCarga}` : null,
+    ].filter(Boolean).join(' · ')
+
     await createViaje({
       operacion_id: null,
       vehiculo_id: null,
@@ -621,12 +643,12 @@ export function CotizadorPage() {
       km_reales: 0,
       estado: 'pendiente',
       fecha_programada: new Date().toISOString().split('T')[0],
-      costo_combustible: result.combustible ?? 0,
+      costo_combustible: result.costoCombustible ?? 0,
       costo_casetas: result.casetas ?? 0,
-      costo_viaticos: 0,
+      costo_viaticos: result.viaticos ?? 0,
       costo_proveedor: 0,
       ingreso_cliente: result.precioFinal,
-      notas: `Cotización #${result.id} · ${result.dias} día(s) · ${result.unidad.modelo} (${result.unidad.placa})`,
+      notas,
       creado_por: user?.name ?? user?.email ?? 'Cotizador',
     })
   }, [result, user, createViaje])
@@ -870,8 +892,14 @@ export function CotizadorPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={lbl}>Nombre del cliente</label>
-                    <input type="text" className={inp} placeholder="Nombre del cliente"
-                      value={cliente} onChange={e => setCliente(e.target.value)} />
+                    <select className={inp} value={cliente} onChange={e => setCliente(e.target.value)}>
+                      <option value="">{loadingClientes ? 'Cargando clientes...' : '— Seleccionar cliente —'}</option>
+                      {clientesCatalogo.map(c => (
+                        <option key={`${c.codigo}-${c.nombre}`} value={c.nombre}>
+                          {c.codigo} — {c.nombre}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className={lbl}>Tipo de cliente / margen</label>
@@ -909,7 +937,7 @@ export function CotizadorPage() {
                     <label className={lbl}>Maniobrista</label>
                     <select className={inp} value={maniobrista} onChange={e => setManiobrista(e.target.value)}>
                       <option value="">Sin maniobrista asignado</option>
-                      {MANIOBRISTAS_DEFAULT.map(m => <option key={m} value={m}>{m}</option>)}
+                      {maniobristas.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
                   </div>
                   <div>

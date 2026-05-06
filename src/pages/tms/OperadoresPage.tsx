@@ -7,16 +7,18 @@ import { OperadorForm, type OperadorFormData } from './components/OperadorForm'
 import type { Operador } from '../../types/tms'
 
 const fmtMoney = (n: number) => `$${n.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
+const esManiobrista = (o: Operador) => /maniobrista/i.test(o.notas ?? '')
 
 export function OperadoresPage() {
   const { operadores, loading, createOperador, updateOperador, deleteOperador } = useOperadores()
   const [showForm, setShowForm] = useState(false)
   const [editTarget, setEditTarget] = useState<Operador | null>(null)
   const [busqueda, setBusqueda] = useState('')
-  const [filtroTipo, setFiltroTipo] = useState<'todos' | 'propio' | 'externo'>('todos')
+  const [filtroTipo, setFiltroTipo] = useState<'todos' | 'propio' | 'externo' | 'maniobrista'>('todos')
 
   const filtered = operadores
     .filter(o => {
+      if (filtroTipo === 'maniobrista') return esManiobrista(o)
       if (filtroTipo === 'propio') return o.es_propio
       if (filtroTipo === 'externo') return !o.es_propio
       return true
@@ -48,6 +50,7 @@ export function OperadoresPage() {
 
   const propios = operadores.filter(o => o.es_propio).length
   const externos = operadores.filter(o => !o.es_propio).length
+  const maniobristas = operadores.filter(esManiobrista).length
 
   return (
     <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
@@ -59,7 +62,7 @@ export function OperadoresPage() {
             <div>
               <h1 className="text-xl font-bold text-[#1e3a5f]">Operadores</h1>
               <p className="text-xs text-gray-400 mt-0.5">
-                {propios} propios · {externos} externos · {operadores.length} total
+                {propios} propios · {externos} externos · {maniobristas} maniobristas · {operadores.length} total
               </p>
             </div>
             <button onClick={() => { setEditTarget(null); setShowForm(true) }}
@@ -71,10 +74,10 @@ export function OperadoresPage() {
           {/* Filtros */}
           <div className="flex gap-3 mb-4 items-end">
             <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-              {(['todos', 'propio', 'externo'] as const).map(tab => (
+              {(['todos', 'propio', 'externo', 'maniobrista'] as const).map(tab => (
                 <button key={tab} onClick={() => setFiltroTipo(tab)}
                   className={`px-4 h-9 text-sm font-medium transition-colors ${filtroTipo === tab ? 'bg-[#1e3a5f] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
-                  {tab === 'todos' ? 'Todos' : tab === 'propio' ? 'Propios' : 'Externos'}
+                  {tab === 'todos' ? 'Todos' : tab === 'propio' ? 'Propios' : tab === 'externo' ? 'Externos' : 'Maniobristas'}
                 </button>
               ))}
             </div>
@@ -116,8 +119,12 @@ export function OperadoresPage() {
                       {o.licencia_numero && <div className="text-[10px] text-gray-400">{o.licencia_numero}</div>}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${o.es_propio ? 'bg-blue-50 text-blue-700' : 'bg-orange-50 text-orange-700'}`}>
-                        {o.es_propio ? 'Propio' : 'Externo'}
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
+                        esManiobrista(o)
+                          ? 'bg-cyan-50 text-cyan-700'
+                          : o.es_propio ? 'bg-blue-50 text-blue-700' : 'bg-orange-50 text-orange-700'
+                      }`}>
+                        {esManiobrista(o) ? 'Maniobrista' : o.es_propio ? 'Propio' : 'Externo'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right text-gray-600">{o.es_propio ? fmtMoney(o.sueldo_diario) : '—'}</td>

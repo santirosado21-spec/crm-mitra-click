@@ -124,16 +124,17 @@ INSERT INTO vehiculos (clave, placa, modelo, tipo, combustible, rendimiento, dep
   ('AUT_MGP230A','MGP230A','KIA Rio','Auto chico','Gasolina',14.0,35.96,true)
 ON CONFLICT (clave) DO NOTHING;
 
--- ── 6. Seed: operadores existentes ─────────────────────────────────────────
-INSERT INTO operadores (nombre, es_propio, sueldo_diario)
-SELECT v.nombre, true, 420
+-- ── 6. Seed: operadores y maniobristas existentes ──────────────────────────
+INSERT INTO operadores (nombre, es_propio, sueldo_diario, notas)
+SELECT v.nombre, true, 420, v.notas
 FROM (VALUES
-  ('Luis Manuel Lopez Celis'),
-  ('Jose Luis Martinez Gonzalez'),
-  ('Estanislao Valverde Gonzalez'),
-  ('Guadalupe Hernandez Jimenez'),
-  ('Ruben Rodarte Martinez')
-) AS v(nombre)
+  ('Ruben Rodarte Martinez', 'Operador de transporte'),
+  ('Estanislao Valverde Gonzalez', 'Operador de transporte'),
+  ('Jose Luis Martinez Gonzalez', 'Operador de transporte'),
+  ('Luis Manuel Lopez Celis', 'Operador de transporte'),
+  ('Guadalupe Hernandez Jimenez', 'Maniobrista'),
+  ('Roberto Jimenez', 'Maniobrista')
+) AS v(nombre, notas)
 WHERE NOT EXISTS (SELECT 1 FROM operadores op WHERE op.nombre = v.nombre);
 
 -- ── 7. RLS Policies ────────────────────────────────────────────────────────

@@ -19,6 +19,11 @@ const fmtDate = (d: string | null) => {
   const [y, m, day] = d.split('T')[0].split('-')
   return `${day}/${m}/${y}`
 }
+const notaValue = (notas: string | null | undefined, label: string) => {
+  if (!notas) return ''
+  const match = notas.match(new RegExp(`${label}:\\s*([^·]+)`, 'i'))
+  return match?.[1]?.trim() ?? ''
+}
 
 export function ViajesPage() {
   const { user } = useAuthContext()
@@ -83,7 +88,14 @@ export function ViajesPage() {
     ? viajes.filter(v => {
         const q = busqueda.toLowerCase()
         const ref = v.operacion_id ? (opRefMap[v.operacion_id] || '') : ''
-        return v.origen.toLowerCase().includes(q) || v.destino.toLowerCase().includes(q) || ref.toLowerCase().includes(q)
+        const cliente = notaValue(v.notas, 'Cliente')
+        const operador = notaValue(v.notas, 'Operador')
+        return v.origen.toLowerCase().includes(q) ||
+          v.destino.toLowerCase().includes(q) ||
+          ref.toLowerCase().includes(q) ||
+          cliente.toLowerCase().includes(q) ||
+          operador.toLowerCase().includes(q) ||
+          v.notas?.toLowerCase().includes(q)
       })
     : viajes
 
@@ -225,17 +237,18 @@ export function ViajesPage() {
             </div>
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input type="text" placeholder="Buscar origen/destino/ref..." value={busqueda} onChange={e => setBusqueda(e.target.value)}
+              <input type="text" placeholder="Buscar origen/destino/ref/cliente..." value={busqueda} onChange={e => setBusqueda(e.target.value)}
                 className="h-9 pl-9 pr-3 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20 w-56" />
             </div>
           </div>
 
           {/* Tabla */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
+            <table className="w-full min-w-[980px] text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
                   <th className="text-left px-4 py-3 font-semibold text-gray-600">Ref</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Cliente</th>
                   <th className="text-left px-4 py-3 font-semibold text-gray-600">Ruta</th>
                   <th className="text-left px-4 py-3 font-semibold text-gray-600">Vehículo</th>
                   <th className="text-left px-4 py-3 font-semibold text-gray-600">Operador / Prov.</th>
@@ -249,9 +262,9 @@ export function ViajesPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={10} className="text-center py-10 text-gray-400">Cargando...</td></tr>
+                  <tr><td colSpan={11} className="text-center py-10 text-gray-400">Cargando...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={10} className="text-center py-10 text-gray-400">
+                  <tr><td colSpan={11} className="text-center py-10 text-gray-400">
                     <Route size={32} className="text-gray-200 mx-auto mb-2" />
                     No hay viajes registrados
                   </td></tr>
@@ -260,10 +273,14 @@ export function ViajesPage() {
                   const op = v.operador_id ? operadorMap[v.operador_id] : null
                   const prov = v.proveedor_nombre
                   const ref = v.operacion_id ? opRefMap[v.operacion_id] : null
+                  const cliente = notaValue(v.notas, 'Cliente')
+                  const operadorNota = notaValue(v.notas, 'Operador')
+                  const maniobristaNota = notaValue(v.notas, 'Maniobrista')
 
                   return (
                     <tr key={v.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="px-4 py-3 font-mono text-xs font-semibold text-[#1e3a5f]">{ref || '—'}</td>
+                      <td className="px-4 py-3 text-xs font-medium text-gray-700">{cliente || '—'}</td>
                       <td className="px-4 py-3">
                         <div className="text-xs text-gray-800">{v.origen}</div>
                         <div className="text-[10px] text-gray-400">→ {v.destino}</div>
@@ -274,6 +291,11 @@ export function ViajesPage() {
                           <span className="text-xs text-orange-700">{prov}</span>
                         ) : op ? (
                           <span className="text-xs text-gray-700">{op.nombre}</span>
+                        ) : operadorNota ? (
+                          <span className="text-xs text-gray-700">
+                            {operadorNota}
+                            {maniobristaNota && <span className="block text-[10px] text-gray-400">Maniobra: {maniobristaNota}</span>}
+                          </span>
                         ) : (
                           <span className="text-xs text-gray-400">Sin asignar</span>
                         )}
