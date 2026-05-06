@@ -132,7 +132,7 @@ FROM (VALUES
   ('Estanislao Valverde Gonzalez', 'Operador de transporte'),
   ('Jose Luis Martinez Gonzalez', 'Operador de transporte'),
   ('Luis Manuel Lopez Celis', 'Operador de transporte'),
-  ('Guadalupe Hernandez Jimenez', 'Maniobrista'),
+  ('Guadalupe Hernadez Jimenez', 'Maniobrista'),
   ('Roberto Jimenez', 'Maniobrista')
 ) AS v(nombre, notas)
 WHERE NOT EXISTS (SELECT 1 FROM operadores op WHERE op.nombre = v.nombre);

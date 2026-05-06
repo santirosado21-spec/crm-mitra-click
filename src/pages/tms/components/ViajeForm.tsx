@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { X, Save } from 'lucide-react'
 import { useVehiculos } from '../../../hooks/useVehiculos'
 import { useOperadores } from '../../../hooks/useOperadores'
+import { useClientCatalog } from '../../../hooks/useClientCatalog'
 import type { Viaje } from '../../../types/tms'
+import { isBaseManiobrista, isCatalogOperador } from '../../../lib/tmsCatalog'
 
 export interface ViajeFormData {
   operacion_id: string | null
@@ -33,14 +35,28 @@ interface Props {
 const inputCls = 'w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20'
 const labelCls = 'text-xs font-semibold text-gray-500 mb-1 block'
 const today = new Date().toISOString().split('T')[0]
+const notaValue = (notas: string | null | undefined, label: string) => {
+  if (!notas) return ''
+  const match = notas.match(new RegExp(`${label}:\\s*([^·]+)`, 'i'))
+  return match?.[1]?.trim() ?? ''
+}
+const withNota = (notas: string, label: string, value: string) => {
+  const parts = notas.split('·').map(p => p.trim()).filter(Boolean)
+    .filter(p => !p.toLowerCase().startsWith(`${label.toLowerCase()}:`))
+  if (value.trim()) parts.push(`${label}: ${value.trim()}`)
+  return parts.join(' · ')
+}
 
 export function ViajeForm({ onSave, onClose, editData }: Props) {
   const { vehiculos } = useVehiculos()
   const { operadores } = useOperadores()
+  const { clientes, loading: loadingClientes } = useClientCatalog()
 
   const [operacionId, setOperacionId] = useState(editData?.operacion_id ?? '')
   const [vehiculoId, setVehiculoId] = useState(editData?.vehiculo_id ?? '')
   const [operadorId, setOperadorId] = useState(editData?.operador_id ?? '')
+  const [cliente, setCliente] = useState(notaValue(editData?.notas, 'Cliente'))
+  const [maniobrista, setManiobrista] = useState(notaValue(editData?.notas, 'Maniobrista'))
   const [proveedorNombre, setProveedorNombre] = useState(editData?.proveedor_nombre ?? '')
   const [usaExterno, setUsaExterno] = useState(!!editData?.proveedor_nombre)
   const [origen, setOrigen] = useState(editData?.origen ?? '')
@@ -56,16 +72,27 @@ export function ViajeForm({ onSave, onClose, editData }: Props) {
 
   const costoTotal = (parseFloat(costoCombustible) || 0) + (parseFloat(costoCasetas) || 0) + (parseFloat(costoViaticos) || 0) + (parseFloat(costoProveedor) || 0)
   const margen = (parseFloat(ingresoCliente) || 0) - costoTotal
+  const operadoresPropios = operadores.filter(o => o.es_propio && !isBaseManiobrista(o.nombre, o.notas))
+  const maniobristas = operadores.filter(o => o.es_propio && isBaseManiobrista(o.nombre, o.notas))
+  const operadorSeleccionado = operadoresPropios.find(o => o.id === operadorId)
 
   const canSave = origen.trim().length > 0 && destino.trim().length > 0
   const hasAssignment = vehiculoId || proveedorNombre
 
   const handleSubmit = () => {
     if (!canSave) return
+    const operadorNombre = operadorSeleccionado?.nombre ?? ''
+    const operadorIdReal = operadorSeleccionado && !isCatalogOperador(operadorSeleccionado.id) ? operadorSeleccionado.id : null
+    const notasFinales = [
+      ['Cliente', cliente],
+      ['Operador', operadorNombre],
+      ['Maniobrista', maniobrista],
+    ].reduce((acc, [label, value]) => withNota(acc, label, value), notas)
+
     onSave({
       operacion_id: operacionId || null,
       vehiculo_id: usaExterno ? null : (vehiculoId || null),
-      operador_id: usaExterno ? null : (operadorId || null),
+      operador_id: usaExterno ? null : operadorIdReal,
       proveedor_nombre: usaExterno ? (proveedorNombre.trim() || null) : null,
       origen: origen.trim(),
       destino: destino.trim(),
@@ -78,7 +105,7 @@ export function ViajeForm({ onSave, onClose, editData }: Props) {
       costo_viaticos: parseFloat(costoViaticos) || 0,
       costo_proveedor: parseFloat(costoProveedor) || 0,
       ingreso_cliente: parseFloat(ingresoCliente) || 0,
-      notas,
+      notas: notasFinales,
       creado_por: 'Admin',
     })
   }
@@ -94,6 +121,17 @@ export function ViajeForm({ onSave, onClose, editData }: Props) {
         </div>
 
         <div className="space-y-4">
+          {/* Origen / Destino */}
+          <div>
+            <label className={labelCls}>Cliente</label>
+            <select value={cliente} onChange={e => setCliente(e.target.value)} className={inputCls}>
+              <option value="">{loadingClientes ? 'Cargando clientes...' : 'Seleccionar cliente...'}</option>
+              {clientes.map(c => (
+                <option key={`${c.codigo}-${c.nombre}`} value={c.nombre}>{c.codigo} — {c.nombre}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Origen / Destino */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -157,8 +195,17 @@ export function ViajeForm({ onSave, onClose, editData }: Props) {
                 <label className={labelCls}>Operador</label>
                 <select value={operadorId} onChange={e => setOperadorId(e.target.value)} className={inputCls}>
                   <option value="">Seleccionar...</option>
-                  {operadores.filter(o => o.es_propio).map(o => (
+                  {operadoresPropios.map(o => (
                     <option key={o.id} value={o.id}>{o.nombre}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className={labelCls}>Maniobrista</label>
+                <select value={maniobrista} onChange={e => setManiobrista(e.target.value)} className={inputCls}>
+                  <option value="">Sin maniobrista</option>
+                  {maniobristas.map(o => (
+                    <option key={o.id} value={o.nombre}>{o.nombre}</option>
                   ))}
                 </select>
               </div>

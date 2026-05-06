@@ -1,6 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, LayoutDashboard, Truck, UserCheck, Route, PieChart, Calculator, CalendarClock, ArrowRight } from 'lucide-react'
+import { ArrowLeft, LayoutDashboard, Truck, UserCheck, Route, PieChart, Calculator, CalendarClock, ArrowRight, Clock, DollarSign, TrendingUp } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
+import { useViajes } from '../../hooks/useViajes'
+import { useVehiculos } from '../../hooks/useVehiculos'
+import { useOperadores } from '../../hooks/useOperadores'
+import { isBaseManiobrista } from '../../lib/tmsCatalog'
 
 interface Tool {
   to: string
@@ -28,6 +32,25 @@ const categories = [
 
 export function TMSHome() {
   const navigate = useNavigate()
+  const { viajes } = useViajes()
+  const { vehiculos } = useVehiculos()
+  const { operadores } = useOperadores()
+
+  const pendientes = viajes.filter(v => v.estado === 'pendiente' || v.estado === 'asignado').length
+  const enRuta = viajes.filter(v => v.estado === 'en_transito').length
+  const ingreso = viajes.reduce((sum, v) => sum + (v.ingreso_cliente || 0), 0)
+  const margen = viajes.reduce((sum, v) => sum + (v.margen || 0), 0)
+  const operadoresBase = operadores.filter(o => !isBaseManiobrista(o.nombre, o.notas)).length
+  const maniobristas = operadores.filter(o => isBaseManiobrista(o.nombre, o.notas)).length
+
+  const indicadores = [
+    { label: 'Pendientes', value: pendientes, icon: Clock, color: '#b45309', bg: '#fffbeb' },
+    { label: 'En ruta', value: enRuta, icon: Route, color: '#1d4ed8', bg: '#eff6ff' },
+    { label: 'Ingreso', value: `$${ingreso.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`, icon: DollarSign, color: '#0e7490', bg: '#ecfeff' },
+    { label: 'Margen', value: `$${margen.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`, icon: TrendingUp, color: margen >= 0 ? '#15803d' : '#b91c1c', bg: margen >= 0 ? '#f0fdf4' : '#fef2f2' },
+    { label: 'Vehículos', value: vehiculos.length, icon: Truck, color: '#7c3aed', bg: '#f5f3ff' },
+    { label: 'Operadores', value: `${operadoresBase}/${maniobristas}`, icon: UserCheck, color: '#1e3a5f', bg: '#eef2f7' },
+  ]
 
   return (
     <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg, #f5f7fa)' }}>
@@ -44,6 +67,25 @@ export function TMSHome() {
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-[#1e3a5f]">TMS Transportes</h1>
             <p className="text-sm text-gray-500 mt-1">Transport Management System · Flotas, viajes y cotizaciones</p>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+            {indicadores.map(({ label, value, icon: Icon, color, bg }) => (
+              <button
+                key={label}
+                onClick={() => navigate(label === 'Operadores' ? '/tms/operadores' : label === 'Vehículos' ? '/tms/vehiculos' : '/tms/viajes')}
+                className="text-left bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all p-4"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: bg }}>
+                    <Icon size={17} style={{ color }} />
+                  </span>
+                  <ArrowRight size={14} className="text-gray-300" />
+                </div>
+                <p className="text-2xl font-extrabold" style={{ color }}>{value}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mt-1">{label}</p>
+              </button>
+            ))}
           </div>
 
           {categories.map(cat => {

@@ -5,9 +5,10 @@ import { Sidebar } from '../../components/layout/Sidebar'
 import { useOperadores } from '../../hooks/useOperadores'
 import { OperadorForm, type OperadorFormData } from './components/OperadorForm'
 import type { Operador } from '../../types/tms'
+import { isBaseManiobrista, isCatalogOperador } from '../../lib/tmsCatalog'
 
 const fmtMoney = (n: number) => `$${n.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
-const esManiobrista = (o: Operador) => /maniobrista/i.test(o.notas ?? '')
+const esManiobrista = (o: Operador) => isBaseManiobrista(o.nombre, o.notas)
 
 export function OperadoresPage() {
   const { operadores, loading, createOperador, updateOperador, deleteOperador } = useOperadores()
@@ -136,16 +137,20 @@ export function OperadoresPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => { setEditTarget(o); setShowForm(true) }}
-                          className="p-1.5 rounded hover:bg-blue-50 text-gray-400 hover:text-[#1e3a5f] transition-colors" title="Editar">
-                          <Edit3 size={14} />
-                        </button>
-                        <button onClick={() => handleDelete(o.id)}
-                          className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors" title="Desactivar">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
+                      {isCatalogOperador(o.id) ? (
+                        <span className="text-[10px] font-semibold text-gray-300">Catálogo</span>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => { setEditTarget(o); setShowForm(true) }}
+                            className="p-1.5 rounded hover:bg-blue-50 text-gray-400 hover:text-[#1e3a5f] transition-colors" title="Editar">
+                            <Edit3 size={14} />
+                          </button>
+                          <button onClick={() => handleDelete(o.id)}
+                            className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors" title="Desactivar">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -17,6 +17,7 @@ import {
 import { useVehiculos } from '../../hooks/useVehiculos'
 import { useOperadores } from '../../hooks/useOperadores'
 import { calcularFlete, type CotizadorResult, type Parada, type Contenedor } from './cotizadorCalc'
+import { isBaseManiobrista } from '../../lib/tmsCatalog'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const mxn = (n: number) =>
@@ -33,7 +34,7 @@ const uniqueNames = (names: string[]) =>
   Array.from(new Set(names.map(n => n.trim()).filter(Boolean)))
 
 const isManiobristaNombre = (nombre: string, notas?: string | null) =>
-  /maniobrista/i.test(notas ?? '') || MANIOBRISTAS_DEFAULT.some(m => m.toLowerCase() === nombre.toLowerCase())
+  isBaseManiobrista(nombre, notas)
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
 const inp = 'w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:border-[#1e3a5f] focus:bg-white focus:ring-1 focus:ring-[#1e3a5f]/20 transition-colors'

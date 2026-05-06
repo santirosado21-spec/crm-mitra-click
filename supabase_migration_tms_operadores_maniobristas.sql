@@ -7,7 +7,7 @@ WITH catalogo(nombre, es_propio, sueldo_diario, notas) AS (
     ('Estanislao Valverde Gonzalez', true, 420, 'Operador de transporte'),
     ('Jose Luis Martinez Gonzalez', true, 420, 'Operador de transporte'),
     ('Luis Manuel Lopez Celis', true, 420, 'Operador de transporte'),
-    ('Guadalupe Hernandez Jimenez', true, 420, 'Maniobrista'),
+    ('Guadalupe Hernadez Jimenez', true, 420, 'Maniobrista'),
     ('Roberto Jimenez', true, 420, 'Maniobrista')
 )
 INSERT INTO operadores (nombre, es_propio, sueldo_diario, notas, activo)
@@ -25,7 +25,7 @@ SET notas = 'Maniobrista',
     activo = true,
     updated_at = now()
 WHERE lower(nombre) IN (
-  lower('Guadalupe Hernandez Jimenez'),
+  lower('Guadalupe Hernadez Jimenez'),
   lower('Roberto Jimenez')
 );
 

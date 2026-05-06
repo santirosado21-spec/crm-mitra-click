@@ -11,7 +11,7 @@ export interface ClienteCatalog {
 }
 
 // Fallback local en caso de que Supabase no responda
-const FALLBACK_CLIENTES: ClienteCatalog[] = [
+export const FALLBACK_CLIENTES: ClienteCatalog[] = [
   { id: '', codigo: '200',  nombre: 'FITNESS FOR LIFE RIVIERA MAYA' },
   { id: '', codigo: '090',  nombre: 'FITNESS FOR LIFE MÉRIDA' },
   { id: '', codigo: 'VY8',  nombre: 'VERMONT YORK' },
@@ -40,7 +40,7 @@ const FALLBACK_CLIENTES: ClienteCatalog[] = [
 ]
 
 export function useClientCatalog() {
-  const [clientes, setClientes] = useState<ClienteCatalog[]>([])
+  const [clientes, setClientes] = useState<ClienteCatalog[]>(FALLBACK_CLIENTES)
   const [loading, setLoading] = useState(true)
 
   const fetchClientes = useCallback(async () => {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Operador } from '../types/tms'
+import { BASE_TMS_PERSONAL, mergeBaseOperadores } from '../lib/tmsCatalog'
 
 export type CreateOperadorData = Omit<Operador, 'id' | 'created_at' | 'updated_at'>
 export type UpdateOperadorData = Partial<CreateOperadorData>
@@ -24,9 +25,33 @@ export function useOperadores(filtro?: { esPropio?: boolean }) {
 
       const { data, error: err } = await query
       if (err) throw err
-      setOperadores((data ?? []) as Operador[])
+      let rows = (data ?? []) as Operador[]
+
+      const missing = BASE_TMS_PERSONAL.filter(item =>
+        !rows.some(o => o.nombre.toLowerCase() === item.nombre.toLowerCase())
+      )
+
+      if (missing.length > 0 && filtro?.esPropio !== false) {
+        const { data: inserted } = await supabase
+          .from('operadores')
+          .insert(missing.map(item => ({
+            nombre: item.nombre,
+            es_propio: true,
+            sueldo_diario: 420,
+            notas: item.notas,
+            activo: true,
+          })))
+          .select('*')
+
+        if (inserted?.length) {
+          rows = [...rows, ...(inserted as Operador[])]
+        }
+      }
+
+      setOperadores(filtro?.esPropio === false ? rows : mergeBaseOperadores(rows))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al cargar operadores')
+      setOperadores(filtro?.esPropio === false ? [] : mergeBaseOperadores([]))
     } finally {
       setLoading(false)
     }

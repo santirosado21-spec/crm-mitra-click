@@ -2,6 +2,7 @@
 // Cotizador de Fletes — Supply Chain México
 // Extracted from SupplyChain_Cotizador_v6.html
 // ─────────────────────────────────────────────────────────────────────────────
+import { BASE_MANIOBRISTAS, BASE_OPERADORES } from '../../lib/tmsCatalog'
 
 export interface Unidad {
   clave:        string
@@ -72,18 +73,10 @@ export const FIJOS = {
 export const FIJOS_DIA = FIJOS.GPS + FIJOS.RENTA + FIJOS.SEGURO  // 184.43 / día
 
 // Operadores de flota (4 — manejan unidad)
-export const OPERADORES_DEFAULT = [
-  'Ruben Rodarte Martinez',
-  'Estanislao Valverde Gonzalez',
-  'Jose Luis Martinez Gonzalez',
-  'Luis Manuel Lopez Celis',
-]
+export const OPERADORES_DEFAULT = BASE_OPERADORES
 
 // Maniobristas (2 — carga/descarga, no manejan unidad)
-export const MANIOBRISTAS_DEFAULT = [
-  'Guadalupe Hernandez Jimenez',
-  'Roberto Jimenez',
-]
+export const MANIOBRISTAS_DEFAULT = BASE_MANIOBRISTAS
 
 // Link a GlobalMap para calcular rutas reales
 export const GLOBALMAP_URL = 'https://www.gmap.com.mx/Console/index.php'
