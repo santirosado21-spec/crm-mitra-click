@@ -95,8 +95,9 @@ export async function fetchExecutiveData(range: ExecutiveRange): Promise<Executi
   if (viajesRes.error) throw viajesRes.error
   if (opsRes.error)    throw opsRes.error
   if (tasksRes.error)  throw tasksRes.error
-  if (auditRes.error)  throw auditRes.error
-  // guias may fail silently if migration not applied yet — use empty array as fallback
+  // Audit and parcel guides are auxiliary sections. If their migrations are not
+  // applied yet, keep the executive report usable with empty sheets/KPIs.
+  const audit = auditRes.error ? [] : ((auditRes.data ?? []) as TaskAuditEntry[])
   const guias = guiasRes.error ? [] : ((guiasRes.data ?? []) as GuiaPaqueteria[])
 
   return {
@@ -104,7 +105,7 @@ export async function fetchExecutiveData(range: ExecutiveRange): Promise<Executi
     viajes:     (viajesRes.data ?? []) as Viaje[],
     operations: (opsRes.data ?? []) as Operation[],
     tasks:      (tasksRes.data ?? []) as Task[],
-    audit:      (auditRes.data ?? []) as TaskAuditEntry[],
+    audit,
     guias,
   }
 }
