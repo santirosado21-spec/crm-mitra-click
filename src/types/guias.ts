@@ -1,6 +1,6 @@
-// Tipos para módulo SAC · Guías de paquetería (Estafeta/UPS)
+// Tipos para módulo SAC · Guías de paquetería
 
-export type Paqueteria = 'estafeta' | 'ups'
+export type Paqueteria = 'estafeta' | 'ups' | 'fedex' | 'dhl' | 'castores'
 export type GuiaOrigen = 'extensiv' | 'manual'
 export type GuiaExtensivType = 'order' | 'receipt'
 
@@ -40,9 +40,15 @@ export interface GuiaFilters {
 export const PAQUETERIA_LABEL: Record<Paqueteria, string> = {
   estafeta: 'Estafeta',
   ups:      'UPS',
+  fedex:    'FedEx',
+  dhl:      'DHL',
+  castores: 'Castores',
 }
 
 export const PAQUETERIA_COLOR: Record<Paqueteria, string> = {
   estafeta: '#dc3545',     // rojo Estafeta
   ups:      '#7c3aed',     // morado UPS (brand: marrón #351c15, pero aquí morado para legibilidad)
+  fedex:    '#4d148c',     // morado FedEx
+  dhl:      '#ffcc00',     // amarillo DHL
+  castores: '#1e3a5f',     // azul institucional
 }

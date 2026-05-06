@@ -1,8 +1,8 @@
 -- ============================================================================
--- Módulo SAC · Guías de paquetería (Estafeta / UPS)
+-- Módulo SAC · Guías de paquetería
 --
--- Permite a SAC capturar costo y precio de cada guía emitida con Estafeta o
--- UPS, ligándola a una transacción Extensiv (clientes integrados: Epos,
+-- Permite a SAC capturar costo y precio de cada guía emitida con Estafeta,
+-- UPS, FedEx, DHL o Castores, ligándola a una transacción Extensiv (clientes integrados: Epos,
 -- ToughBuilt, iFit, FFL, Linet) o a una referencia manual (clientes Seko 365
 -- cuyo inventario NO vive en Extensiv: BASF, KST, Lululemon, Burberry).
 --
@@ -12,7 +12,7 @@
 -- 1. Tabla principal --------------------------------------------------------
 CREATE TABLE IF NOT EXISTS guias_paqueteria (
   id                          UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-  paqueteria                  TEXT         NOT NULL CHECK (paqueteria IN ('estafeta','ups')),
+  paqueteria                  TEXT         NOT NULL CHECK (paqueteria IN ('estafeta','ups','fedex','dhl','castores')),
   tracking_number             TEXT         NOT NULL,
   cliente_id                  UUID         NOT NULL REFERENCES clients(id) ON DELETE RESTRICT,
   cliente_codigo              TEXT,
@@ -75,7 +75,7 @@ CREATE POLICY anon_all_guias_paqueteria
 
 -- 5. Comentarios ------------------------------------------------------------
 COMMENT ON TABLE  guias_paqueteria IS
-  'Guías de paquetería emitidas por SAC (Estafeta/UPS). Liga costo y precio a una transacción Extensiv o a una referencia manual.';
+  'Guías de paquetería emitidas por SAC (Estafeta/UPS/FedEx/DHL/Castores). Liga costo y precio a una transacción Extensiv o a una referencia manual.';
 COMMENT ON COLUMN guias_paqueteria.costo           IS 'Costo MXN pagado a la paquetería';
 COMMENT ON COLUMN guias_paqueteria.precio          IS 'Precio MXN cobrado al cliente final';
 COMMENT ON COLUMN guias_paqueteria.margen          IS 'Diferencia precio - costo (auto)';

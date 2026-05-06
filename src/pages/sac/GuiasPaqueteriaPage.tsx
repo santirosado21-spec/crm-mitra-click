@@ -17,6 +17,7 @@ import {
   type Paqueteria, type GuiaOrigen, type GuiaFilters, type GuiaPaqueteria, type CreateGuiaData,
 } from '../../types/guias'
 
+const PAQUETERIAS: Paqueteria[] = ['estafeta', 'ups', 'fedex', 'dhl', 'castores']
 const fmtMXN = (n: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n)
 const fmtDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: '2-digit' })
 
@@ -92,7 +93,7 @@ export function GuiasPaqueteriaPage() {
                 <Package size={20} /> Guías de paquetería
               </h1>
               <p className="text-xs text-gray-400 mt-0.5">
-                SAC · Captura de costo y precio de Estafeta y UPS · Liga a Extensiv o referencia manual (Seko 365 / PT)
+                SAC · Captura de costo y precio por paquetería · Liga a Extensiv o referencia manual (Seko 365 / PT)
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -148,8 +149,7 @@ export function GuiasPaqueteriaPage() {
               className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:border-[#1e3a5f] outline-none"
             >
               <option value="">Todas las paqueterías</option>
-              <option value="estafeta">Estafeta</option>
-              <option value="ups">UPS</option>
+              {PAQUETERIAS.map(p => <option key={p} value={p}>{PAQUETERIA_LABEL[p]}</option>)}
             </select>
             <select
               value={filters.origen ?? ''}
@@ -410,8 +410,8 @@ function GuiaForm({ onClose, onSubmit, clientes, creadoPor }: GuiaFormProps) {
           {/* Paquetería */}
           <div>
             <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5 block">Paquetería</label>
-            <div className="flex gap-2">
-              {(['estafeta', 'ups'] as Paqueteria[]).map(p => (
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              {PAQUETERIAS.map(p => (
                 <button
                   key={p}
                   type="button"
