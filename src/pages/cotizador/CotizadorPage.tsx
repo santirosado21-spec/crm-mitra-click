@@ -22,7 +22,8 @@ import { calcularFlete, type CotizadorResult, type Parada, type Contenedor } fro
 const mxn = (n: number) =>
   n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 })
 
-const STORAGE_KEY_OPS = 'sc_operadores'
+// v2: bump key para invalidar listas viejas guardadas en localStorage
+const STORAGE_KEY_OPS = 'sc_operadores_v2'
 function loadOperadores(): string[] {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY_OPS) || 'null') ?? OPERADORES_DEFAULT }
   catch { return OPERADORES_DEFAULT }
@@ -904,6 +905,18 @@ export function CotizadorPage() {
                       {operadores.map(o => <option key={o} value={o}>{o}</option>)}
                     </select>
                   </div>
+                  <div>
+                    <label className={lbl}>Maniobrista</label>
+                    <select className={inp} value={maniobrista} onChange={e => setManiobrista(e.target.value)}>
+                      <option value="">Sin maniobrista asignado</option>
+                      {MANIOBRISTAS_DEFAULT.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={lbl}>Viáticos extras ($)</label>
+                    {numInp(viaticosExtras, setViaticosExtras)}
+                    <p className="text-[10px] text-gray-400 mt-1">Peajes adicionales, propinas, imprevistos</p>
+                  </div>
                 </div>
               </div>
 
@@ -957,25 +970,10 @@ export function CotizadorPage() {
                     </p>
                   </div>
                 </div>
-                {(mHoras + mMinutos) > 0 && (
-                  <div className="mt-3">
-                    <label className={lbl}>Maniobrista asignado</label>
-                    <select
-                      value={maniobrista}
-                      onChange={e => setManiobrista(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10 outline-none"
-                    >
-                      <option value="">— Sin maniobrista asignado —</option>
-                      {MANIOBRISTAS_DEFAULT.map(m => (
-                        <option key={m} value={m}>{m}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
               </Collapsible>
 
               {/* 5. Bonos operador */}
-              <Collapsible title="Bonos al Operador / Viáticos (opcional)" icon="💰">
+              <Collapsible title="Bonos al Operador (opcional)" icon="💰">
                 <label className="flex items-center gap-2 cursor-pointer mb-4">
                   <input type="checkbox" checked={incluyeBonos} onChange={e => setIncluyeBonos(e.target.checked)}
                     className="w-4 h-4 accent-[#1e3a5f]" />
@@ -989,13 +987,6 @@ export function CotizadorPage() {
                     <div><label className={lbl}>Bono km vacío ($/km)</label>{numInp(bonoKmVacio, setBonoKmVacio)}</div>
                   </div>
                 )}
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <label className={lbl}>Viáticos extras ($) — peajes adicionales, propinas, imprevistos</label>
-                  {numInp(viaticosExtras, setViaticosExtras)}
-                  <p className="text-[11px] text-gray-500 mt-1">
-                    Se suman a los viáticos calculados por bonos. Útil para gastos ad-hoc no contemplados.
-                  </p>
-                </div>
               </Collapsible>
 
               {/* 6. Días especiales */}
