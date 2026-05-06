@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import {
   MapPin, Truck, ChevronDown, ChevronRight, RotateCcw,
   Calculator, CheckCircle, Printer, ExternalLink, Plus,
-  Minus, ArrowRight, ArrowLeftRight, Package, X,
+  Minus, ArrowRight, ArrowLeftRight, Package, X, Loader2, AlertCircle,
 } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
@@ -281,11 +281,26 @@ async function generarPDF(c: CotizadorResult) {
 // ── Result panel ──────────────────────────────────────────────────────────────
 function ResultPanel({ result, onAddToBitacora, onReset }: {
   result: CotizadorResult
-  onAddToBitacora: () => void
+  onAddToBitacora: () => Promise<void>
   onReset: () => void
 }) {
   const [added, setAdded] = useState(false)
-  const handleAdd = () => { onAddToBitacora(); setAdded(true) }
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+
+  const handleAdd = async () => {
+    if (saving || added) return
+    setSaving(true)
+    setSaveError('')
+    try {
+      await onAddToBitacora()
+      setAdded(true)
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'No se pudo registrar el viaje.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const rutaDisplay = result.esMultiparadas
     ? result.origen + ' → ' + result.paradas.filter(p => p.nombre).map(p => p.nombre).join(' → ')
@@ -369,14 +384,21 @@ function ResultPanel({ result, onAddToBitacora, onReset }: {
         {!added ? (
           <button
             onClick={handleAdd}
-            className="flex items-center justify-center gap-2 w-full py-3 bg-[#1e3a5f] hover:opacity-90 text-white text-sm font-bold rounded-xl transition-opacity"
+            disabled={saving}
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#1e3a5f] hover:opacity-90 text-white text-sm font-bold rounded-xl transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ boxShadow: '0 2px 8px rgba(30,58,95,0.35)' }}
           >
-            <Plus size={16} /> Crear Viaje desde Cotización
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+            {saving ? 'Registrando viaje...' : 'Confirmar cotización y registrar viaje'}
           </button>
         ) : (
           <div className="flex items-center justify-center gap-2 w-full py-3 bg-green-50 border border-green-200 text-green-700 text-sm font-bold rounded-xl">
-            <CheckCircle size={16} /> Viaje Creado
+            <CheckCircle size={16} /> Cotización confirmada y viaje registrado
+          </div>
+        )}
+        {saveError && (
+          <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+            <AlertCircle size={14} /> {saveError}
           </div>
         )}
         <div className="grid grid-cols-2 gap-2">
@@ -555,9 +577,9 @@ export function CotizadorPage() {
   ])
 
   // ── Crear viaje desde cotización ─────────────────────────────────────────────
-  const handleAddToBitacora = useCallback(() => {
-    if (!result) return
-    createViaje({
+  const handleAddToBitacora = useCallback(async () => {
+    if (!result) throw new Error('Primero calcula una cotización.')
+    await createViaje({
       operacion_id: null,
       vehiculo_id: null,
       operador_id: null,
