@@ -293,16 +293,16 @@ export function RCPage() {
   const hasExtensivId = !!extensivId
 
   return (
-    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
       <div className="print:hidden">
         <Header />
       </div>
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <div className="print:hidden">
           <Sidebar />
         </div>
 
-        <main className="flex-1 overflow-auto p-6 rc-print-wrapper">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y p-6 rc-print-wrapper">
 
           {/* ── Page header ─────────────────────────────────────────────── */}
           <div className="rc-no-print flex items-start justify-between mb-6 flex-wrap gap-4">

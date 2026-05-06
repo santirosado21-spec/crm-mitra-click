@@ -61,11 +61,11 @@ export function CostosTransportePage() {
   const costoXKm = costoPromKm > 0 ? stats.costoTotal / costoPromKm : 0
 
   return (
-    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
       <Header />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-auto p-6">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y p-6">
           <div className="mb-6">
             <h1 className="text-xl font-bold text-[#1e3a5f]">Costos de Transporte</h1>
             <p className="text-xs text-gray-400 mt-0.5">Análisis de costos, márgenes y rendimiento por proveedor</p>

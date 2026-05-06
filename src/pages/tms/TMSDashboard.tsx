@@ -23,11 +23,11 @@ export function TMSDashboard() {
   ]
 
   return (
-    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
       <Header />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-auto p-6 space-y-6">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y p-6 space-y-6">
           <div className="animate-fade-up">
             <h1 className="text-xl font-bold tracking-tight" style={{ color: 'var(--brand-navy)' }}>
               TMS Dashboard

@@ -107,9 +107,9 @@ export function TaskDetail() {
 
   if (loading) {
     return (
-      <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
+      <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
         <Header />
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex min-h-0 flex-1 overflow-hidden">
           <Sidebar />
           <main className="flex-1 flex items-center justify-center text-gray-400 gap-2">
             <Spinner size={20} /> Cargando tarea...
@@ -121,9 +121,9 @@ export function TaskDetail() {
 
   if (error || !task) {
     return (
-      <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
+      <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
         <Header />
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex min-h-0 flex-1 overflow-hidden">
           <Sidebar />
           <main className="flex-1 flex flex-col items-center justify-center gap-2 text-gray-500">
             <p>{error ?? 'Tarea no encontrada'}</p>
@@ -138,11 +138,11 @@ export function TaskDetail() {
   const end = new Date(task.scheduled_end)
 
   return (
-    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg)' }}>
+    <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
       <Header />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-auto p-4 sm:p-6">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y p-4 sm:p-6">
           <button
             type="button"
             onClick={() => navigate(-1)}

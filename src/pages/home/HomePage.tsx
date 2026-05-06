@@ -68,9 +68,9 @@ export function HomePage() {
   ]
 
   return (
-    <div className="flex flex-col min-h-dvh" style={{ background: 'var(--page-bg, #f5f7fa)' }}>
+    <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg, #f5f7fa)' }}>
       <Header />
-      <main className="flex-1 overflow-auto">
+      <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y">
         <div className="max-w-6xl mx-auto px-6 py-10">
           {/* Welcome */}
           <div className="mb-10 text-center">
