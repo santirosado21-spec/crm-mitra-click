@@ -1,4 +1,4 @@
-import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt } from 'lucide-react'
+import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
@@ -49,6 +49,7 @@ const TASKS_LINKS: Link[] = [
 const TASKS_ADMIN_LINKS: Link[] = [
   { to: '/tasks/admin/team',              label: 'Equipo y horarios',   icon: UserCog },
   { to: '/tasks/admin/reports',           label: 'Reportes operativos', icon: BarChart3 },
+  { to: '/tasks/admin/audit-log',         label: 'Auditoría',           icon: History },
   { to: '/tasks/admin/extensiv-billing',  label: 'Extensiv Billing',    icon: Receipt },
 ]
 

@@ -124,3 +124,50 @@ export const TASK_STATUS_COLOR: Record<TaskStatus, string> = {
 
 export const DAY_OF_WEEK_LABEL = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'] as const
 export const DAY_OF_WEEK_FULL  = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'] as const
+
+// ── Sprint H · Audit log ─────────────────────────────────────────────────────
+export type TaskAuditAction =
+  | 'created' | 'edited' | 'accepted' | 'rejected'
+  | 'cancelled' | 'finalized' | 'started' | 'paused' | 'other'
+
+export interface TaskAuditEntry {
+  audit_id:            string
+  audit_at:            string
+  action:              string                                  // raw "status:propuesta→aceptada"
+  action_category:     TaskAuditAction
+  before:              Record<string, unknown> | null
+  after:               Record<string, unknown> | null
+  actor_email:         string
+  actor_name:          string
+  actor_role:          string | null
+  task_id:             string | null
+  task_ref:            string | null
+  task_title:          string | null
+  task_current_status: string | null
+  assigner_email:      string | null
+  assignee_email:      string | null
+}
+
+export const AUDIT_ACTION_LABEL: Record<TaskAuditAction, string> = {
+  created:    'creó',
+  edited:     'editó',
+  accepted:   'aceptó',
+  rejected:   'rechazó',
+  cancelled:  'canceló',
+  finalized:  'finalizó',
+  started:    'inició',
+  paused:     'pausó',
+  other:      'modificó',
+}
+
+export const AUDIT_ACTION_COLOR: Record<TaskAuditAction, string> = {
+  created:    '#64748b',                                       // gris
+  edited:     '#1e3a5f',                                       // azul
+  accepted:   '#28a745',                                       // verde
+  rejected:   '#dc3545',                                       // rojo
+  cancelled:  '#f59e0b',                                       // ámbar
+  finalized:  '#7c3aed',                                       // púrpura
+  started:    '#22c55e',                                       // verde claro
+  paused:     '#f59e0b',
+  other:      '#94a3b8',
+}

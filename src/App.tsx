@@ -34,6 +34,7 @@ import { TaskTemplates } from './pages/tasks/TaskTemplates'
 import { TeamSettings } from './pages/tasks/admin/TeamSettings'
 import { Reports } from './pages/tasks/admin/Reports'
 import { ExtensivBilling } from './pages/tasks/admin/ExtensivBilling'
+import { AuditLog } from './pages/tasks/admin/AuditLog'
 import { WelcomeTour } from './components/features/WelcomeTour'
 import { ALMACEN_ROLES, TASK_ROLES, TMS_ROLES, WMS_ROLES } from './config/permissions'
 
@@ -144,6 +145,9 @@ function App() {
           } />
           <Route path="/tasks/admin/extensiv-billing" element={
             <ProtectedRoute allowedRoles={['admin', 'cobranza']}><ExtensivBilling /></ProtectedRoute>
+          } />
+          <Route path="/tasks/admin/audit-log" element={
+            <ProtectedRoute allowedRoles={['admin']}><AuditLog /></ProtectedRoute>
           } />
           <Route path="/tasks/:id" element={
             <ProtectedRoute><TaskDetail /></ProtectedRoute>
