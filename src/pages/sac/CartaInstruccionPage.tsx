@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Printer, RotateCcw, Plus, Trash2, AlertTriangle } from 'lucide-react'
+import { Printer, RotateCcw, Plus, Trash2, AlertTriangle, Send, Loader2 } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { useClientCatalog } from '../../hooks/useClientCatalog'
+import { useCartasInstruccion } from '../../hooks/useCartasInstruccion'
+import { useAuthContext } from '../../context/AuthContext'
+import { useToast } from '../../hooks/useToast'
 
 type Mercancia = {
   descripcion: string
@@ -29,6 +32,10 @@ const emptyMercancia: Mercancia = {
 
 export function CartaInstruccionPage() {
   const { clientes } = useClientCatalog()
+  const { create } = useCartasInstruccion()
+  const { user } = useAuthContext()
+  const toast = useToast()
+  const [enviando, setEnviando] = useState(false)
   const [folio, setFolio] = useState(`CI-${Date.now().toString().slice(-6)}`)
   const [fecha, setFecha] = useState(today)
   const [cliente, setCliente] = useState('')
@@ -104,6 +111,61 @@ export function CartaInstruccionPage() {
     setMercancias([{ ...emptyMercancia }])
   }
 
+  const enviarATransportes = async () => {
+    if (faltantes.length > 0) {
+      toast.error('Faltan campos', `Completa: ${faltantes.join(', ')}`)
+      return
+    }
+    setEnviando(true)
+    try {
+      const clienteObj = clientes.find(c => c.nombre === cliente)
+      const ahora = new Date().toISOString()
+      await create({
+        folio,
+        fecha,
+        status: 'enviada',
+        cliente_id:        clienteObj?.id ?? null,
+        cliente_nombre:    cliente,
+        referencia:        referencia || null,
+        orden_compra:      ordenCompra || null,
+        tipo_servicio:     tipoServicio || null,
+        origen:            origen || null,
+        origen_direccion:  origenDir || null,
+        destino,
+        destino_direccion: destinoDir,
+        fecha_carga:       fechaCarga || null,
+        hora_carga:        horaCarga || null,
+        fecha_entrega:     fechaEntrega || null,
+        hora_entrega:      horaEntrega || null,
+        contacto_carga:    contactoCarga || null,
+        contacto_entrega:  contactoEntrega || null,
+        unidad_sugerida:   unidad || null,
+        operador_sugerido: operador || null,
+        placas_sugeridas:  placas || null,
+        maniobras:         maniobras || null,
+        sellos:            sellos || null,
+        documentos:        documentos || null,
+        instrucciones:     instrucciones || null,
+        seguridad:         seguridad || null,
+        mercancias:        mercancias.filter(m => m.descripcion.trim()),
+        total_bultos:      totalBultos,
+        total_peso_kg:     totalPeso,
+        enviada_por:       user?.name ?? user?.email ?? null,
+        enviada_at:        ahora,
+        procesada_por:     null,
+        procesada_at:      null,
+        carta_porte_id:    null,
+        notas:             '',
+      })
+      toast.success('Carta enviada a Transportes', `Folio ${folio} ya está en /tms/cartas-recibidas`)
+      reset()
+    } catch (e) {
+      toast.error('No se pudo enviar', e instanceof Error ? e.message : 'Error desconocido')
+    } finally {
+      setEnviando(false)
+    }
+  }
+
   return (
     <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg)' }}>
       <Header />
@@ -137,8 +199,17 @@ export function CartaInstruccionPage() {
               <button onClick={reset} className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-600 flex items-center gap-2 hover:bg-gray-50">
                 <RotateCcw size={15} /> Limpiar
               </button>
-              <button onClick={() => window.print()} className="h-10 px-4 rounded-lg bg-[#1e3a5f] text-white text-sm font-semibold flex items-center gap-2 hover:bg-[#16304d]">
+              <button onClick={() => window.print()} className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-700 flex items-center gap-2 hover:bg-gray-50">
                 <Printer size={15} /> Imprimir / PDF
+              </button>
+              <button
+                onClick={enviarATransportes}
+                disabled={enviando || faltantes.length > 0}
+                className="h-10 px-4 rounded-lg bg-[#1e3a5f] text-white text-sm font-semibold flex items-center gap-2 hover:bg-[#16304d] disabled:opacity-50 disabled:cursor-not-allowed"
+                title={faltantes.length > 0 ? `Faltan: ${faltantes.join(', ')}` : 'Persiste la carta y la pone en la bandeja de Transportes'}
+              >
+                {enviando ? <Loader2 className="animate-spin" size={15} /> : <Send size={15} />}
+                Enviar a Transportes
               </button>
             </div>
           </div>

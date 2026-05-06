@@ -29,6 +29,7 @@ import { ReceiptGeneratorPage } from './pages/sac/ReceiptGeneratorPage'
 import { CartaInstruccionPage } from './pages/sac/CartaInstruccionPage'
 import { GuiasPaqueteriaPage } from './pages/sac/GuiasPaqueteriaPage'
 import { CartaPortePage } from './pages/tms/CartaPortePage'
+import { CartasRecibidasPage } from './pages/tms/CartasRecibidasPage'
 import { TaskInbox } from './pages/tasks/TaskInbox'
 import { TaskCalendar } from './pages/tasks/TaskCalendar'
 import { TaskCreate } from './pages/tasks/TaskCreate'
@@ -99,6 +100,9 @@ function App() {
           } />
           <Route path="/tms/carta-porte" element={
             <ProtectedRoute allowedRoles={TMS_ROLES}><CartaPortePage /></ProtectedRoute>
+          } />
+          <Route path="/tms/cartas-recibidas" element={
+            <ProtectedRoute allowedRoles={TMS_ROLES}><CartasRecibidasPage /></ProtectedRoute>
           } />
           <Route path="/tramites" element={
             <ProtectedRoute allowedRoles={TMS_ROLES}><TramitesPage /></ProtectedRoute>

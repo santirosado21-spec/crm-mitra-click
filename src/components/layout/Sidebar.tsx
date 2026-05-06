@@ -36,6 +36,7 @@ const TMS_LINKS: Link[] = [
   { to: '/tms/viajes',     label: 'Viajes',               icon: Route },
   { to: '/tms/costos',     label: 'Costos',               icon: PieChart },
   { to: '/cotizador',      label: 'Cotizador',            icon: Calculator },
+  { to: '/tms/cartas-recibidas', label: 'Cartas recibidas', icon: Inbox },
   { to: '/tms/carta-porte', label: 'Carta Porte', icon: FileCheck },
   { to: '/tramites',       label: 'Trámites',             icon: CalendarClock },
 ]

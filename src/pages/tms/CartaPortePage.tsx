@@ -1,11 +1,18 @@
-import { useMemo, useState } from 'react'
-import { AlertTriangle, Plus, Printer, RotateCcw, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { AlertTriangle, Plus, Printer, RotateCcw, Trash2, Inbox, Upload, Loader2, X } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { useClientCatalog } from '../../hooks/useClientCatalog'
 import { useOperadores } from '../../hooks/useOperadores'
 import { useVehiculos } from '../../hooks/useVehiculos'
+import { useCartasInstruccion } from '../../hooks/useCartasInstruccion'
+import { useToast } from '../../hooks/useToast'
+import { useAuthContext } from '../../context/AuthContext'
 import { isBaseManiobrista } from '../../lib/tmsCatalog'
+import { extractReceiptItemsFromPT } from '../../lib/ptParser'
+import { supabase } from '../../lib/supabase'
+import type { CartaInstruccion } from '../../types/cartas'
 
 type MercanciaCP = {
   bienesTransp: string
@@ -75,6 +82,110 @@ export function CartaPortePage() {
   const [operadorDomicilio, setOperadorDomicilio] = useState('')
   const [observaciones, setObservaciones] = useState('Precaptura para revisión del contador y timbrado en CONTPAQi/PAC autorizado.')
   const [mercancias, setMercancias] = useState<MercanciaCP[]>([{ ...emptyMercancia }])
+
+  // Importadores
+  const toast = useToast()
+  const { user } = useAuthContext()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const fromCartaId = searchParams.get('fromCarta')
+  const { cartas: cartasEnviadas } = useCartasInstruccion({ status: 'enviada' })
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importingPDF, setImportingPDF] = useState(false)
+  const [importedCartaId, setImportedCartaId] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const applyCartaInstruccion = (c: CartaInstruccion) => {
+    if (c.cliente_nombre)       setCliente(c.cliente_nombre)
+    if (c.origen)               setOrigenNombre(c.origen)
+    if (c.origen_direccion)     setOrigenDomicilio(c.origen_direccion)
+    if (c.destino)              setDestinoNombre(c.destino)
+    if (c.destino_direccion)    setDestinoDomicilio(c.destino_direccion)
+    if (c.fecha_carga)          setOrigenFechaHora(`${c.fecha_carga}T${c.hora_carga || '08:00'}`)
+    if (c.fecha_entrega)        setDestinoFechaHora(`${c.fecha_entrega}T${c.hora_entrega || '18:00'}`)
+    if (c.placas_sugeridas)     setPlacaVm(c.placas_sugeridas)
+    if (c.operador_sugerido)    setOperador(c.operador_sugerido)
+    if (c.mercancias?.length) {
+      setMercancias(c.mercancias.map(m => ({
+        bienesTransp:      '',
+        descripcion:       m.descripcion ?? m.sku ?? '',
+        cantidad:          String(m.cantidad ?? ''),
+        claveUnidad:       'H87',
+        unidad:            m.empaque || 'Pieza',
+        pesoKg:            String(m.peso ?? ''),
+        valor:             String(m.valor ?? ''),
+        materialPeligroso: 'No',
+        embalaje:          m.empaque ?? '',
+        pedimento:         '',
+      })))
+    }
+    setImportedCartaId(c.id)
+    toast.success('Carta importada', `Folio ${c.folio} — ${c.mercancias?.length ?? 0} mercancías`)
+  }
+
+  // Si entró con ?fromCarta=<id>, busca y autollena.
+  useEffect(() => {
+    if (!fromCartaId) return
+    let cancelled = false
+    supabase.from('cartas_instruccion').select('*').eq('id', fromCartaId).maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled) return
+        if (error || !data) {
+          toast.error('No se encontró la carta', error?.message ?? 'ID inválido')
+          return
+        }
+        applyCartaInstruccion(data as CartaInstruccion)
+        searchParams.delete('fromCarta')
+        setSearchParams(searchParams, { replace: true })
+      })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromCartaId])
+
+  const handleImportFile = async (file: File | null) => {
+    if (!file) return
+    setImportingPDF(true)
+    try {
+      const ext = await extractReceiptItemsFromPT(file)
+      if (ext.items.length === 0) {
+        toast.error('Sin items detectados', 'El parser no encontró SKUs/cantidades en el archivo.')
+        return
+      }
+      setMercancias(ext.items.map(it => ({
+        bienesTransp:      '',
+        descripcion:       it.sku,
+        cantidad:          String(it.qty),
+        claveUnidad:       'H87',
+        unidad:            'Pieza',
+        pesoKg:            '',
+        valor:             '',
+        materialPeligroso: 'No',
+        embalaje:          '',
+        pedimento:         '',
+      })))
+      toast.success('Archivo importado', `${ext.items.length} mercancías cargadas${ext.ref ? ` · ref ${ext.ref}` : ''}`)
+      setShowImportModal(false)
+    } catch (e) {
+      toast.error('Error al parsear el archivo', e instanceof Error ? e.message : 'Formato no reconocido')
+    } finally {
+      setImportingPDF(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
+  const marcarComoProcesada = async () => {
+    if (!importedCartaId) return
+    try {
+      await supabase.from('cartas_instruccion').update({
+        status:        'procesada',
+        procesada_por: user?.name ?? user?.email ?? null,
+        procesada_at:  new Date().toISOString(),
+      }).eq('id', importedCartaId)
+      toast.success('Carta marcada como procesada')
+      setImportedCartaId(null)
+    } catch (e) {
+      toast.error('No se pudo marcar', e instanceof Error ? e.message : 'Error')
+    }
+  }
 
   const operadoresBase = operadores.filter(o => !isBaseManiobrista(o.nombre, o.notas))
   const pesoTotal = useMemo(() => mercancias.reduce((sum, item) => sum + (Number(item.pesoKg) || 0), 0), [mercancias])
@@ -193,6 +304,27 @@ export function CartaPortePage() {
               <button onClick={reset} className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-600 flex items-center gap-2 hover:bg-gray-50">
                 <RotateCcw size={15} /> Limpiar
               </button>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-700 flex items-center gap-2 hover:bg-gray-50"
+                title="Autollena los campos desde una Carta de Instrucción enviada por SAC, o desde un PT en PDF/Excel"
+              >
+                <Inbox size={15} /> Importar
+                {cartasEnviadas.length > 0 && (
+                  <span className="ml-1 inline-flex items-center justify-center bg-[#dc3545] text-white text-[10px] font-bold rounded-full w-4 h-4">
+                    {cartasEnviadas.length}
+                  </span>
+                )}
+              </button>
+              {importedCartaId && (
+                <button
+                  onClick={marcarComoProcesada}
+                  className="h-10 px-3 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100"
+                  title="Marca la carta importada como procesada — desaparece de la bandeja de SAC"
+                >
+                  Marcar carta como procesada
+                </button>
+              )}
               <button onClick={() => window.print()} className="h-10 px-4 rounded-lg bg-[#1e3a5f] text-white text-sm font-semibold flex items-center gap-2 hover:bg-[#16304d]">
                 <Printer size={15} /> Imprimir / PDF
               </button>
@@ -319,6 +451,84 @@ export function CartaPortePage() {
           </div>
         </main>
       </div>
+
+      {/* Modal Importar */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4 ci-no-print">
+          <div className="bg-white w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl shadow-xl">
+            <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between">
+              <h2 className="text-base font-bold text-[#1e3a5f] inline-flex items-center gap-2">
+                <Inbox size={18} /> Importar a Carta Porte
+              </h2>
+              <button type="button" onClick={() => setShowImportModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-5 space-y-5">
+              {/* Sección 1: cartas de SAC */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-2">Carta de Instrucción enviada por SAC</h3>
+                <p className="text-[11px] text-gray-500 mb-2">
+                  Selecciona una para autollenar cliente, origen, destino, fechas, mercancías y operador sugerido.
+                </p>
+                {cartasEnviadas.length === 0 ? (
+                  <div className="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-lg">
+                    No hay cartas pendientes de SAC.
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 max-h-64 overflow-y-auto">
+                    {cartasEnviadas.map(c => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => { applyCartaInstruccion(c); setShowImportModal(false) }}
+                        className="w-full text-left bg-white border border-gray-200 hover:border-[#1e3a5f] hover:bg-blue-50/30 rounded-lg p-2.5 transition-colors"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-xs font-mono text-[#1e3a5f]">{c.folio}</p>
+                            <p className="text-sm font-semibold text-gray-800 truncate">{c.cliente_nombre}</p>
+                            <p className="text-[11px] text-gray-500 truncate">{c.origen ?? '—'} → {c.destino} · {c.mercancias.length} mercancías · {c.total_peso_kg} kg</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-gray-100" />
+
+              {/* Sección 2: archivo PDF/Excel */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-2">Importar desde archivo</h3>
+                <p className="text-[11px] text-gray-500 mb-2">
+                  Sube un Pick Ticket en PDF o Excel. El parser intenta extraer SKU + cantidad y rellena las mercancías.
+                </p>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".pdf,.xlsx,.xls"
+                  onChange={e => handleImportFile(e.target.files?.[0] ?? null)}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={importingPDF}
+                  className="w-full h-12 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#1e3a5f] hover:bg-blue-50/30 text-sm text-gray-600 hover:text-[#1e3a5f] flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  {importingPDF ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
+                  {importingPDF ? 'Procesando…' : 'Subir PDF o Excel'}
+                </button>
+                <p className="text-[10px] text-gray-400 mt-1.5">
+                  Solo extrae mercancías. Cliente, origen, destino y datos del vehículo se llenan a mano.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
