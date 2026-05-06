@@ -126,16 +126,20 @@ export function TeamSettings() {
     patchRowLocal(row.email, { name: newName })             // optimista
     setSavingEmail(row.email)
     try {
-      const { error: err } = await supabase.from('team_members').upsert({
-        user_email: row.email,
-        user_name: newName,
-        role: row.role,
-        active: row.active,
-      })
+      const { data, error: err } = await supabase
+        .from('team_members')
+        .update({ user_name: newName, role: row.role, active: row.active })
+        .eq('user_email', row.email)
+        .select()
       if (err) throw err
+      if (!data || data.length === 0) throw new Error('RLS_BLOCKED')
     } catch (e) {
       patchRowLocal(row.email, { name: prevName })           // revertir
-      toast.error('No se pudo actualizar el nombre', e instanceof Error ? e.message : 'Error desconocido')
+      const msg = e instanceof Error ? e.message : 'Error desconocido'
+      const hint = msg === 'RLS_BLOCKED'
+        ? 'Supabase RLS bloqueó la operación. Tu cuenta logueada debe tener role=\'admin\' y active=true en team_members.'
+        : msg
+      toast.error('No se pudo actualizar el nombre', hint)
     } finally { setSavingEmail(null) }
   }
 
@@ -145,20 +149,28 @@ export function TeamSettings() {
     patchRowLocal(row.email, { role })                       // optimista — el <select> queda en el nuevo valor
     setSavingEmail(row.email)
     try {
-      const { error: err } = await supabase.from('team_members').upsert({
-        user_email: row.email,
-        user_name: row.name,
-        role,
-        active: row.active,
-      })
+      // .select() para forzar a Supabase a devolver las filas afectadas.
+      // Sin esto, RLS que filtra silenciosamente devuelve error=null + data=[]
+      // y el código pensaba que había éxito.
+      const { data, error: err } = await supabase
+        .from('team_members')
+        .update({ user_name: row.name, role, active: row.active })
+        .eq('user_email', row.email)
+        .select()
       if (err) throw err
+      if (!data || data.length === 0) {
+        throw new Error('RLS_BLOCKED')
+      }
       toast.success('Rol actualizado', `${row.email} → ${ROLE_LABEL[role]}`)
     } catch (e) {
       patchRowLocal(row.email, { role: prevRole })           // revertir → el <select> vuelve solo
       const msg = e instanceof Error ? e.message : 'Error desconocido'
-      const hint = /check.*role|violates.*check/i.test(msg)
-        ? 'El CHECK constraint de team_members aún no acepta "transporte". Corre supabase_migration_role_transporte.sql en Supabase.'
-        : msg
+      let hint = msg
+      if (msg === 'RLS_BLOCKED') {
+        hint = 'Supabase RLS bloqueó la operación. Tu cuenta logueada debe estar en team_members con role=\'admin\' y active=true. Verifica en Supabase: SELECT * FROM team_members WHERE user_email = \'<tu_email>\';'
+      } else if (/check.*role|violates.*check/i.test(msg)) {
+        hint = 'El CHECK constraint de team_members aún no acepta "transporte". Corre supabase_migration_role_transporte.sql en Supabase.'
+      }
       toast.error('No se pudo cambiar el rol', hint)
     } finally { setSavingEmail(null) }
   }
@@ -168,16 +180,20 @@ export function TeamSettings() {
     patchRowLocal(row.email, { active: newActive })          // optimista
     setSavingEmail(row.email)
     try {
-      const { error: err } = await supabase.from('team_members').upsert({
-        user_email: row.email,
-        user_name: row.name,
-        role: row.role,
-        active: newActive,
-      })
+      const { data, error: err } = await supabase
+        .from('team_members')
+        .update({ user_name: row.name, role: row.role, active: newActive })
+        .eq('user_email', row.email)
+        .select()
       if (err) throw err
+      if (!data || data.length === 0) throw new Error('RLS_BLOCKED')
     } catch (e) {
       patchRowLocal(row.email, { active: !newActive })       // revertir
-      toast.error('No se pudo cambiar el estado', e instanceof Error ? e.message : 'Error desconocido')
+      const msg = e instanceof Error ? e.message : 'Error desconocido'
+      const hint = msg === 'RLS_BLOCKED'
+        ? 'Supabase RLS bloqueó la operación. Tu cuenta logueada debe tener role=\'admin\' y active=true en team_members.'
+        : msg
+      toast.error('No se pudo cambiar el estado', hint)
     } finally { setSavingEmail(null) }
   }
 
