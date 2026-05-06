@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { Upload, FileSpreadsheet, Download, Trash2, CheckCircle2, XCircle, AlertTriangle, Search, Loader2, Database, WifiOff } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
+import { useToast } from '../../hooks/useToast'
 import {
   isExtensivConfigured,
   getExtensivCustomers,
@@ -355,6 +356,7 @@ function downloadResults(results: SKUResult[], ptName: string) {
 /* ─── Component ────────────────────────────────────────────────────── */
 export function ValidadorSKUPage() {
   const apiConfigured = isExtensivConfigured()
+  const toast = useToast()
 
   // State
   const [ptFile, setPtFile] = useState<File | null>(null)
@@ -508,10 +510,45 @@ export function ValidadorSKUPage() {
   const canAdjustResults = partialResults.length > 0 && pendingPartialCount === 0
 
   const handleAdjustResults = () => {
+    // 1) Si quedan SKUs sin decidir, scrolleamos al primero pendiente y avisamos.
+    if (pendingPartialCount > 0) {
+      const firstPending = partialResults.find(r => !isPartialReviewComplete(r))
+      if (firstPending) {
+        const row = document.getElementById(`sku-row-${firstPending.sku}`)
+        row?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        row?.classList.add('ring-2', 'ring-yellow-400')
+        setTimeout(() => row?.classList.remove('ring-2', 'ring-yellow-400'), 2000)
+      }
+      toast.error(
+        `Faltan ${pendingPartialCount} SKU${pendingPartialCount === 1 ? '' : 's'} por revisar`,
+        'Confirma (✓) o declina (✗) cada candidato antes de ajustar.',
+      )
+      return
+    }
+
+    // 2) Inventory fallback: usa activeInventory; si está null por algún motivo,
+    //    cae a inventoryCache (Extensiv) para que el cálculo no se rompa.
+    const inv = activeInventory ?? inventoryCache
+    if (!inv) {
+      toast.error('No hay inventario cargado', 'Vuelve a validar para refrescar el inventario.')
+      return
+    }
+
+    // 3) Aplicar ajustes y reordenar.
     const order = { missing: 0, partial: 1, insufficient: 2, ok: 3 }
-    setResults(prev => prev
-      .map(result => adjustPartialResult(result, activeInventory))
-      .sort((a, b) => order[a.status] - order[b.status])
+    let adjustedCount = 0
+    setResults(prev => {
+      const next = prev.map(r => {
+        if (r.matchType !== 'partial') return r
+        adjustedCount++
+        return adjustPartialResult(r, inv)
+      })
+      next.sort((a, b) => order[a.status] - order[b.status])
+      return next
+    })
+    toast.success(
+      `${adjustedCount} resultado${adjustedCount === 1 ? '' : 's'} ajustado${adjustedCount === 1 ? '' : 's'}`,
+      'El stock se calculó solo con los candidatos aprobados (✓).',
     )
   }
 
@@ -686,11 +723,22 @@ export function ValidadorSKUPage() {
                 {partialResults.length > 0 && (
                   <button
                     onClick={handleAdjustResults}
-                    disabled={!canAdjustResults}
-                    className="h-10 px-4 rounded-lg bg-yellow-500 text-sm font-semibold text-white flex items-center gap-2 hover:bg-yellow-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    title={canAdjustResults ? 'Ajustar resultado con los candidatos aprobados' : 'Confirma o declina todos los SKUs en duda antes de ajustar'}
+                    className={`h-10 px-4 rounded-lg text-sm font-semibold text-white flex items-center gap-2 transition-colors ${
+                      canAdjustResults
+                        ? 'bg-yellow-500 hover:bg-yellow-600'
+                        : 'bg-yellow-300 hover:bg-yellow-400'
+                    }`}
+                    title={canAdjustResults
+                      ? 'Ajustar resultado con los candidatos aprobados'
+                      : `Faltan ${pendingPartialCount} SKU(s) por revisar — clic para ir al primero`
+                    }
                   >
                     <CheckCircle2 size={16} /> Ajustar resultados
+                    {pendingPartialCount > 0 && (
+                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">
+                        {pendingPartialCount}
+                      </span>
+                    )}
                   </button>
                 )}
                 <button
@@ -779,7 +827,7 @@ export function ValidadorSKUPage() {
                         ? 'border-b border-yellow-100 bg-yellow-50/40 hover:bg-yellow-50/70 transition-colors'
                         : 'border-b border-gray-50 hover:bg-gray-50/50 transition-colors'
                       return (
-                      <tr key={r.sku} className={rowClass}>
+                      <tr key={r.sku} id={`sku-row-${r.sku}`} className={rowClass}>
                         <td className="px-4 py-3 font-mono text-xs font-semibold text-gray-800">{r.sku}</td>
                         <td className="px-4 py-3 text-right text-gray-600">{r.required}</td>
                         <td className={`px-4 py-3 text-right font-semibold ${
