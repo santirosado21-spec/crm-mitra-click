@@ -13,6 +13,7 @@ const TOOL_RESULTS: Result[] = [
   { type: 'tool', label: 'Cartas de instrucción',     sub: 'WMS · SAC',        to: '/sac/carta-instruccion' },
   { type: 'tool', label: 'Generador de RC',           sub: 'WMS · Facturación', to: '/rc' },
   { type: 'tool', label: 'Generador de Proformas',    sub: 'WMS · Facturación', to: '/proformas' },
+  { type: 'tool', label: 'Billing Seko 365',          sub: 'WMS · Facturación', to: '/seko-billing' },
   { type: 'tool', label: 'Tarifarios',                sub: 'Catálogos',         to: '/tarifarios' },
   { type: 'tool', label: 'Servicios Adicionales',     sub: 'Catálogos',         to: '/servicios' },
   { type: 'tool', label: 'Clientes',                  sub: 'Directorio',        to: '/clients' },

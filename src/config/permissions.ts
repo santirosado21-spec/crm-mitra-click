@@ -88,6 +88,7 @@ export function moduleFromPath(path: string): AppModule | null {
     path === '/proformas' ||
     path === '/tarifarios' ||
     path === '/servicios' ||
+    path === '/seko-billing' ||
     path.startsWith('/clients')
   ) return 'wms'
   return null

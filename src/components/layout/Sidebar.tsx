@@ -21,6 +21,7 @@ const WMS_LINKS: Link[] = [
   { to: '/sac/receipt-generator',  label: 'Generador Receipt',    icon: FileInput },
   { to: '/sac/carta-instruccion', label: 'Carta Instrucción', icon: FileText },
   { to: '/sac/guias-paqueteria',   label: 'Guías paquetería',     icon: Package },
+  { to: '/seko-billing',           label: 'Billing Seko 365',     icon: Receipt },
   { to: '/rc',                     label: 'Rendición RC',         icon: FileCheck },
   { to: '/proformas',              label: 'Proformas',            icon: FileText },
   { to: '/wms/cfdi-generator',     label: 'Generador CFDI',       icon: FileCode },
@@ -55,6 +56,7 @@ const TASKS_ADMIN_LINKS: Link[] = [
   { to: '/admin/executive-report',        label: 'Reporte ejecutivo',   icon: FileSpreadsheet },
   { to: '/tasks/admin/audit-log',         label: 'Auditoría',           icon: History },
   { to: '/tasks/admin/extensiv-billing',  label: 'Extensiv Billing',    icon: Receipt },
+  { to: '/tasks/admin/seko-billing',      label: 'Billing Seko 365',    icon: FileSpreadsheet },
 ]
 
 type ModuleKey = 'home' | 'wms' | 'tms' | 'almacen' | 'tasks'
@@ -93,10 +95,10 @@ export function Sidebar() {
   const isAdmin    = user?.role === 'admin'
   const isCobranza = user?.role === 'cobranza'
   // En el módulo tasks, mostramos sección admin a admin (todos los links)
-  // o a cobranza (solo Extensiv Billing).
+  // o a cobranza (solo billing).
   const showAdminTasks = currentModule === 'tasks' && (isAdmin || isCobranza)
   const visibleAdminLinks = TASKS_ADMIN_LINKS.filter(l =>
-    isAdmin || l.to === '/tasks/admin/extensiv-billing'
+    isAdmin || l.to === '/tasks/admin/extensiv-billing' || l.to === '/tasks/admin/seko-billing'
   )
 
   return (

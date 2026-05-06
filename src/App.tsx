@@ -39,6 +39,7 @@ import { Reports } from './pages/tasks/admin/Reports'
 import { ExtensivBilling } from './pages/tasks/admin/ExtensivBilling'
 import { AuditLog } from './pages/tasks/admin/AuditLog'
 import { ExecutiveReportPage } from './pages/admin/ExecutiveReportPage'
+import { SekoBillingPage } from './pages/admin/SekoBillingPage'
 import { WelcomeTour } from './components/features/WelcomeTour'
 import { ALMACEN_ROLES, TASK_ROLES, TMS_ROLES, WMS_ROLES } from './config/permissions'
 
@@ -136,6 +137,9 @@ function App() {
           <Route path="/sac/guias-paqueteria" element={
             <ProtectedRoute allowedRoles={WMS_ROLES}><GuiasPaqueteriaPage /></ProtectedRoute>
           } />
+          <Route path="/seko-billing" element={
+            <ProtectedRoute allowedRoles={WMS_ROLES}><SekoBillingPage /></ProtectedRoute>
+          } />
 
           {/* Task Tracker */}
           <Route path="/tasks" element={
@@ -158,6 +162,9 @@ function App() {
           } />
           <Route path="/tasks/admin/extensiv-billing" element={
             <ProtectedRoute allowedRoles={['admin', 'cobranza']}><ExtensivBilling /></ProtectedRoute>
+          } />
+          <Route path="/tasks/admin/seko-billing" element={
+            <ProtectedRoute allowedRoles={WMS_ROLES}><SekoBillingPage /></ProtectedRoute>
           } />
           <Route path="/tasks/admin/audit-log" element={
             <ProtectedRoute allowedRoles={['admin']}><AuditLog /></ProtectedRoute>
