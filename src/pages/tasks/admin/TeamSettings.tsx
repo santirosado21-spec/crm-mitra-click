@@ -116,23 +116,33 @@ export function TeamSettings() {
     } finally { setSavingEmail(null) }
   }
 
+  const patchRowLocal = (email: string, patch: Partial<TeamRow>) => {
+    setRows(prev => prev.map(r => r.email === email ? { ...r, ...patch } : r))
+  }
+
   const updateName = async (row: TeamRow, name: string) => {
+    const newName = name.trim() || null
+    const prevName = row.name
+    patchRowLocal(row.email, { name: newName })             // optimista
     setSavingEmail(row.email)
     try {
       const { error: err } = await supabase.from('team_members').upsert({
         user_email: row.email,
-        user_name: name.trim() || null,
+        user_name: newName,
         role: row.role,
         active: row.active,
       })
       if (err) throw err
-      await reload()
     } catch (e) {
+      patchRowLocal(row.email, { name: prevName })           // revertir
       toast.error('No se pudo actualizar el nombre', e instanceof Error ? e.message : 'Error desconocido')
     } finally { setSavingEmail(null) }
   }
 
   const updateRole = async (row: TeamRow, role: Role) => {
+    if (role === row.role) return
+    const prevRole = row.role
+    patchRowLocal(row.email, { role })                       // optimista — el <select> queda en el nuevo valor
     setSavingEmail(row.email)
     try {
       const { error: err } = await supabase.from('team_members').upsert({
@@ -143,28 +153,30 @@ export function TeamSettings() {
       })
       if (err) throw err
       toast.success('Rol actualizado', `${row.email} → ${ROLE_LABEL[role]}`)
-      await reload()
     } catch (e) {
+      patchRowLocal(row.email, { role: prevRole })           // revertir → el <select> vuelve solo
       const msg = e instanceof Error ? e.message : 'Error desconocido'
       const hint = /check.*role|violates.*check/i.test(msg)
-        ? 'El rol no está permitido por el CHECK constraint en team_members. Aplica supabase_migration_role_transporte.sql en Supabase.'
+        ? 'El CHECK constraint de team_members aún no acepta "transporte". Corre supabase_migration_role_transporte.sql en Supabase.'
         : msg
       toast.error('No se pudo cambiar el rol', hint)
     } finally { setSavingEmail(null) }
   }
 
   const toggleActive = async (row: TeamRow) => {
+    const newActive = !row.active
+    patchRowLocal(row.email, { active: newActive })          // optimista
     setSavingEmail(row.email)
     try {
       const { error: err } = await supabase.from('team_members').upsert({
         user_email: row.email,
         user_name: row.name,
         role: row.role,
-        active: !row.active,
+        active: newActive,
       })
       if (err) throw err
-      await reload()
     } catch (e) {
+      patchRowLocal(row.email, { active: !newActive })       // revertir
       toast.error('No se pudo cambiar el estado', e instanceof Error ? e.message : 'Error desconocido')
     } finally { setSavingEmail(null) }
   }
