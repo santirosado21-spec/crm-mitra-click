@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { FileText, Printer, RotateCcw, Plus, Trash2, AlertTriangle } from 'lucide-react'
+import { Printer, RotateCcw, Plus, Trash2, AlertTriangle } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { useClientCatalog } from '../../hooks/useClientCatalog'
@@ -25,10 +25,6 @@ const emptyMercancia: Mercancia = {
   empaque: '',
   peso: '',
   valor: '',
-}
-
-function joinAddress(parts: string[]) {
-  return parts.map(p => p.trim()).filter(Boolean).join(', ')
 }
 
 export function CartaInstruccionPage() {
@@ -156,7 +152,7 @@ export function CartaInstruccionPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Field label="Folio"><input className={inputCls} value={folio} onChange={e => setFolio(e.target.value)} /></Field>
                 <Field label="Fecha"><input type="date" className={inputCls} value={fecha} onChange={e => setFecha(e.target.value)} /></Field>
                 <Field label="Cliente">
@@ -170,19 +166,19 @@ export function CartaInstruccionPage() {
                 <Field label="Tipo de servicio"><input className={inputCls} value={tipoServicio} onChange={e => setTipoServicio(e.target.value)} /></Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Field label="Origen"><input className={inputCls} value={origen} onChange={e => setOrigen(e.target.value)} /></Field>
                 <Field label="Destino"><input className={inputCls} value={destino} onChange={e => setDestino(e.target.value)} /></Field>
                 <Field label="Domicilio origen"><textarea className={areaCls} value={origenDir} onChange={e => setOrigenDir(e.target.value)} /></Field>
                 <Field label="Domicilio destino"><textarea className={areaCls} value={destinoDir} onChange={e => setDestinoDir(e.target.value)} /></Field>
                 <Field label="Fecha/hora carga">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input type="date" className={inputCls} value={fechaCarga} onChange={e => setFechaCarga(e.target.value)} />
                     <input type="time" className={inputCls} value={horaCarga} onChange={e => setHoraCarga(e.target.value)} />
                   </div>
                 </Field>
                 <Field label="Fecha/hora entrega">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input type="date" className={inputCls} value={fechaEntrega} onChange={e => setFechaEntrega(e.target.value)} />
                     <input type="time" className={inputCls} value={horaEntrega} onChange={e => setHoraEntrega(e.target.value)} />
                   </div>
@@ -191,11 +187,12 @@ export function CartaInstruccionPage() {
                 <Field label="Contacto entrega"><input className={inputCls} value={contactoEntrega} onChange={e => setContactoEntrega(e.target.value)} /></Field>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Field label="Unidad requerida"><input className={inputCls} value={unidad} onChange={e => setUnidad(e.target.value)} placeholder="Van, rabón, caja seca..." /></Field>
                 <Field label="Operador asignado"><input className={inputCls} value={operador} onChange={e => setOperador(e.target.value)} /></Field>
                 <Field label="Placas"><input className={inputCls} value={placas} onChange={e => setPlacas(e.target.value)} /></Field>
                 <Field label="Maniobra"><select className={inputCls} value={maniobras} onChange={e => setManiobras(e.target.value)}><option>No</option><option>Sí</option></select></Field>
+                <Field label="Sellos"><input className={inputCls} value={sellos} onChange={e => setSellos(e.target.value)} /></Field>
               </div>
 
               <Field label="Documentos requeridos"><textarea className={areaCls} value={documentos} onChange={e => setDocumentos(e.target.value)} /></Field>
@@ -220,7 +217,7 @@ export function CartaInstruccionPage() {
                           <button onClick={() => setMercancias(prev => prev.filter((_, i) => i !== idx))} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
                         )}
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <input className={inputCls} placeholder="Descripción" value={m.descripcion} onChange={e => updateMercancia(idx, 'descripcion', e.target.value)} />
                         <input className={inputCls} placeholder="SKU / Parte" value={m.sku} onChange={e => updateMercancia(idx, 'sku', e.target.value)} />
                         <input className={inputCls} placeholder="Cantidad" value={m.cantidad} onChange={e => updateMercancia(idx, 'cantidad', e.target.value)} />

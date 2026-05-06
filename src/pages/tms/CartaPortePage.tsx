@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, FileCheck2, Plus, Printer, RotateCcw, Trash2 } from 'lucide-react'
+import { AlertTriangle, Plus, Printer, RotateCcw, Trash2 } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { useClientCatalog } from '../../hooks/useClientCatalog'
@@ -213,7 +213,7 @@ export function CartaPortePage() {
               )}
 
               <Block title="CFDI y receptor">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Field label="Folio interno"><input className={inputCls} value={folio} onChange={e => setFolio(e.target.value)} /></Field>
                   <Field label="Fecha"><input type="date" className={inputCls} value={fecha} onChange={e => setFecha(e.target.value)} /></Field>
                   <Field label="Tipo CFDI"><select className={inputCls} value={tipoCfdi} onChange={e => setTipoCfdi(e.target.value)}><option>Ingreso</option><option>Traslado</option></select></Field>
@@ -231,7 +231,7 @@ export function CartaPortePage() {
               </Block>
 
               <Block title="Complemento Carta Porte">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Field label="Transp. internacional"><select className={inputCls} value={transpInternac} onChange={e => setTranspInternac(e.target.value)}><option>No</option><option>Sí</option></select></Field>
                   <Field label="Total distancia recorrida km"><input className={inputCls} value={totalDist} onChange={e => setTotalDist(e.target.value)} /></Field>
                   <Field label="Logística inversa"><select className={inputCls} value={logisticaInversa} onChange={e => setLogisticaInversa(e.target.value)}><option>No</option><option>Sí</option></select></Field>
@@ -239,7 +239,7 @@ export function CartaPortePage() {
               </Block>
 
               <Block title="Ubicaciones">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Field label="RFC origen"><input className={inputCls} value={origenRfc} onChange={e => setOrigenRfc(e.target.value.toUpperCase())} /></Field>
                   <Field label="Nombre origen"><input className={inputCls} value={origenNombre} onChange={e => setOrigenNombre(e.target.value)} /></Field>
                   <Field label="Salida origen"><input type="datetime-local" className={inputCls} value={origenFechaHora} onChange={e => setOrigenFechaHora(e.target.value)} /></Field>
@@ -252,7 +252,7 @@ export function CartaPortePage() {
               </Block>
 
               <Block title="Autotransporte y figura">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Field label="Vehículo">
                     <select className={inputCls} onChange={e => handleVehicle(e.target.value)} defaultValue="">
                       <option value="">Seleccionar...</option>
@@ -298,7 +298,7 @@ export function CartaPortePage() {
                         <span className="text-xs font-bold text-gray-500">Mercancía {idx + 1}</span>
                         {mercancias.length > 1 && <button onClick={() => setMercancias(prev => prev.filter((_, i) => i !== idx))} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>}
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <input className={inputCls} placeholder="Clave SAT bienes" value={m.bienesTransp} onChange={e => updateMercancia(idx, 'bienesTransp', e.target.value)} />
                         <input className={inputCls} placeholder="Descripción" value={m.descripcion} onChange={e => updateMercancia(idx, 'descripcion', e.target.value)} />
                         <input className={inputCls} placeholder="Cantidad" value={m.cantidad} onChange={e => updateMercancia(idx, 'cantidad', e.target.value)} />
