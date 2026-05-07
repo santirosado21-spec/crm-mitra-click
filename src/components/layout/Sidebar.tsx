@@ -1,4 +1,4 @@
-import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet, Package } from 'lucide-react'
+import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet, Package, MapPin } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
@@ -42,6 +42,8 @@ const TMS_LINKS: Link[] = [
 
 const PARCEL_LINKS: Link[] = [
   { to: '/tms/guias-paqueteria', label: 'Guías paquetería',    icon: Package },
+  { to: '/tms/parcel-map',       label: 'Mapa de tracking',    icon: MapPin },
+  { to: '/tms/parcel-dashboard', label: 'Dashboard paquetes',  icon: LayoutDashboard },
   { to: '/tms/carriers',         label: 'Configurar carriers', icon: UserCog },
   { to: '/tms/carriers/reglas',  label: 'Reglas de routing',   icon: FileSpreadsheet },
 ]
@@ -74,6 +76,8 @@ function detectModule(pathname: string): ModuleKey {
   // TMS de Paqueterías es módulo separado aunque vive bajo /tms/* por ahora.
   if (pathname === '/tms/guias-paqueteria' ||
       pathname.startsWith('/tms/guias-paqueteria/') ||
+      pathname === '/tms/parcel-map' ||
+      pathname === '/tms/parcel-dashboard' ||
       pathname === '/tms/carriers' ||
       pathname.startsWith('/tms/carriers/'))                                     return 'parcel'
   if (pathname.startsWith('/tms') || pathname === '/cotizador' || pathname === '/tramites')

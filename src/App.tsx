@@ -32,6 +32,8 @@ import { CartaPortePage } from './pages/tms/CartaPortePage'
 import { CartasRecibidasPage } from './pages/tms/CartasRecibidasPage'
 import { CarriersConfigPage } from './pages/tms/CarriersConfigPage'
 import { ShippingRulesPage } from './pages/tms/ShippingRulesPage'
+import { ParcelTrackingMapPage } from './pages/tms/ParcelTrackingMapPage'
+import { ParcelDashboardPage } from './pages/tms/ParcelDashboardPage'
 import { TaskInbox } from './pages/tasks/TaskInbox'
 import { TaskCalendar } from './pages/tasks/TaskCalendar'
 import { TaskCreate } from './pages/tasks/TaskCreate'
@@ -142,6 +144,12 @@ function App() {
           } />
           <Route path="/tms/guias-paqueteria" element={
             <ProtectedRoute allowedRoles={PARCEL_ROLES}><GuiasPaqueteriaPage /></ProtectedRoute>
+          } />
+          <Route path="/tms/parcel-map" element={
+            <ProtectedRoute allowedRoles={PARCEL_ROLES}><ParcelTrackingMapPage /></ProtectedRoute>
+          } />
+          <Route path="/tms/parcel-dashboard" element={
+            <ProtectedRoute allowedRoles={PARCEL_ROLES}><ParcelDashboardPage /></ProtectedRoute>
           } />
           <Route path="/tms/carriers" element={
             <ProtectedRoute allowedRoles={['admin']}><CarriersConfigPage /></ProtectedRoute>

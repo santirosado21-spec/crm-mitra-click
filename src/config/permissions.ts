@@ -99,6 +99,8 @@ export function moduleFromPath(path: string): AppModule | null {
     path.startsWith('/parcel') ||
     path === '/tms/guias-paqueteria' ||
     path.startsWith('/tms/guias-paqueteria/') ||
+    path === '/tms/parcel-map' ||
+    path === '/tms/parcel-dashboard' ||
     path === '/tms/carriers' ||
     path.startsWith('/tms/carriers/')
   ) return 'parcel'
@@ -121,6 +123,8 @@ export function moduleFromPath(path: string): AppModule | null {
 // SAC también necesita entrar.
 const PATH_ROLE_OVERRIDES: { prefix: string; roles: UserRole[] }[] = [
   { prefix: '/tms/guias-paqueteria', roles: PARCEL_ROLES },
+  { prefix: '/tms/parcel-map',       roles: PARCEL_ROLES },
+  { prefix: '/tms/parcel-dashboard', roles: PARCEL_ROLES },
   // /tms/carriers (config de credenciales) y /tms/carriers/reglas (routing)
   // son admin-only — credenciales sensibles + reglas que afectan a todos.
   { prefix: '/tms/carriers',         roles: ['admin'] },
