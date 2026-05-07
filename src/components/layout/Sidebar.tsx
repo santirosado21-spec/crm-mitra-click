@@ -20,7 +20,6 @@ const WMS_LINKS: Link[] = [
   { to: '/sac/validador',          label: 'Validador SKU',        icon: ScanBarcode },
   { to: '/sac/receipt-generator',  label: 'Generador Receipt',    icon: FileInput },
   { to: '/sac/carta-instruccion', label: 'Carta Instrucción', icon: FileText },
-  { to: '/sac/guias-paqueteria',   label: 'Guías paquetería',     icon: Package },
   { to: '/seko-billing',           label: 'Billing Seko 365',     icon: Receipt },
   { to: '/rc',                     label: 'Rendición RC',         icon: FileCheck },
   { to: '/proformas',              label: 'Proformas',            icon: FileText },
@@ -37,6 +36,7 @@ const TMS_LINKS: Link[] = [
   { to: '/tms/costos',     label: 'Costos',               icon: PieChart },
   { to: '/cotizador',      label: 'Cotizador',            icon: Calculator },
   { to: '/tms/cartas-recibidas', label: 'Cartas recibidas', icon: Inbox },
+  { to: '/tms/guias-paqueteria', label: 'Guías paquetería', icon: Package },
   { to: '/tms/carta-porte', label: 'Carta Porte', icon: FileCheck },
   { to: '/tramites',       label: 'Trámites',             icon: CalendarClock },
 ]

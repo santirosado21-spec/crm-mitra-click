@@ -1,8 +1,29 @@
-// Tipos para módulo SAC · Guías de paquetería
+// Tipos para módulo TMS · Guías de paquetería
 
 export type Paqueteria = 'estafeta' | 'ups' | 'fedex' | 'dhl' | 'castores'
 export type GuiaOrigen = 'extensiv' | 'manual'
 export type GuiaExtensivType = 'order' | 'receipt'
+
+export type CarrierProvider =
+  | 'manual' | 'easypost' | 'skydropx'
+  | 'direct_dhl' | 'direct_ups' | 'direct_fedex' | 'direct_estafeta'
+
+export type LabelFormat = 'pdf' | 'zpl'
+
+export type TrackingStatus =
+  | 'cotizado' | 'comprado' | 'en_transito' | 'entregado' | 'excepcion' | 'devuelto'
+
+/** Cotización snapshot guardada en rate_quotes JSONB para auditoría. */
+export interface RateQuote {
+  carrier:         Paqueteria | string
+  service:         string
+  price_mxn:       number
+  delivery_days:   number
+  is_local:        boolean
+  provider:        CarrierProvider
+  provider_rate_id: string
+  raw?:            unknown
+}
 
 export interface GuiaPaqueteria {
   id:                          string
@@ -23,6 +44,32 @@ export interface GuiaPaqueteria {
   creado_por:                  string | null
   created_at:                  string
   updated_at:                  string
+
+  // ── Campos TMS de paqueterías (rate shopping + auto-pick) ──
+  from_postal_code?:    string | null
+  to_postal_code?:      string | null
+  to_country?:          string | null      // 'MX' por default
+  weight_kg?:           number | null
+  length_cm?:           number | null
+  width_cm?:            number | null
+  height_cm?:           number | null
+  is_local?:            boolean | null
+
+  rate_quotes?:         RateQuote[]        // snapshot al momento del auto-pick
+  auto_pick_carrier?:   string | null
+  auto_pick_service?:   string | null
+  auto_pick_score?:     number | null
+  auto_pick_reasoning?: string | null
+
+  override_reason?:     string | null      // NULL si SAC aceptó el auto-pick
+  override_by?:         string | null
+
+  label_url?:           string | null
+  label_format?:        LabelFormat | null
+  provider?:            CarrierProvider | null
+  provider_shipment_id?: string | null
+  provider_rate_id?:    string | null
+  tracking_status?:     TrackingStatus | null
 }
 
 export type CreateGuiaData = Omit<GuiaPaqueteria, 'id' | 'margen' | 'created_at' | 'updated_at'>

@@ -29,6 +29,9 @@ export const WMS_ROLES: UserRole[]     = ['admin', 'servicio_cliente', 'cobranza
 export const TMS_ROLES: UserRole[]     = ['admin', 'transporte']
 export const ALMACEN_ROLES: UserRole[] = ['admin', 'almacen', 'servicio_cliente']
 export const TASK_ROLES: UserRole[]    = ['admin', 'almacen', 'servicio_cliente', 'cobranza', 'transporte']
+// PARCEL_ROLES: el TMS de paquetería vive bajo /tms/* pero SAC también
+// genera y compra guías, así que lo dejamos accesible a transporte + SAC.
+export const PARCEL_ROLES: UserRole[]  = ['admin', 'transporte', 'servicio_cliente']
 
 export const MODULE_BRIEFS: Record<AppModule, { title: string; body: string; tips: string[] }> = {
   wms: {
@@ -94,7 +97,20 @@ export function moduleFromPath(path: string): AppModule | null {
   return null
 }
 
+// Overrides por path específico cuando la regla "rol ⊂ módulo" no aplica.
+// Útil para casos cross-módulo como Guías de paquetería: vive bajo /tms/* pero
+// SAC también necesita entrar.
+const PATH_ROLE_OVERRIDES: { prefix: string; roles: UserRole[] }[] = [
+  { prefix: '/tms/guias-paqueteria', roles: PARCEL_ROLES },
+  { prefix: '/tms/carriers',         roles: PARCEL_ROLES },
+]
+
 export function canAccessPath(role: UserRole | undefined, path: string) {
+  for (const { prefix, roles } of PATH_ROLE_OVERRIDES) {
+    if (path === prefix || path.startsWith(prefix + '/')) {
+      return Boolean(role && roles.includes(role))
+    }
+  }
   const module = moduleFromPath(path)
   return module ? canAccessModule(role, module) : true
 }

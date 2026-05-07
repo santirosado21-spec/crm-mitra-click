@@ -27,7 +27,7 @@ import { ServiciosPage } from './pages/servicios/ServiciosPage'
 import { ValidadorSKUPage } from './pages/sac/ValidadorSKUPage'
 import { ReceiptGeneratorPage } from './pages/sac/ReceiptGeneratorPage'
 import { CartaInstruccionPage } from './pages/sac/CartaInstruccionPage'
-import { GuiasPaqueteriaPage } from './pages/sac/GuiasPaqueteriaPage'
+import { GuiasPaqueteriaPage } from './pages/tms/GuiasPaqueteriaPage'
 import { CartaPortePage } from './pages/tms/CartaPortePage'
 import { CartasRecibidasPage } from './pages/tms/CartasRecibidasPage'
 import { TaskInbox } from './pages/tasks/TaskInbox'
@@ -42,7 +42,7 @@ import { AuditLog } from './pages/tasks/admin/AuditLog'
 import { ExecutiveReportPage } from './pages/admin/ExecutiveReportPage'
 import { SekoBillingPage } from './pages/admin/SekoBillingPage'
 import { WelcomeTour } from './components/features/WelcomeTour'
-import { ALMACEN_ROLES, TASK_ROLES, TMS_ROLES, WMS_ROLES } from './config/permissions'
+import { ALMACEN_ROLES, TASK_ROLES, TMS_ROLES, WMS_ROLES, PARCEL_ROLES } from './config/permissions'
 
 function App() {
   return (
@@ -138,9 +138,12 @@ function App() {
           <Route path="/sac/carta-instruccion" element={
             <ProtectedRoute allowedRoles={WMS_ROLES}><CartaInstruccionPage /></ProtectedRoute>
           } />
-          <Route path="/sac/guias-paqueteria" element={
-            <ProtectedRoute allowedRoles={WMS_ROLES}><GuiasPaqueteriaPage /></ProtectedRoute>
+          <Route path="/tms/guias-paqueteria" element={
+            <ProtectedRoute allowedRoles={PARCEL_ROLES}><GuiasPaqueteriaPage /></ProtectedRoute>
           } />
+          {/* Compat redirect: la ruta vieja /sac/guias-paqueteria sigue funcionando
+              mientras los bookmarks/links externos se actualizan. */}
+          <Route path="/sac/guias-paqueteria" element={<Navigate to="/tms/guias-paqueteria" replace />} />
           <Route path="/seko-billing" element={
             <ProtectedRoute allowedRoles={WMS_ROLES}><SekoBillingPage /></ProtectedRoute>
           } />
