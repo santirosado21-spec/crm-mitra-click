@@ -83,10 +83,16 @@ export function Header() {
         <TimerPill />
         <NotificationBell />
         <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600 font-medium">
-          <div className="w-7 h-7 rounded-full bg-[#1e3a5f] flex items-center justify-center shrink-0" aria-hidden="true">
-            <span className="text-white text-[10px] font-bold">
-              {(user?.name ?? 'U').charAt(0).toUpperCase()}
-            </span>
+          <div
+            className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden"
+            aria-hidden="true"
+          >
+            <img
+              src="/hd-logo.png"
+              alt=""
+              className="w-full h-full object-contain p-1"
+              style={{ mixBlendMode: 'multiply' }}
+            />
           </div>
           <span>{user?.name ?? 'Usuario'}</span>
         </div>

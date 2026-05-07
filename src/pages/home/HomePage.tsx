@@ -109,9 +109,12 @@ export function HomePage() {
                 <button
                   key={m.id}
                   onClick={m.onClick}
-                  className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 overflow-hidden h-full flex flex-col"
+                  className="group text-left rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 h-full flex flex-col p-0.5"
+                  style={{ background: m.color }}
                 >
-                  {/* Header strip */}
+                  {/* Marco coloreado externo (mismo patrón visual que el login) */}
+                  <div className="bg-white rounded-[calc(1rem-2px)] flex flex-col flex-1 overflow-hidden">
+                  {/* Header strip — refuerza el color del frame en el interior */}
                   <div
                     className="h-1.5 w-full shrink-0"
                     style={{ background: m.color }}
@@ -167,6 +170,7 @@ export function HomePage() {
                       <span>Entrar al módulo</span>
                       <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </div>
+                  </div>
                   </div>
                 </button>
               )

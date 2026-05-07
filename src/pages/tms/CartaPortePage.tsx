@@ -80,7 +80,7 @@ export function CartaPortePage() {
   const [operadorRfc, setOperadorRfc] = useState('')
   const [licencia, setLicencia] = useState('')
   const [operadorDomicilio, setOperadorDomicilio] = useState('')
-  const [observaciones, setObservaciones] = useState('Precaptura para revisión del contador y timbrado en CONTPAQi/PAC autorizado.')
+  const [observaciones, setObservaciones] = useState('Precaptura para revisión del contador y timbrado posterior por PAC autorizado.')
   const [mercancias, setMercancias] = useState<MercanciaCP[]>([{ ...emptyMercancia }])
 
   // Importadores
@@ -258,7 +258,7 @@ export function CartaPortePage() {
     setOperadorRfc('')
     setLicencia('')
     setOperadorDomicilio('')
-    setObservaciones('Precaptura para revisión del contador y timbrado en CONTPAQi/PAC autorizado.')
+    setObservaciones('Precaptura para revisión del contador y timbrado posterior por PAC autorizado.')
     setMercancias([{ ...emptyMercancia }])
   }
 
@@ -297,7 +297,7 @@ export function CartaPortePage() {
             <div>
               <h1 className="text-xl font-bold text-[#1e3a5f]">Precaptura Carta Porte</h1>
               <p className="text-xs text-gray-400 mt-0.5">
-                Formato base para revisión contable y captura/timbrado en CONTPAQi con CFDI 4.0 + Complemento Carta Porte 3.1.
+                Formato base para revisión contable y posterior timbrado vía PAC autorizado, con CFDI 4.0 + Complemento Carta Porte 3.1.
               </p>
             </div>
             <div className="flex gap-2">
@@ -333,14 +333,14 @@ export function CartaPortePage() {
 
           <div className="cp-no-print rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 mb-5 flex gap-2">
             <AlertTriangle size={15} className="shrink-0 mt-0.5" />
-            Este módulo no timbra CFDI ni reemplaza CONTPAQi. Genera una precaptura de campos para revisión del contador y posterior emisión fiscal.
+            Este módulo no timbra CFDI por sí mismo. Genera una precaptura de campos para revisión del contador y posterior emisión fiscal vía PAC autorizado.
           </div>
 
           <div className="cp-no-print grid grid-cols-1 xl:grid-cols-[0.95fr_1.05fr] gap-6 items-start">
             <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-5">
               {faltantes.length > 0 && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                  Faltan datos recomendados para CONTPAQi/SAT: {faltantes.join(', ')}.
+                  Faltan datos recomendados para SAT: {faltantes.join(', ')}.
                 </div>
               )}
 
@@ -547,7 +547,7 @@ function CartaPortePreview({ data }: { data: any }) {
       <div className="flex items-start justify-between border-b-2 border-[#1e3a5f] pb-4 mb-5">
         <div>
           <p className="text-2xl font-extrabold text-[#1e3a5f]">PRECAPTURA CARTA PORTE</p>
-          <p className="text-xs font-semibold text-gray-500 mt-1">CFDI 4.0 · Complemento Carta Porte 3.1 · Revisión CONTPAQi</p>
+          <p className="text-xs font-semibold text-gray-500 mt-1">CFDI 4.0 · Complemento Carta Porte 3.1 · Revisión contable</p>
         </div>
         <div className="text-right text-xs">
           <p><b>Folio:</b> {data.folio || '—'}</p>
@@ -557,7 +557,7 @@ function CartaPortePreview({ data }: { data: any }) {
       </div>
 
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-800 mb-5">
-        Documento preliminar. No es CFDI, no está timbrado y debe validarse contra catálogos SAT/CONTPAQi antes de emisión fiscal.
+        Documento preliminar. No es CFDI, no está timbrado y debe validarse contra catálogos SAT antes de emisión fiscal por PAC autorizado.
       </div>
 
       <Section title="Receptor y complemento">
@@ -625,11 +625,6 @@ function CartaPortePreview({ data }: { data: any }) {
         <p className="text-xs whitespace-pre-wrap">{data.observaciones || '—'}</p>
       </Section>
 
-      <div className="grid grid-cols-3 gap-8 mt-10 text-center text-xs">
-        {['Transportes', 'Contabilidad', 'Operador'].map(label => (
-          <div key={label}><div className="border-t border-gray-400 pt-2">{label}</div></div>
-        ))}
-      </div>
     </article>
   )
 }
