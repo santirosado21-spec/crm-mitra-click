@@ -170,6 +170,8 @@ export function ExecutiveReportPage() {
                 <KPI title="Costo guías"     value={mxn(kpis.costoGuias)}          color="#dc3545" />
                 <KPI title="Precio guías"    value={mxn(kpis.precioGuias)}         color="#28a745" />
                 <KPI title="Margen guías"    value={mxn(kpis.margenGuias)}         color="#7c3aed" />
+                <KPI title="Ahorro auto-pick" value={mxn(kpis.ahorroAutopick)}     color="#10b981" />
+                <KPI title="Overrides SAC"   value={String(kpis.numOverrides)}     color="#f59e0b" />
               </div>
 
               {/* Top clientes / proveedores */}

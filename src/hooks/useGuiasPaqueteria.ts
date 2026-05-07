@@ -16,11 +16,15 @@ export function useGuiasPaqueteria(filters?: GuiaFilters) {
         .order('fecha', { ascending: false })
         .order('created_at', { ascending: false })
 
-      if (filters?.clienteId)  q = q.eq('cliente_id', filters.clienteId)
-      if (filters?.paqueteria) q = q.eq('paqueteria', filters.paqueteria)
-      if (filters?.origen)     q = q.eq('origen',     filters.origen)
-      if (filters?.fechaDesde) q = q.gte('fecha', filters.fechaDesde)
-      if (filters?.fechaHasta) q = q.lte('fecha', filters.fechaHasta)
+      if (filters?.clienteId)      q = q.eq('cliente_id', filters.clienteId)
+      if (filters?.paqueteria)     q = q.eq('paqueteria', filters.paqueteria)
+      if (filters?.origen)         q = q.eq('origen',     filters.origen)
+      if (filters?.provider)       q = q.eq('provider',   filters.provider)
+      if (filters?.trackingStatus) q = q.eq('tracking_status', filters.trackingStatus)
+      if (filters?.isLocal === 'local') q = q.eq('is_local', true)
+      if (filters?.isLocal === 'intl')  q = q.eq('is_local', false)
+      if (filters?.fechaDesde)     q = q.gte('fecha', filters.fechaDesde)
+      if (filters?.fechaHasta)     q = q.lte('fecha', filters.fechaHasta)
       if (filters?.search) {
         const s = filters.search.replace(/[%_]/g, '\\$&')
         q = q.or(`tracking_number.ilike.%${s}%,manual_reference.ilike.%${s}%,cliente_codigo.ilike.%${s}%`)
@@ -34,7 +38,11 @@ export function useGuiasPaqueteria(filters?: GuiaFilters) {
     } finally {
       setLoading(false)
     }
-  }, [filters?.clienteId, filters?.paqueteria, filters?.origen, filters?.fechaDesde, filters?.fechaHasta, filters?.search])
+  }, [
+    filters?.clienteId, filters?.paqueteria, filters?.origen,
+    filters?.provider, filters?.trackingStatus, filters?.isLocal,
+    filters?.fechaDesde, filters?.fechaHasta, filters?.search,
+  ])
 
   useEffect(() => { fetchGuias() }, [fetchGuias])
 

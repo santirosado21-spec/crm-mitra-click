@@ -30,6 +30,8 @@ import { CartaInstruccionPage } from './pages/sac/CartaInstruccionPage'
 import { GuiasPaqueteriaPage } from './pages/tms/GuiasPaqueteriaPage'
 import { CartaPortePage } from './pages/tms/CartaPortePage'
 import { CartasRecibidasPage } from './pages/tms/CartasRecibidasPage'
+import { CarriersConfigPage } from './pages/tms/CarriersConfigPage'
+import { ShippingRulesPage } from './pages/tms/ShippingRulesPage'
 import { TaskInbox } from './pages/tasks/TaskInbox'
 import { TaskCalendar } from './pages/tasks/TaskCalendar'
 import { TaskCreate } from './pages/tasks/TaskCreate'
@@ -140,6 +142,12 @@ function App() {
           } />
           <Route path="/tms/guias-paqueteria" element={
             <ProtectedRoute allowedRoles={PARCEL_ROLES}><GuiasPaqueteriaPage /></ProtectedRoute>
+          } />
+          <Route path="/tms/carriers" element={
+            <ProtectedRoute allowedRoles={['admin']}><CarriersConfigPage /></ProtectedRoute>
+          } />
+          <Route path="/tms/carriers/reglas" element={
+            <ProtectedRoute allowedRoles={['admin']}><ShippingRulesPage /></ProtectedRoute>
           } />
           {/* Compat redirect: la ruta vieja /sac/guias-paqueteria sigue funcionando
               mientras los bookmarks/links externos se actualizan. */}

@@ -37,6 +37,8 @@ const TMS_LINKS: Link[] = [
   { to: '/cotizador',      label: 'Cotizador',            icon: Calculator },
   { to: '/tms/cartas-recibidas', label: 'Cartas recibidas', icon: Inbox },
   { to: '/tms/guias-paqueteria', label: 'Guías paquetería', icon: Package },
+  { to: '/tms/carriers',         label: 'Configurar carriers', icon: UserCog },
+  { to: '/tms/carriers/reglas',  label: 'Reglas de routing',   icon: FileSpreadsheet },
   { to: '/tms/carta-porte', label: 'Carta Porte', icon: FileCheck },
   { to: '/tramites',       label: 'Trámites',             icon: CalendarClock },
 ]

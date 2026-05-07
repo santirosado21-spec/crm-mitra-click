@@ -76,12 +76,15 @@ export type CreateGuiaData = Omit<GuiaPaqueteria, 'id' | 'margen' | 'created_at'
 export type UpdateGuiaData = Partial<CreateGuiaData>
 
 export interface GuiaFilters {
-  clienteId?:    string
-  paqueteria?:   Paqueteria | ''
-  origen?:       GuiaOrigen | ''
-  fechaDesde?:   string
-  fechaHasta?:   string
-  search?:       string                                            // tracking #, manual_reference o cliente
+  clienteId?:      string
+  paqueteria?:     Paqueteria | ''
+  origen?:         GuiaOrigen | ''
+  provider?:       CarrierProvider | ''
+  trackingStatus?: TrackingStatus | ''
+  isLocal?:        'local' | 'intl' | ''
+  fechaDesde?:     string
+  fechaHasta?:     string
+  search?:         string                                          // tracking #, manual_reference o cliente
 }
 
 export const PAQUETERIA_LABEL: Record<Paqueteria, string> = {

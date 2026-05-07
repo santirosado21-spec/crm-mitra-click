@@ -102,7 +102,9 @@ export function moduleFromPath(path: string): AppModule | null {
 // SAC también necesita entrar.
 const PATH_ROLE_OVERRIDES: { prefix: string; roles: UserRole[] }[] = [
   { prefix: '/tms/guias-paqueteria', roles: PARCEL_ROLES },
-  { prefix: '/tms/carriers',         roles: PARCEL_ROLES },
+  // /tms/carriers (config de credenciales) y /tms/carriers/reglas (routing)
+  // son admin-only — credenciales sensibles + reglas que afectan a todos.
+  { prefix: '/tms/carriers',         roles: ['admin'] },
 ]
 
 export function canAccessPath(role: UserRole | undefined, path: string) {

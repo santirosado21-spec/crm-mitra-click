@@ -46,6 +46,8 @@ export interface ExecutiveKPIs {
   costoGuias:       number
   precioGuias:      number
   margenGuias:      number
+  ahorroAutopick:   number
+  numOverrides:     number
   topClientes:      { cliente: string; ingreso: number; viajes: number }[]
   topProveedores:   { proveedor: string; costo: number; viajes: number }[]
 }
@@ -164,6 +166,25 @@ export function computeKPIs(data: ExecutiveData): ExecutiveKPIs {
   const precioGuias = guias.reduce((s, g) => s + Number(g.precio || 0), 0)
   const margenGuias = precioGuias - costoGuias
 
+  // Ahorro estimado por auto-pick: por cada guía con rate_quotes y auto_pick,
+  // calcular costo del 2º más barato menos costo elegido. Si SAC overrideó,
+  // el "ahorro" puede ser negativo (pagaron más que el auto-pick) y lo
+  // tratamos como cero para no inflar la métrica.
+  const ahorroAutopick = guias.reduce((sum, g) => {
+    const quotes = (g.rate_quotes ?? []) as { price_mxn?: number }[]
+    if (quotes.length < 2) return sum
+    const sorted = quotes.map(q => Number(q.price_mxn ?? 0)).filter(p => p > 0).sort((a, b) => a - b)
+    if (sorted.length < 2) return sum
+    const cheapest = sorted[0]
+    const second   = sorted[1]
+    const chosen   = Number(g.costo) || cheapest
+    // Si SAC eligió el más barato, ahorro = second - cheapest. Si overrideó,
+    // ahorro perdido (no se cuenta como positivo).
+    const saved = chosen <= cheapest ? Math.max(0, second - cheapest) : 0
+    return sum + saved
+  }, 0)
+  const numOverrides = guias.filter(g => g.override_reason && g.override_reason.trim()).length
+
   return {
     numViajes:        viajes.length,
     ingresoTotal,
@@ -180,6 +201,8 @@ export function computeKPIs(data: ExecutiveData): ExecutiveKPIs {
     costoGuias,
     precioGuias,
     margenGuias,
+    ahorroAutopick,
+    numOverrides,
     topClientes,
     topProveedores,
   }
@@ -213,11 +236,13 @@ export function buildExecutiveWorkbook(data: ExecutiveData): XLSX.WorkBook {
     ['Aceptaciones (audit)',         k.numAceptaciones],
     ['Rechazos (audit)',             k.numRechazos],
     [],
-    ['KPIs DE GUÍAS PAQUETERÍA (SAC)'],
+    ['KPIs DE GUÍAS PAQUETERÍA (TMS)'],
     ['Guías emitidas',               k.numGuias],
     ['Costo total guías',            mxn(k.costoGuias)],
     ['Precio total guías',           mxn(k.precioGuias)],
     ['Margen guías',                 mxn(k.margenGuias)],
+    ['Ahorro por auto-pick',         mxn(k.ahorroAutopick)],
+    ['Overrides SAC (carrier ≠ recomendado)', k.numOverrides],
     [],
     ['TOP 3 CLIENTES POR INGRESO'],
     ['Cliente', 'Ingreso', 'Viajes'],
@@ -351,26 +376,53 @@ export function buildExecutiveWorkbook(data: ExecutiveData): XLSX.WorkBook {
 
   // ── Hoja 6: Guías paquetería ───────────────────────────────────────────────
   const guiasHeader = [
-    'Fecha', 'Paquetería', 'Tracking', 'Cliente', 'Costo', 'Precio', 'Margen', 'Origen', 'Referencia', 'Notas',
+    'Fecha', 'Paquetería', 'Tracking', 'Cliente',
+    'CP origen', 'CP destino', 'Peso (kg)', 'Provider', 'Status',
+    'Auto-pick carrier', 'Auto-pick servicio',
+    'Costo', 'Precio', 'Margen',
+    'Ahorro vs 2°', 'Override', 'Motivo override',
+    'Origen ref', 'Referencia', 'Notas',
   ]
-  const guiasRows = data.guias.map(g => [
-    g.fecha,
-    PAQUETERIA_LABEL[g.paqueteria] ?? g.paqueteria,
-    g.tracking_number,
-    g.cliente_codigo ?? '',
-    Number(g.costo),
-    Number(g.precio),
-    Number(g.margen),
-    g.origen === 'extensiv' ? 'Extensiv' : 'Manual',
-    g.origen === 'extensiv'
-      ? `${g.extensiv_transaction_type}:${g.extensiv_transaction_id ?? ''}`
-      : (g.manual_reference ?? ''),
-    g.notas ?? '',
-  ])
+  const guiasRows = data.guias.map(g => {
+    const quotes = (g.rate_quotes ?? []) as { price_mxn?: number }[]
+    const sortedPrices = quotes.map(q => Number(q.price_mxn ?? 0)).filter(p => p > 0).sort((a, b) => a - b)
+    const cheapest = sortedPrices[0] ?? Number(g.costo) ?? 0
+    const second   = sortedPrices[1] ?? cheapest
+    const chosen   = Number(g.costo) || cheapest
+    const ahorro   = chosen <= cheapest ? Math.max(0, second - cheapest) : 0
+    return [
+      g.fecha,
+      PAQUETERIA_LABEL[g.paqueteria] ?? g.paqueteria,
+      g.tracking_number,
+      g.cliente_codigo ?? '',
+      g.from_postal_code ?? '',
+      g.to_postal_code ?? '',
+      g.weight_kg ?? '',
+      g.provider ?? '',
+      g.tracking_status ?? '',
+      g.auto_pick_carrier ?? '',
+      g.auto_pick_service ?? '',
+      Number(g.costo),
+      Number(g.precio),
+      Number(g.margen),
+      ahorro,
+      g.override_reason ? 'Sí' : 'No',
+      g.override_reason ?? '',
+      g.origen === 'extensiv' ? 'Extensiv' : 'Manual',
+      g.origen === 'extensiv'
+        ? `${g.extensiv_transaction_type}:${g.extensiv_transaction_id ?? ''}`
+        : (g.manual_reference ?? ''),
+      g.notas ?? '',
+    ]
+  })
   const wsGuias = XLSX.utils.aoa_to_sheet([guiasHeader, ...guiasRows])
   wsGuias['!cols'] = [
-    { wch: 12 }, { wch: 12 }, { wch: 22 }, { wch: 16 }, { wch: 12 }, { wch: 12 },
-    { wch: 12 }, { wch: 10 }, { wch: 28 }, { wch: 28 },
+    { wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 16 },
+    { wch: 9 },  { wch: 9 },  { wch: 9 },  { wch: 11 }, { wch: 11 },
+    { wch: 14 }, { wch: 18 },
+    { wch: 11 }, { wch: 11 }, { wch: 11 },
+    { wch: 11 }, { wch: 9 },  { wch: 28 },
+    { wch: 11 }, { wch: 24 }, { wch: 24 },
   ]
   XLSX.utils.book_append_sheet(wb, wsGuias, 'Guías paquetería')
 

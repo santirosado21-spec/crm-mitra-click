@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Package, Plus, Search, X, Download, Trash2, AlertCircle, DollarSign, TrendingUp,
+  Package, Plus, Search, X, Download, Trash2, AlertCircle, DollarSign, TrendingUp, Sparkles,
 } from 'lucide-react'
+import { CotizarShipmentModal } from './CotizarShipmentModal'
 import * as XLSX from 'xlsx'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
@@ -15,7 +16,25 @@ import type { ExtensivPickResult } from '../../lib/extensiv'
 import {
   PAQUETERIA_LABEL, PAQUETERIA_COLOR,
   type Paqueteria, type GuiaOrigen, type GuiaFilters, type GuiaPaqueteria, type CreateGuiaData,
+  type CarrierProvider, type TrackingStatus,
 } from '../../types/guias'
+
+const STATUS_LABEL: Record<TrackingStatus, string> = {
+  cotizado:    'Cotizado',
+  comprado:    'Comprado',
+  en_transito: 'En tránsito',
+  entregado:   'Entregado',
+  excepcion:   'Excepción',
+  devuelto:    'Devuelto',
+}
+const STATUS_COLOR: Record<TrackingStatus, string> = {
+  cotizado:    '#94a3b8',
+  comprado:    '#1e3a5f',
+  en_transito: '#0ea5e9',
+  entregado:   '#28a745',
+  excepcion:   '#dc3545',
+  devuelto:    '#f59e0b',
+}
 
 const PAQUETERIAS: Paqueteria[] = ['estafeta', 'ups', 'fedex', 'dhl', 'castores']
 const fmtMXN = (n: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n)
@@ -37,6 +56,7 @@ export function GuiasPaqueteriaPage() {
   const { guias, loading, error, kpis, create, remove } = useGuiasPaqueteria(filters)
 
   const [showForm, setShowForm] = useState(false)
+  const [showCotizar, setShowCotizar] = useState(false)
 
   const clienteById = useMemo(() => {
     const m = new Map<string, { codigo: string; nombre: string; extensiv_customer_id?: number | null }>()
@@ -107,10 +127,19 @@ export function GuiasPaqueteriaPage() {
               <button
                 type="button"
                 onClick={() => setShowForm(true)}
+                className="h-10 px-3 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 inline-flex items-center gap-1.5 hover:bg-gray-50"
+                title="Captura una guía generada fuera del sistema (manual)"
+              >
+                <Plus size={14} /> Captura manual
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCotizar(true)}
                 className="h-10 px-4 rounded-xl text-sm font-bold text-white inline-flex items-center gap-2 shadow-sm"
                 style={{ background: 'var(--brand-navy)' }}
+                title="Cotiza con todas las paqueterías y compra la mejor opción"
               >
-                <Plus size={16} /> Nueva guía
+                <Sparkles size={16} /> Cotizar y comprar
               </button>
             </div>
           </div>
@@ -124,7 +153,7 @@ export function GuiasPaqueteriaPage() {
           </div>
 
           {/* Filtros */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 mb-4 grid grid-cols-1 sm:grid-cols-5 gap-2">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 mb-4 grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-8 gap-2">
             <div className="relative">
               <Search size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
               <input
@@ -160,7 +189,43 @@ export function GuiasPaqueteriaPage() {
               <option value="extensiv">Extensiv</option>
               <option value="manual">Manual (Seko / PT)</option>
             </select>
-            <div className="flex gap-1.5 items-center">
+            <select
+              value={filters.provider ?? ''}
+              onChange={e => setFilters(f => ({ ...f, provider: (e.target.value || undefined) as CarrierProvider | undefined }))}
+              className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:border-[#1e3a5f] outline-none"
+            >
+              <option value="">Todos los providers</option>
+              <option value="manual">Manual / Mock</option>
+              <option value="easypost">EasyPost</option>
+              <option value="skydropx">Skydropx</option>
+              <option value="direct_dhl">DHL directo</option>
+              <option value="direct_ups">UPS directo</option>
+              <option value="direct_fedex">FedEx directo</option>
+              <option value="direct_estafeta">Estafeta directo</option>
+            </select>
+            <select
+              value={filters.trackingStatus ?? ''}
+              onChange={e => setFilters(f => ({ ...f, trackingStatus: (e.target.value || undefined) as TrackingStatus | undefined }))}
+              className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:border-[#1e3a5f] outline-none"
+            >
+              <option value="">Todos los estados</option>
+              <option value="cotizado">Cotizado</option>
+              <option value="comprado">Comprado</option>
+              <option value="en_transito">En tránsito</option>
+              <option value="entregado">Entregado</option>
+              <option value="excepcion">Excepción</option>
+              <option value="devuelto">Devuelto</option>
+            </select>
+            <select
+              value={filters.isLocal ?? ''}
+              onChange={e => setFilters(f => ({ ...f, isLocal: (e.target.value || undefined) as 'local' | 'intl' | undefined }))}
+              className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:border-[#1e3a5f] outline-none"
+            >
+              <option value="">Local + intl</option>
+              <option value="local">Solo locales (MX)</option>
+              <option value="intl">Solo internacionales</option>
+            </select>
+            <div className="flex gap-1.5 items-center sm:col-span-2 lg:col-span-2">
               <input
                 type="date"
                 value={filters.fechaDesde ?? ''}
@@ -211,6 +276,8 @@ export function GuiasPaqueteriaPage() {
                       <th className="px-4 py-3">Paquetería</th>
                       <th className="px-4 py-3">Tracking</th>
                       <th className="px-4 py-3">Cliente</th>
+                      <th className="px-4 py-3">Ruta</th>
+                      <th className="px-4 py-3">Status</th>
                       <th className="px-4 py-3 text-right">Costo</th>
                       <th className="px-4 py-3 text-right">Precio</th>
                       <th className="px-4 py-3 text-right">Margen</th>
@@ -231,7 +298,37 @@ export function GuiasPaqueteriaPage() {
                           </span>
                         </td>
                         <td className="px-4 py-2.5 font-mono text-[12px] text-gray-700">{g.tracking_number}</td>
-                        <td className="px-4 py-2.5 text-gray-700">{clienteById.get(g.cliente_id)?.nombre ?? g.cliente_codigo ?? '—'}</td>
+                        <td className="px-4 py-2.5 text-gray-700">
+                          <div className="truncate">{clienteById.get(g.cliente_id)?.nombre ?? g.cliente_codigo ?? '—'}</div>
+                          {g.auto_pick_carrier && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 mt-0.5 rounded bg-emerald-50 text-emerald-700 text-[9px] font-bold uppercase tracking-wide">
+                              auto-pick
+                            </span>
+                          )}
+                          {g.override_reason && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 mt-0.5 rounded bg-amber-50 text-amber-700 text-[9px] font-bold uppercase tracking-wide ml-1" title={g.override_reason}>
+                              override
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2.5 text-[11px] text-gray-500 font-mono whitespace-nowrap">
+                          {g.from_postal_code && g.to_postal_code
+                            ? <>{g.from_postal_code} → {g.to_postal_code}{g.is_local === false && <span className="ml-1 text-amber-600">⌁</span>}</>
+                            : '—'}
+                          {g.weight_kg ? <div className="text-[10px] text-gray-400">{g.weight_kg} kg</div> : null}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          {g.tracking_status ? (
+                            <span
+                              className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold text-white"
+                              style={{ background: STATUS_COLOR[g.tracking_status] }}
+                            >
+                              {STATUS_LABEL[g.tracking_status]}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-gray-400">—</span>
+                          )}
+                        </td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-rose-600">{fmtMXN(Number(g.costo))}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums text-emerald-600 font-semibold">{fmtMXN(Number(g.precio))}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums font-bold" style={{ color: Number(g.margen) >= 0 ? '#7c3aed' : '#dc3545' }}>
@@ -268,7 +365,23 @@ export function GuiasPaqueteriaPage() {
         </main>
       </div>
 
-      {/* Modal form */}
+      {/* Modal: Cotizar y comprar (mock provider o real cuando haya credenciales) */}
+      <CotizarShipmentModal
+        open={showCotizar}
+        onClose={() => setShowCotizar(false)}
+        clientes={clientes}
+        creadoPor={user?.name ?? user?.email ?? null}
+        onSubmit={async (data) => {
+          try {
+            await create(data)
+            toast.success('Guía registrada', `${data.tracking_number} · ${fmtMXN((data.precio || 0) - (data.costo || 0))} de margen`)
+          } catch (e) {
+            toast.error('No se pudo registrar', e instanceof Error ? e.message : 'Error')
+          }
+        }}
+      />
+
+      {/* Modal: Captura manual (legacy — etiqueta generada fuera del sistema) */}
       {showForm && (
         <GuiaForm
           onClose={() => setShowForm(false)}
@@ -305,15 +418,29 @@ function GuiaCard({ guia, clienteNombre, onDelete }: { guia: GuiaPaqueteria; cli
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3">
       <div className="flex items-start justify-between gap-2 mb-1">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
+          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
             <span
               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold text-white"
               style={{ background: PAQUETERIA_COLOR[guia.paqueteria] }}
             >
               {PAQUETERIA_LABEL[guia.paqueteria]}
             </span>
+            {guia.tracking_status && (
+              <span
+                className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold text-white"
+                style={{ background: STATUS_COLOR[guia.tracking_status] }}
+              >
+                {STATUS_LABEL[guia.tracking_status]}
+              </span>
+            )}
             <span className="text-[10px] text-gray-400">{fmtDate(guia.fecha)}</span>
           </div>
+          {guia.from_postal_code && guia.to_postal_code && (
+            <p className="text-[10px] text-gray-500 font-mono mb-0.5">
+              {guia.from_postal_code} → {guia.to_postal_code}
+              {guia.weight_kg ? ` · ${guia.weight_kg} kg` : ''}
+            </p>
+          )}
           <p className="text-xs font-mono font-semibold text-gray-800 truncate">{guia.tracking_number}</p>
           <p className="text-[11px] text-gray-500 truncate">{clienteNombre ?? guia.cliente_codigo ?? '—'}</p>
         </div>
