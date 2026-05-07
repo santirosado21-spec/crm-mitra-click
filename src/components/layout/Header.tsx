@@ -49,14 +49,14 @@ export function Header() {
         </button>
       )}
 
-      {/* Logo HD */}
+      {/* Botón "Menú principal" — reemplaza el logo en la esquina superior izquierda */}
       <div className="flex items-center shrink-0">
-        <Link to="/" className="flex items-center focus-visible:outline-none rounded-lg hover:opacity-90 transition-opacity">
-          <img
-            src="/hd-logo.png"
-            alt="Supply Chain MX"
-            className="h-12 sm:h-20 w-auto object-contain"
-          />
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm sm:text-base font-bold text-[#1e3a5f] hover:bg-gray-100 transition-colors focus-visible:outline-none"
+        >
+          <Menu size={18} className="hidden sm:inline" aria-hidden="true" />
+          <span>Menú principal</span>
         </Link>
       </div>
 

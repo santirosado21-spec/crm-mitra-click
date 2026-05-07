@@ -83,11 +83,13 @@ export function HomePage() {
       <Header />
       <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y">
         <div className="max-w-7xl mx-auto px-6 py-10">
-          {/* Welcome */}
-          <div className="mb-10 text-center">
-            <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2">
-              Supply Chain MX
-            </h1>
+          {/* Welcome — logo HD centrado */}
+          <div className="mb-10 text-center flex flex-col items-center">
+            <img
+              src="/hd-logo.png"
+              alt="Supply Chain MX"
+              className="h-20 sm:h-28 w-auto object-contain mb-3"
+            />
             <p className="text-sm text-gray-500">
               Selecciona el módulo al que deseas acceder
             </p>
