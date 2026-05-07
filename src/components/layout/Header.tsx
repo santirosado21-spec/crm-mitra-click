@@ -4,6 +4,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { GlobalSearch } from './GlobalSearch'
 import { NotificationBell } from './NotificationBell'
 import { TimerPill } from './TimerPill'
+import { ModuleSwitcher } from './ModuleSwitcher'
 import { useAuthContext } from '../../context/AuthContext'
 import { useActiveTimer } from '../../hooks/useActiveTimer'
 import { useToast } from '../../hooks/useToast'
@@ -37,40 +38,37 @@ export function Header() {
     <header className="bg-white h-16 sm:h-24 flex items-center gap-2 sm:gap-4 px-3 sm:px-6 shrink-0 relative z-20 border-b border-gray-200/80"
       style={{ boxShadow: '0 1px 0 #e8edf2' }}
     >
-      {/* Hamburger — solo móvil + cuando hay sidebar */}
+      {/* ModuleSwitcher: hamburger clickable que abre dropdown con home + módulos.
+          Se muestra siempre. En homepage tiene label "Página principal" al lado. */}
+      <ModuleSwitcher label={pathname === '/' ? 'Página principal' : null} />
+
+      {/* Hamburger del sidebar móvil — solo en móvil + cuando hay sidebar (no homepage).
+          Esto es DISTINTO al ModuleSwitcher: abre la nav contextual del módulo actual. */}
       {showHamburger && (
         <button
           type="button"
           onClick={toggleSidebar}
-          className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 text-gray-600 shrink-0"
-          aria-label="Abrir menú"
+          className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-100 text-gray-500 shrink-0"
+          aria-label="Abrir navegación del módulo"
+          title="Navegación del módulo"
         >
-          <Menu size={22} />
+          <Menu size={18} />
         </button>
       )}
 
-      {/* Esquina superior izquierda:
-          - En la homepage (/): texto "Página principal" — el logo grande va al centro de la página.
-          - En módulos: el logo HD (comportamiento original). */}
-      <div className="flex items-center shrink-0">
-        {pathname === '/' ? (
-          <Link
-            to="/"
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm sm:text-base font-bold text-[#1e3a5f] hover:bg-gray-100 transition-colors focus-visible:outline-none"
-          >
-            <Menu size={18} className="hidden sm:inline" aria-hidden="true" />
-            <span>Página principal</span>
-          </Link>
-        ) : (
+      {/* Logo HD (solo fuera de homepage — en homepage el logo grande vive en el centro de la página) */}
+      {pathname !== '/' && (
+        <div className="flex items-center shrink-0">
           <Link to="/" className="flex items-center focus-visible:outline-none rounded-lg hover:opacity-90 transition-opacity">
             <img
               src="/hd-logo.png"
               alt="Supply Chain MX"
               className="h-12 sm:h-20 w-auto object-contain"
+              style={{ mixBlendMode: 'multiply' }}
             />
           </Link>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Divider */}
       <div className="h-8 w-px bg-gray-200 shrink-0 hidden sm:block" />

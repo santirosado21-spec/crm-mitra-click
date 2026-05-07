@@ -87,12 +87,14 @@ export function HomePage() {
       <Header />
       <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y">
         <div className="max-w-7xl mx-auto px-6 py-10">
-          {/* Welcome — logo HD centrado */}
+          {/* Welcome — logo HD centrado, mix-blend-mode multiply hace que el
+               fondo blanco del PNG se funda con el background de la página */}
           <div className="mb-10 text-center flex flex-col items-center">
             <img
               src="/hd-logo.png"
               alt="Supply Chain MX"
-              className="h-20 sm:h-28 w-auto object-contain mb-3"
+              className="h-20 sm:h-32 w-auto object-contain mb-3"
+              style={{ mixBlendMode: 'multiply' }}
             />
             <p className="text-sm text-gray-500">
               Selecciona el módulo al que deseas acceder
@@ -139,14 +141,14 @@ export function HomePage() {
                       {m.description}
                     </p>
 
-                    {/* Tools list — alturas fijas (header + 4 items) idénticas en todas las tiles */}
-                    <div className="border-t border-gray-100 pt-3 mb-4 shrink-0">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
+                    {/* Tools list — alturas fijas (header + 4 items × 18px = ~90px) idénticas en todas las tiles */}
+                    <div className="border-t border-gray-100 pt-3 mb-4 shrink-0 min-h-[6.5rem]">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5 h-3 leading-3">
                         Incluye
                       </p>
                       <ul className="space-y-1">
                         {m.tools.map(tool => (
-                          <li key={tool} className="flex items-center gap-2 text-[11px] text-gray-600">
+                          <li key={tool} className="flex items-center gap-2 text-[11px] text-gray-600 h-4 leading-4">
                             <span
                               className="w-1 h-1 rounded-full shrink-0"
                               style={{ background: m.color }}
