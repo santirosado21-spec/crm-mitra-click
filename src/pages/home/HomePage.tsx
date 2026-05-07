@@ -71,7 +71,7 @@ export function HomePage() {
     },
     {
       id: 'parcel',
-      title: 'TMS de Guías de Paquetería',
+      title: 'TMS Guías de Paquetería',
       subtitle: 'Rate shopping · Auto-pick · Etiquetas',
       description: 'Cotiza con Estafeta, UPS, FedEx, DHL y Castores en un solo paso. El sistema elige automáticamente el carrier más conveniente por costo, distancia y tiempo.',
       icon: PackingPerson,
@@ -87,16 +87,18 @@ export function HomePage() {
       <Header />
       <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y">
         <div className="max-w-7xl mx-auto px-6 py-10">
-          {/* Welcome — logo HD centrado, mix-blend-mode multiply hace que el
-               fondo blanco del PNG se funda con el background de la página */}
-          <div className="mb-10 text-center flex flex-col items-center">
-            <img
-              src="/hd-logo.png"
-              alt="Supply Chain MX"
-              className="h-20 sm:h-32 w-auto object-contain mb-3"
-              style={{ mixBlendMode: 'multiply' }}
-            />
-            <p className="text-sm text-gray-500">
+          {/* Welcome — logo HD en white card. El fondo blanco del PNG se
+               funde naturalmente con el card blanco (sin necesidad de
+               mix-blend-mode), evitando halos en mobile y desktop. */}
+          <div className="mb-10 flex flex-col items-center text-center">
+            <div className="bg-white rounded-2xl shadow-md px-8 py-5 sm:px-12 sm:py-6 inline-flex items-center justify-center">
+              <img
+                src="/hd-logo.png"
+                alt="Supply Chain MX"
+                className="h-16 sm:h-24 w-auto object-contain select-none"
+              />
+            </div>
+            <p className="text-sm text-gray-500 mt-4">
               Selecciona el módulo al que deseas acceder
             </p>
           </div>
@@ -109,11 +111,11 @@ export function HomePage() {
                 <button
                   key={m.id}
                   onClick={m.onClick}
-                  className="group text-left rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 h-full flex flex-col p-0.5"
-                  style={{ background: m.color }}
+                  className="group login-frame text-left rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 h-full flex flex-col p-1"
                 >
-                  {/* Marco coloreado externo (mismo patrón visual que el login) */}
-                  <div className="bg-white rounded-[calc(1rem-2px)] flex flex-col flex-1 overflow-hidden">
+                  {/* Marco animado tipo login (gradient navy↔red en flujo). El
+                       interior blanco mantiene la legibilidad de cada tile. */}
+                  <div className="bg-white rounded-[calc(1rem-4px)] flex flex-col flex-1 overflow-hidden">
                   {/* Header strip — refuerza el color del frame en el interior */}
                   <div
                     className="h-1.5 w-full shrink-0"

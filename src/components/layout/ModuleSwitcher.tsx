@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  Menu, Home, Package, Truck, Warehouse, ClipboardList, Sparkles, ChevronRight,
+  Home, Package, Truck, Warehouse, ClipboardList, ChevronRight,
 } from 'lucide-react'
+import { PackingPerson } from '../icons/PackingPerson'
 import { useAuthContext } from '../../context/AuthContext'
 import { canAccessModule, type AppModule } from '../../config/permissions'
 
@@ -10,14 +11,14 @@ interface ModuleEntry {
   id:    AppModule
   to:    string
   label: string
-  icon:  typeof Home
+  icon:  React.ComponentType<{ size?: number }>
   color: string
 }
 
 const MODULES: ModuleEntry[] = [
   { id: 'wms',     to: '/wms',                   label: 'Herramientas de WMS',        icon: Package,        color: '#1e3a5f' },
   { id: 'tms',     to: '/tms',                   label: 'Transportes',                icon: Truck,          color: '#c8373c' },
-  { id: 'parcel',  to: '/tms/guias-paqueteria',  label: 'TMS de Guías de Paquetería', icon: Sparkles,       color: '#0ea5e9' },
+  { id: 'parcel',  to: '/tms/guias-paqueteria',  label: 'TMS Guías de Paquetería',    icon: PackingPerson,  color: '#0ea5e9' },
   { id: 'almacen', to: '/almacen',               label: 'Almacén CEDIS Lerma',        icon: Warehouse,      color: '#059669' },
   { id: 'tasks',   to: '/tasks',                 label: 'Task Tracker',               icon: ClipboardList,  color: '#7c3aed' },
 ]
@@ -71,7 +72,7 @@ export function ModuleSwitcher({ label }: Props) {
           open ? 'bg-gray-100 text-[#1e3a5f]' : 'text-[#1e3a5f] hover:bg-gray-100'
         }`}
       >
-        <Menu size={20} aria-hidden="true" />
+        <PackingPerson size={22} aria-hidden="true" />
         {label && <span className="hidden sm:inline">{label}</span>}
       </button>
 

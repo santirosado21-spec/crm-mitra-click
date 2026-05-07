@@ -64,7 +64,6 @@ export function Header() {
               src="/hd-logo.png"
               alt="Supply Chain MX"
               className="h-12 sm:h-20 w-auto object-contain"
-              style={{ mixBlendMode: 'multiply' }}
             />
           </Link>
         </div>
@@ -84,14 +83,13 @@ export function Header() {
         <NotificationBell />
         <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600 font-medium">
           <div
-            className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden"
+            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden"
             aria-hidden="true"
           >
             <img
               src="/hd-logo.png"
               alt=""
               className="w-full h-full object-contain p-1"
-              style={{ mixBlendMode: 'multiply' }}
             />
           </div>
           <span>{user?.name ?? 'Usuario'}</span>

@@ -15,7 +15,7 @@ export const MODULE_LABEL: Record<AppModule, string> = {
   tms:     'Transportes',
   almacen: 'Almacén',
   tasks:   'Task Manager',
-  parcel:  'TMS de Guías de Paquetería',
+  parcel:  'TMS Guías de Paquetería',
 }
 
 export const MODULE_ACCESS: Record<UserRole, AppModule[]> = {
@@ -72,7 +72,7 @@ export const MODULE_BRIEFS: Record<AppModule, { title: string; body: string; tip
     ],
   },
   parcel: {
-    title: 'TMS de Guías de Paquetería',
+    title: 'TMS Guías de Paquetería',
     body: 'Cotiza con todas las paqueterías al mismo tiempo (Estafeta, UPS, FedEx, DHL, Castores), elige automáticamente la mejor por costo + distancia + tiempo, y compra la etiqueta sin salir del sistema.',
     tips: [
       'Auto-pick recomienda el carrier más conveniente; puedes overridear con justificación.',
