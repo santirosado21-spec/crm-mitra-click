@@ -49,15 +49,27 @@ export function Header() {
         </button>
       )}
 
-      {/* Botón "Menú principal" — reemplaza el logo en la esquina superior izquierda */}
+      {/* Esquina superior izquierda:
+          - En la homepage (/): texto "Página principal" — el logo grande va al centro de la página.
+          - En módulos: el logo HD (comportamiento original). */}
       <div className="flex items-center shrink-0">
-        <Link
-          to="/"
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm sm:text-base font-bold text-[#1e3a5f] hover:bg-gray-100 transition-colors focus-visible:outline-none"
-        >
-          <Menu size={18} className="hidden sm:inline" aria-hidden="true" />
-          <span>Menú principal</span>
-        </Link>
+        {pathname === '/' ? (
+          <Link
+            to="/"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm sm:text-base font-bold text-[#1e3a5f] hover:bg-gray-100 transition-colors focus-visible:outline-none"
+          >
+            <Menu size={18} className="hidden sm:inline" aria-hidden="true" />
+            <span>Página principal</span>
+          </Link>
+        ) : (
+          <Link to="/" className="flex items-center focus-visible:outline-none rounded-lg hover:opacity-90 transition-opacity">
+            <img
+              src="/hd-logo.png"
+              alt="Supply Chain MX"
+              className="h-12 sm:h-20 w-auto object-contain"
+            />
+          </Link>
+        )}
       </div>
 
       {/* Divider */}

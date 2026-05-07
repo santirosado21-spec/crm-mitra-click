@@ -78,7 +78,7 @@ export function HomePage() {
       color: '#0ea5e9',
       accentColor: '#f0f9ff',
       onClick: () => navigate('/tms/guias-paqueteria'),
-      tools: ['Cotizar y comprar', 'Auto-pick por código postal', 'Reglas de routing', 'Configurar carriers'],
+      tools: ['Cotizar y comprar', 'Auto-pick por CP', 'Reglas de routing', 'Configurar carriers'],
     },
   ]
 
@@ -126,20 +126,20 @@ export function HomePage() {
                       </div>
                     </div>
 
-                    {/* Title */}
-                    <h2 className="text-base font-bold text-gray-900 mb-1 leading-tight">
+                    {/* Title — min-h fija para que 1-línea y 2-líneas ocupen el mismo espacio */}
+                    <h2 className="text-base font-bold text-gray-900 mb-1 leading-tight min-h-[2.6rem] line-clamp-2">
                       {m.title}
                     </h2>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: m.color }}>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-3 min-h-[1rem] truncate" style={{ color: m.color }}>
                       {m.subtitle}
                     </p>
 
-                    {/* Description — flex-1 para que crezca y empuje el bloque inferior abajo */}
-                    <p className="text-[13px] text-gray-500 leading-relaxed mb-4 flex-1">
+                    {/* Description — min-h fija (4 líneas) para que todas las descripciones ocupen el mismo bloque */}
+                    <p className="text-[13px] text-gray-500 leading-relaxed mb-4 flex-1 min-h-[4.5rem]">
                       {m.description}
                     </p>
 
-                    {/* Tools list */}
+                    {/* Tools list — alturas fijas (header + 4 items) idénticas en todas las tiles */}
                     <div className="border-t border-gray-100 pt-3 mb-4 shrink-0">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
                         Incluye
@@ -151,7 +151,7 @@ export function HomePage() {
                               className="w-1 h-1 rounded-full shrink-0"
                               style={{ background: m.color }}
                             />
-                            {tool}
+                            <span className="truncate">{tool}</span>
                           </li>
                         ))}
                       </ul>
