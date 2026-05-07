@@ -36,11 +36,14 @@ const TMS_LINKS: Link[] = [
   { to: '/tms/costos',     label: 'Costos',               icon: PieChart },
   { to: '/cotizador',      label: 'Cotizador',            icon: Calculator },
   { to: '/tms/cartas-recibidas', label: 'Cartas recibidas', icon: Inbox },
-  { to: '/tms/guias-paqueteria', label: 'Guías paquetería', icon: Package },
-  { to: '/tms/carriers',         label: 'Configurar carriers', icon: UserCog },
-  { to: '/tms/carriers/reglas',  label: 'Reglas de routing',   icon: FileSpreadsheet },
   { to: '/tms/carta-porte', label: 'Carta Porte', icon: FileCheck },
   { to: '/tramites',       label: 'Trámites',             icon: CalendarClock },
+]
+
+const PARCEL_LINKS: Link[] = [
+  { to: '/tms/guias-paqueteria', label: 'Guías paquetería',    icon: Package },
+  { to: '/tms/carriers',         label: 'Configurar carriers', icon: UserCog },
+  { to: '/tms/carriers/reglas',  label: 'Reglas de routing',   icon: FileSpreadsheet },
 ]
 
 const ALMACEN_LINKS: Link[] = [
@@ -62,12 +65,17 @@ const TASKS_ADMIN_LINKS: Link[] = [
   { to: '/tasks/admin/seko-billing',      label: 'Billing Seko 365',    icon: FileSpreadsheet },
 ]
 
-type ModuleKey = 'home' | 'wms' | 'tms' | 'almacen' | 'tasks'
+type ModuleKey = 'home' | 'wms' | 'tms' | 'almacen' | 'tasks' | 'parcel'
 
 function detectModule(pathname: string): ModuleKey {
   if (pathname === '/')                                                          return 'home'
   if (pathname === '/almacen')                                                   return 'almacen'
   if (pathname.startsWith('/tasks') || pathname.startsWith('/admin'))            return 'tasks'
+  // TMS de Paqueterías es módulo separado aunque vive bajo /tms/* por ahora.
+  if (pathname === '/tms/guias-paqueteria' ||
+      pathname.startsWith('/tms/guias-paqueteria/') ||
+      pathname === '/tms/carriers' ||
+      pathname.startsWith('/tms/carriers/'))                                     return 'parcel'
   if (pathname.startsWith('/tms') || pathname === '/cotizador' || pathname === '/tramites')
     return 'tms'
   // Default: WMS (/, /wms, /sac/*, /rc, /proformas, /clients, etc.)
@@ -75,10 +83,11 @@ function detectModule(pathname: string): ModuleKey {
 }
 
 const MODULE_CONFIG: Record<Exclude<ModuleKey, 'home'>, { label: string; links: Link[] }> = {
-  wms:     { label: 'Herramientas de WMS', links: WMS_LINKS },
-  tms:     { label: 'Transportes',         links: TMS_LINKS },
-  almacen: { label: 'Almacén',             links: ALMACEN_LINKS },
-  tasks:   { label: 'Task Tracker',        links: TASKS_LINKS },
+  wms:     { label: 'Herramientas de WMS',         links: WMS_LINKS },
+  tms:     { label: 'Transportes',                 links: TMS_LINKS },
+  almacen: { label: 'Almacén',                     links: ALMACEN_LINKS },
+  tasks:   { label: 'Task Tracker',                links: TASKS_LINKS },
+  parcel:  { label: 'TMS Guías de Paquetería',     links: PARCEL_LINKS },
 }
 
 export function Sidebar() {

@@ -1,6 +1,6 @@
 import type { UserRole } from '../types'
 
-export type AppModule = 'wms' | 'tms' | 'almacen' | 'tasks'
+export type AppModule = 'wms' | 'tms' | 'almacen' | 'tasks' | 'parcel'
 
 export const ROLE_LABEL: Record<UserRole, string> = {
   admin:             'Administrador',
@@ -15,14 +15,15 @@ export const MODULE_LABEL: Record<AppModule, string> = {
   tms:     'Transportes',
   almacen: 'Almacén',
   tasks:   'Task Manager',
+  parcel:  'TMS de Guías de Paquetería',
 }
 
 export const MODULE_ACCESS: Record<UserRole, AppModule[]> = {
-  admin:             ['wms', 'tms', 'almacen', 'tasks'],
+  admin:             ['wms', 'tms', 'almacen', 'tasks', 'parcel'],
   almacen:           ['almacen', 'tasks'],
-  servicio_cliente:  ['wms', 'almacen', 'tasks'],
+  servicio_cliente:  ['wms', 'almacen', 'tasks', 'parcel'],
   cobranza:          ['wms', 'tasks'],
-  transporte:        ['tms', 'tasks'],
+  transporte:        ['tms', 'tasks', 'parcel'],
 }
 
 export const WMS_ROLES: UserRole[]     = ['admin', 'servicio_cliente', 'cobranza']
@@ -70,6 +71,15 @@ export const MODULE_BRIEFS: Record<AppModule, { title: string; body: string; tip
       'Consulta calendario y plantillas para trabajo recurrente.',
     ],
   },
+  parcel: {
+    title: 'TMS de Guías de Paquetería',
+    body: 'Cotiza con todas las paqueterías al mismo tiempo (Estafeta, UPS, FedEx, DHL, Castores), elige automáticamente la mejor por costo + distancia + tiempo, y compra la etiqueta sin salir del sistema.',
+    tips: [
+      'Auto-pick recomienda el carrier más conveniente; puedes overridear con justificación.',
+      'Configura reglas para forzar carriers según distancia y costo.',
+      'En modo demo los rates son simulados — registra credenciales en Configurar carriers para activar APIs reales.',
+    ],
+  },
 }
 
 export function canAccessModule(role: UserRole | undefined, module: AppModule) {
@@ -82,7 +92,16 @@ export function getModulesForRole(role: UserRole | undefined): AppModule[] {
 
 export function moduleFromPath(path: string): AppModule | null {
   if (path === '/almacen') return 'almacen'
-  if (path.startsWith('/tasks')) return 'tasks'
+  if (path.startsWith('/tasks') || path.startsWith('/admin')) return 'tasks'
+  // TMS de Paqueterías es un módulo separado aunque sus URLs vivan bajo /tms/*
+  if (
+    path === '/parcel' ||
+    path.startsWith('/parcel') ||
+    path === '/tms/guias-paqueteria' ||
+    path.startsWith('/tms/guias-paqueteria/') ||
+    path === '/tms/carriers' ||
+    path.startsWith('/tms/carriers/')
+  ) return 'parcel'
   if (path.startsWith('/tms') || path === '/cotizador' || path === '/tramites') return 'tms'
   if (
     path.startsWith('/wms') ||
@@ -123,5 +142,6 @@ export function defaultRouteForRole(role: UserRole | undefined) {
   if (first === 'tms') return '/tms'
   if (first === 'almacen') return '/almacen'
   if (first === 'tasks') return '/tasks'
+  if (first === 'parcel') return '/tms/guias-paqueteria'
   return '/'
 }

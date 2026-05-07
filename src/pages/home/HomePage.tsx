@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Package, Truck, Warehouse, ArrowRight, ClipboardList } from 'lucide-react'
+import { Package, Truck, Warehouse, ArrowRight, ClipboardList, Sparkles } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { useAuthContext } from '../../context/AuthContext'
 import { canAccessModule, type AppModule } from '../../config/permissions'
@@ -64,6 +64,17 @@ export function HomePage() {
       accentColor: '#f5f3ff',
       onClick: () => navigate('/tasks'),
       tools: ['Bandeja de tareas', 'Calendario semanal', 'Plantillas recurrentes', 'Equipo y horarios'],
+    },
+    {
+      id: 'parcel',
+      title: 'TMS de Guías de Paquetería',
+      subtitle: 'Rate shopping · Auto-pick · Etiquetas',
+      description: 'Cotiza con Estafeta, UPS, FedEx, DHL y Castores en un solo paso. El sistema elige automáticamente el carrier más conveniente por costo, distancia y tiempo.',
+      icon: Sparkles,
+      color: '#0ea5e9',
+      accentColor: '#f0f9ff',
+      onClick: () => navigate('/tms/guias-paqueteria'),
+      tools: ['Cotizar y comprar', 'Auto-pick por código postal', 'Reglas de routing', 'Configurar carriers'],
     },
   ]
 
