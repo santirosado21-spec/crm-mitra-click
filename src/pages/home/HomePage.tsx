@@ -82,7 +82,7 @@ export function HomePage() {
     <div className="flex h-dvh min-h-dvh flex-col overflow-hidden" style={{ background: 'var(--page-bg, #f5f7fa)' }}>
       <Header />
       <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y">
-        <div className="max-w-6xl mx-auto px-6 py-10">
+        <div className="max-w-7xl mx-auto px-6 py-10">
           {/* Welcome */}
           <div className="mb-10 text-center">
             <h1 className="text-3xl font-bold text-[#1e3a5f] mb-2">
@@ -93,8 +93,8 @@ export function HomePage() {
             </p>
           </div>
 
-          {/* Module cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Module cards — 5 columnas en desktop para que todas quepan en una hilera */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 lg:gap-3">
             {modules.filter(m => canAccessModule(user?.role, m.id)).map(m => {
               const Icon = m.icon
               return (
