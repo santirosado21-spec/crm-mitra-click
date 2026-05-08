@@ -13,10 +13,11 @@ import { useClientCatalog } from '../../hooks/useClientCatalog'
 import { useGuiasPaqueteria } from '../../hooks/useGuiasPaqueteria'
 import { ExtensivOperationPicker } from '../../components/features/ExtensivOperationPicker'
 import type { ExtensivPickResult } from '../../lib/extensiv'
+import { supabase } from '../../lib/supabase'
 import {
   PAQUETERIA_LABEL, PAQUETERIA_COLOR,
   type Paqueteria, type GuiaOrigen, type GuiaFilters, type GuiaPaqueteria, type CreateGuiaData,
-  type CarrierProvider, type TrackingStatus,
+  type CarrierProvider, type TrackingStatus, type RouteStop,
 } from '../../types/guias'
 
 const STATUS_LABEL: Record<TrackingStatus, string> = {
@@ -474,6 +475,10 @@ function GuiaForm({ onClose, onSubmit, clientes, creadoPor }: GuiaFormProps) {
   const [paqueteria, setPaqueteria] = useState<Paqueteria>('estafeta')
   const [trackingNumber, setTrackingNumber] = useState('')
   const [clienteId, setClienteId] = useState('')
+  const [fromPostalCode, setFromPostalCode] = useState('52000')
+  const [toPostalCode, setToPostalCode] = useState('')
+  const [routeStops, setRouteStops] = useState<RouteStop[]>([])
+  const [postalOptions, setPostalOptions] = useState<Array<{ cp: string; label: string }>>([])
   const [costo, setCosto] = useState('')
   const [precio, setPrecio] = useState('')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
@@ -485,10 +490,34 @@ function GuiaForm({ onClose, onSubmit, clientes, creadoPor }: GuiaFormProps) {
   const usaExtensiv = !!cliente?.extensiv_customer_id
 
   const margen = (Number(precio) || 0) - (Number(costo) || 0)
+  const cleanFromCP = fromPostalCode.trim()
+  const cleanToCP = toPostalCode.trim()
+  const cleanStops = routeStops
+    .map(s => ({ cp: s.cp.trim(), label: s.label?.trim() || undefined }))
+    .filter(s => /^\d{5}$/.test(s.cp))
+
+  useEffect(() => {
+    let cancelled = false
+    supabase
+      .from('mx_postal_codes')
+      .select('cp, estado, municipio, ciudad')
+      .order('cp')
+      .limit(400)
+      .then(({ data }) => {
+        if (cancelled) return
+        setPostalOptions((data ?? []).map((p: { cp: string; estado: string | null; municipio: string | null; ciudad: string | null }) => ({
+          cp: p.cp,
+          label: `${p.cp} · ${p.ciudad || p.municipio || 'MX'}${p.estado ? `, ${p.estado}` : ''}`,
+        })))
+      })
+    return () => { cancelled = true }
+  }, [])
 
   const canSubmit =
     !!clienteId
     && !!trackingNumber.trim()
+    && /^\d{5}$/.test(cleanFromCP)
+    && /^\d{5}$/.test(cleanToCP)
     && Number(costo) >= 0
     && Number(precio) >= 0
     && pickResult !== null
@@ -514,6 +543,12 @@ function GuiaForm({ onClose, onSubmit, clientes, creadoPor }: GuiaFormProps) {
         manual_reference:          isExt ? null : (pickResult.reference ?? null),
         notas,
         creado_por:                creadoPor,
+        from_postal_code:          cleanFromCP,
+        to_postal_code:            cleanToCP,
+        route_stops:               cleanStops,
+        to_country:                'MX',
+        provider:                  'manual',
+        tracking_status:           'comprado',
       }
       await onSubmit(data)
     } finally {
@@ -600,6 +635,85 @@ function GuiaForm({ onClose, onSubmit, clientes, creadoPor }: GuiaFormProps) {
                 onChange={e => setFecha(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none"
               />
+            </div>
+          </div>
+
+          {/* Ruta para mapa */}
+          <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-3 space-y-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-0.5">Ruta para mapa *</p>
+              <p className="text-[10px] text-blue-700/70">
+                En captura manual estos CP alimentan el mapa de tracking. Puedes agregar paradas intermedias.
+              </p>
+            </div>
+            <datalist id="mx-postal-code-options">
+              {postalOptions.map(p => <option key={p.cp} value={p.cp}>{p.label}</option>)}
+            </datalist>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5 block">CP origen *</label>
+                <input
+                  value={fromPostalCode}
+                  onChange={e => setFromPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                  list="mx-postal-code-options"
+                  placeholder="52000"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-[#1e3a5f] outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5 block">CP destino *</label>
+                <input
+                  value={toPostalCode}
+                  onChange={e => setToPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                  list="mx-postal-code-options"
+                  placeholder="64000"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-[#1e3a5f] outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Paradas</label>
+                <button
+                  type="button"
+                  onClick={() => setRouteStops(prev => [...prev, { cp: '', label: '' }])}
+                  className="text-[11px] font-bold text-[#1e3a5f] hover:underline"
+                >
+                  + Agregar parada
+                </button>
+              </div>
+              {routeStops.length === 0 ? (
+                <p className="text-[10px] text-gray-400">Sin paradas intermedias.</p>
+              ) : (
+                <div className="space-y-2">
+                  {routeStops.map((stop, idx) => (
+                    <div key={idx} className="grid grid-cols-[90px_1fr_24px] gap-2">
+                      <input
+                        value={stop.cp}
+                        onChange={e => setRouteStops(prev => prev.map((s, i) => i === idx ? { ...s, cp: e.target.value.replace(/\D/g, '').slice(0, 5) } : s))}
+                        list="mx-postal-code-options"
+                        placeholder="CP"
+                        className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-[#1e3a5f] outline-none"
+                      />
+                      <input
+                        value={stop.label ?? ''}
+                        onChange={e => setRouteStops(prev => prev.map((s, i) => i === idx ? { ...s, label: e.target.value } : s))}
+                        placeholder="Nombre de parada (opcional)"
+                        className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-[#1e3a5f] outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setRouteStops(prev => prev.filter((_, i) => i !== idx))}
+                        className="text-gray-300 hover:text-red-600"
+                        aria-label="Quitar parada"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

@@ -12,6 +12,7 @@
 ALTER TABLE guias_paqueteria
   ADD COLUMN IF NOT EXISTS from_postal_code   TEXT,
   ADD COLUMN IF NOT EXISTS to_postal_code     TEXT,
+  ADD COLUMN IF NOT EXISTS route_stops        JSONB NOT NULL DEFAULT '[]'::jsonb,
   ADD COLUMN IF NOT EXISTS to_country         TEXT NOT NULL DEFAULT 'MX',
   ADD COLUMN IF NOT EXISTS weight_kg          NUMERIC(8,3),
   ADD COLUMN IF NOT EXISTS length_cm          NUMERIC(8,2),

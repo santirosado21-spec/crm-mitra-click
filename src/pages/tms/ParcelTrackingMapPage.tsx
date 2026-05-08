@@ -114,10 +114,12 @@ export function ParcelTrackingMapPage() {
         { direction: 'top', offset: [0, -8] },
       )
 
-      // Polyline ruta origen → destino para los en tránsito
-      if (pos.from && pos.to && (status === 'en_transito' || status === 'comprado')) {
+      // Polyline ruta origen → paradas → destino para los en tránsito
+      const routePoints = [pos.from, ...pos.stops, pos.to]
+        .filter((p): p is NonNullable<typeof p> => Boolean(p))
+      if (routePoints.length >= 2 && (status === 'en_transito' || status === 'comprado')) {
         let poly = polylinesRef.current.get(pos.guia.id)
-        const path: L.LatLngExpression[] = [[pos.from.lat, pos.from.lon], [pos.to.lat, pos.to.lon]]
+        const path: L.LatLngExpression[] = routePoints.map(p => [p.lat, p.lon])
         if (!poly) {
           poly = L.polyline(path, {
             color, weight: 2, opacity: 0.4, dashArray: '6, 6',
@@ -280,9 +282,12 @@ function ShipmentDetailPanel({ pos, onClose }: { pos: ShipmentPosition; onClose:
         <Row label="Peso"     value={`${g.weight_kg ?? '—'} kg`} />
         <Row label="ETA"      value={<span className="inline-flex items-center gap-1"><Clock size={11} /> {fmtETA(pos.etaMinutes)}</span>} />
         <Row label="Progreso" value={`${Math.round(pos.progress * 100)}%`} />
+        {pos.stops.length > 0 && (
+          <Row label="Paradas" value={pos.stops.map(s => s.ciudad || s.municipio || s.cp).join(' → ')} />
+        )}
         {pos.from && pos.to && (
           <p className="text-[10px] text-gray-400 mt-2">
-            {pos.from.ciudad ?? pos.from.estado} → {pos.to.ciudad ?? pos.to.estado}
+            {[pos.from, ...pos.stops, pos.to].map(p => p.ciudad ?? p.municipio ?? p.estado ?? p.cp).join(' → ')}
           </p>
         )}
         {g.override_reason && (

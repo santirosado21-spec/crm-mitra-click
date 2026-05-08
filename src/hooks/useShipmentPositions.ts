@@ -15,6 +15,7 @@ export interface ShipmentPosition {
   guia:                GuiaPaqueteria
   from:                PostalCoord | null
   to:                  PostalCoord | null
+  stops:               PostalCoord[]
   current:             { lat: number; lon: number } | null
   /** 0–1 progress along the route. */
   progress:            number
@@ -26,6 +27,28 @@ export interface ShipmentPosition {
 
 const REFRESH_MS = 15_000   // re-interpolar cada 15 s para animación suave
 const DEFAULT_DELIVERY_DAYS = 3
+
+function normalizedStops(g: GuiaPaqueteria): string[] {
+  return (g.route_stops ?? [])
+    .map(s => s?.cp?.trim())
+    .filter((cp): cp is string => Boolean(cp && /^\d{5}$/.test(cp)))
+}
+
+function interpolateRoute(points: PostalCoord[], progress: number) {
+  if (points.length === 0) return null
+  if (points.length === 1) return { lat: points[0].lat, lon: points[0].lon }
+  const clamped = Math.max(0, Math.min(1, progress))
+  const segmentCount = points.length - 1
+  const scaled = clamped * segmentCount
+  const idx = Math.min(Math.floor(scaled), segmentCount - 1)
+  const local = scaled - idx
+  const a = points[idx]
+  const b = points[idx + 1]
+  return {
+    lat: a.lat + (b.lat - a.lat) * local,
+    lon: a.lon + (b.lon - a.lon) * local,
+  }
+}
 
 /**
  * Carga shipments + coordenadas de mx_postal_codes y devuelve la posición
@@ -76,6 +99,7 @@ export function useShipmentPositions(intervalMs: number = REFRESH_MS) {
         for (const g of list) {
           if (g.from_postal_code) cps.add(g.from_postal_code)
           if (g.to_postal_code)   cps.add(g.to_postal_code)
+          for (const cp of normalizedStops(g)) cps.add(cp)
         }
         if (cps.size > 0) {
           const { data: cData } = await supabase
@@ -95,6 +119,32 @@ export function useShipmentPositions(intervalMs: number = REFRESH_MS) {
     })()
     return () => { cancelled = true }
   }, [])
+
+  useEffect(() => {
+    const missing = new Set<string>()
+    for (const g of guias) {
+      if (g.from_postal_code && !coords.has(g.from_postal_code)) missing.add(g.from_postal_code)
+      if (g.to_postal_code && !coords.has(g.to_postal_code)) missing.add(g.to_postal_code)
+      for (const cp of normalizedStops(g)) {
+        if (!coords.has(cp)) missing.add(cp)
+      }
+    }
+    if (missing.size === 0) return
+    let cancelled = false
+    supabase
+      .from('mx_postal_codes')
+      .select('cp, lat, lon, estado, municipio, ciudad')
+      .in('cp', Array.from(missing))
+      .then(({ data }) => {
+        if (cancelled || !data) return
+        setCoords(prev => {
+          const next = new Map(prev)
+          for (const c of data as PostalCoord[]) next.set(c.cp, c)
+          return next
+        })
+      })
+    return () => { cancelled = true }
+  }, [guias, coords])
 
   // Suscripción realtime a cambios en guias_paqueteria — cuando llegue un
   // tracking webhook real, la UI actualiza sin refresh manual.
@@ -120,6 +170,9 @@ export function useShipmentPositions(intervalMs: number = REFRESH_MS) {
     return guias.map(g => {
       const from = g.from_postal_code ? coords.get(g.from_postal_code) ?? null : null
       const to   = g.to_postal_code   ? coords.get(g.to_postal_code)   ?? null : null
+      const stops = normalizedStops(g)
+        .map(cp => coords.get(cp) ?? null)
+        .filter((coord): coord is PostalCoord => Boolean(coord))
 
       let progress = 0
       if (g.tracking_status === 'entregado') progress = 1
@@ -137,11 +190,9 @@ export function useShipmentPositions(intervalMs: number = REFRESH_MS) {
       }
 
       let current: { lat: number; lon: number } | null = null
-      if (from && to) {
-        current = {
-          lat: from.lat + (to.lat - from.lat) * progress,
-          lon: from.lon + (to.lon - from.lon) * progress,
-        }
+      const route = [from, ...stops, to].filter((coord): coord is PostalCoord => Boolean(coord))
+      if (route.length > 0) {
+        current = interpolateRoute(route, progress)
       } else if (from) {
         current = { lat: from.lat, lon: from.lon }
       } else if (to) {
@@ -156,6 +207,7 @@ export function useShipmentPositions(intervalMs: number = REFRESH_MS) {
         guia:     g,
         from,
         to,
+        stops,
         current,
         progress,
         etaMinutes,

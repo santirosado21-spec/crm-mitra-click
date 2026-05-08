@@ -25,6 +25,11 @@ export interface RateQuote {
   raw?:            unknown
 }
 
+export interface RouteStop {
+  cp: string
+  label?: string
+}
+
 export interface GuiaPaqueteria {
   id:                          string
   paqueteria:                  Paqueteria
@@ -48,6 +53,7 @@ export interface GuiaPaqueteria {
   // ── Campos TMS de paqueterías (rate shopping + auto-pick) ──
   from_postal_code?:    string | null
   to_postal_code?:      string | null
+  route_stops?:         RouteStop[] | null
   to_country?:          string | null      // 'MX' por default
   weight_kg?:           number | null
   length_cm?:           number | null
