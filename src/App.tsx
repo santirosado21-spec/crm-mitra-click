@@ -7,7 +7,6 @@ import { Login } from './pages/auth/Login'
 import { HomePage } from './pages/home/HomePage'
 import { WMSHome } from './pages/wms/WMSHome'
 import { StorageBridgePage } from './pages/wms/StorageBridgePage'
-import { CFDIGeneratorPage } from './pages/wms/CFDIGeneratorPage'
 import { EmisorConfigPage } from './pages/wms/EmisorConfigPage'
 import { AlmacenPage } from './pages/almacen/AlmacenPage'
 import { TMSHome } from './pages/tms/TMSHome'
@@ -67,9 +66,6 @@ function App() {
           } />
           <Route path="/wms/storage-bridge" element={
             <ProtectedRoute allowedRoles={WMS_ROLES}><StorageBridgePage /></ProtectedRoute>
-          } />
-          <Route path="/wms/cfdi-generator" element={
-            <ProtectedRoute allowedRoles={WMS_ROLES}><CFDIGeneratorPage /></ProtectedRoute>
           } />
           <Route path="/wms/emisor-config" element={
             <ProtectedRoute allowedRoles={WMS_ROLES}><EmisorConfigPage /></ProtectedRoute>

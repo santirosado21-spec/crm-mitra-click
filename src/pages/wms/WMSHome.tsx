@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ScanBarcode, FileCheck, FileText, Users, ArrowRight, FileInput, RefreshCw, AlertTriangle, TrendingUp, Package, Wifi, FileCode, ClipboardList, Receipt } from 'lucide-react'
+import { ArrowLeft, ScanBarcode, FileCheck, FileText, Users, ArrowRight, FileInput, RefreshCw, AlertTriangle, TrendingUp, Package, Wifi, ClipboardList, Receipt } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { useWMSOperationsData } from '../../hooks/useWMSOperationsData'
@@ -53,13 +53,6 @@ const tools: Tool[] = [
     title: 'Billing Seko 365',
     description: 'Consolida BASF, KST, Burberry y Lululemon con viajes TMS y guías para proforma SAC.',
     icon: Receipt,
-    category: 'facturacion',
-  },
-  {
-    to: '/wms/cfdi-generator',
-    title: 'Generador CFDI',
-    description: 'Genera XMLs CFDI 4.0 listos para timbrar en ContPAQ desde una proforma.',
-    icon: FileCode,
     category: 'facturacion',
   },
   {

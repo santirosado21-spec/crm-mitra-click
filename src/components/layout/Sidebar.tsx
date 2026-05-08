@@ -1,4 +1,4 @@
-import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, FileCode, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet, Package, MapPin } from 'lucide-react'
+import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet, Package, MapPin } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
@@ -23,7 +23,6 @@ const WMS_LINKS: Link[] = [
   { to: '/seko-billing',           label: 'Billing Seko 365',     icon: Receipt },
   { to: '/rc',                     label: 'Rendición RC',         icon: FileCheck },
   { to: '/proformas',              label: 'Proformas',            icon: FileText },
-  { to: '/wms/cfdi-generator',     label: 'Generador CFDI',       icon: FileCode },
   { to: '/clients',                label: 'Clientes',             icon: Users },
 ]
 
