@@ -161,9 +161,9 @@ export function Sidebar() {
         <div className="px-1">
           <ModuleSwitcher
             label={
-              <span className="inline-flex items-center gap-2.5 text-sm font-medium text-gray-700">
-                <Menu size={18} className="text-gray-500" />
-                <span>Menú principal</span>
+              <span className="inline-flex min-w-0 items-center gap-2.5 text-sm font-medium leading-snug text-gray-700">
+                <Menu size={18} className="shrink-0 text-gray-500" />
+                <span className="whitespace-normal break-words">Menú principal</span>
               </span>
             }
           />
@@ -183,7 +183,7 @@ export function Sidebar() {
                 end={to === '/wms' || to === '/tms' || to === '/almacen'}
                 aria-label={linkLabel}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group
+                  `flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium leading-snug transition-all duration-150 group
                   ${isActive
                     ? 'text-white shadow-sm'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
@@ -204,7 +204,7 @@ export function Sidebar() {
                         : 'text-gray-400 group-hover:text-[#1e3a5f] group-hover:scale-110'
                       }`}
                     />
-                    <span className="truncate">{linkLabel}</span>
+                    <span className="min-w-0 flex-1 whitespace-normal break-words">{linkLabel}</span>
                   </>
                 )}
               </NavLink>
@@ -224,7 +224,7 @@ export function Sidebar() {
                   to={to}
                   end
                   className={({ isActive }) =>
-                    `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group
+                    `flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium leading-snug transition-all duration-150 group
                     ${isActive
                       ? 'text-white shadow-sm'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
@@ -239,7 +239,7 @@ export function Sidebar() {
                     <>
                       <Icon size={16} aria-hidden="true" className={`shrink-0 transition-all ${isActive
                         ? 'text-white' : 'text-gray-400 group-hover:text-[#1e3a5f] group-hover:scale-110'}`} />
-                      <span className="truncate">{linkLabel}</span>
+                      <span className="min-w-0 flex-1 whitespace-normal break-words">{linkLabel}</span>
                     </>
                   )}
                 </NavLink>

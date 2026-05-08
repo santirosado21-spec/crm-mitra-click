@@ -66,28 +66,28 @@ export function ModuleSwitcher({ label }: Props) {
   const visibleModules = MODULES.filter(m => canAccessModule(user?.role, m.id))
 
   return (
-    <div ref={containerRef} className="relative shrink-0">
+    <div ref={containerRef} className="relative shrink-0 max-w-full">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Abrir menú principal"
-        className={`flex items-center gap-2 px-2 sm:px-3 py-2 rounded-xl text-sm sm:text-base font-bold transition-colors focus-visible:outline-none ${
+        className={`flex max-w-full items-center gap-2 px-2 sm:px-3 py-2 rounded-xl text-sm sm:text-base font-bold transition-colors focus-visible:outline-none ${
           open ? 'bg-gray-100 text-[#1e3a5f]' : 'text-[#1e3a5f] hover:bg-gray-100'
         }`}
       >
         {/* Si hay label la usamos. Si no, fallback al icono Menu (3 líneas
              hamburger) para que el trigger sea visualmente "abre menú". */}
         {label
-          ? <span className="inline-flex items-center">{label}</span>
+          ? <span className="inline-flex min-w-0 items-center">{label}</span>
           : <Menu size={20} aria-hidden="true" />}
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-[calc(100%+4px)] z-50 w-64 sm:w-72 bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden animate-fade-in"
+          className="absolute left-0 top-[calc(100%+4px)] z-50 w-[min(calc(100vw-2rem),22rem)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden animate-fade-in"
         >
           {/* Home */}
           <Link
@@ -99,8 +99,8 @@ export function ModuleSwitcher({ label }: Props) {
             <span className="w-8 h-8 rounded-lg bg-[#1e3a5f] text-white flex items-center justify-center shrink-0">
               <Home size={15} />
             </span>
-            <span className="font-semibold">Página principal</span>
-            {pathname === '/' && <ChevronRight size={14} className="ml-auto text-[#1e3a5f]" />}
+            <span className="min-w-0 flex-1 font-semibold leading-snug break-words">Página principal</span>
+            {pathname === '/' && <ChevronRight size={14} className="shrink-0 text-[#1e3a5f]" />}
           </Link>
 
           {/* Módulos */}
@@ -128,8 +128,8 @@ export function ModuleSwitcher({ label }: Props) {
                     >
                       <Icon size={15} />
                     </span>
-                    <span className="font-semibold flex-1 truncate">{m.label}</span>
-                    {active && <ChevronRight size={14} className="text-[#1e3a5f]" />}
+                    <span className="min-w-0 flex-1 whitespace-normal break-words font-semibold leading-snug">{m.label}</span>
+                    {active && <ChevronRight size={14} className="shrink-0 text-[#1e3a5f]" />}
                   </Link>
                 )
               })
