@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
-import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, Loader2, RefreshCw, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, Loader2, RefreshCw, Search, Upload, ArrowDown, ArrowUp } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { Spinner } from '../../components/ui/Spinner'
 import { useToast } from '../../hooks/useToast'
+import { useAuthContext } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
 import type { Viaje } from '../../types/tms'
 import type { GuiaPaqueteria, Paqueteria } from '../../types/guias'
 import { PAQUETERIA_LABEL } from '../../types/guias'
+import { useSekoMovements } from '../../hooks/useSekoMovements'
+import { SekoImportModal } from './SekoImportModal'
+import type { CreateSekoMovementData } from '../../types/seko'
 
 const SEKO_CODES = ['BSF', 'KST', 'BB', 'LUL']
 
@@ -139,6 +143,7 @@ function exportSekoBillingXLSX(lines: BillingLine[], monthLabel: string, clientL
 
 export function SekoBillingPage() {
   const toast = useToast()
+  const { user } = useAuthContext()
   const [month, setMonth] = useState(() => startOfMonth(new Date()))
   const [clientFilter, setClientFilter] = useState('todos')
   const [search, setSearch] = useState('')
@@ -146,6 +151,16 @@ export function SekoBillingPage() {
   const [lines, setLines] = useState<BillingLine[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showImport, setShowImport] = useState(false)
+
+  // Movimientos importados de los Excels de Seko 365 — filtrados por mes
+  const fromDateMov = isoDay(startOfMonth(month))
+  const toDateMov   = isoDay(endOfMonth(month))
+  const sekoFilters = useMemo(
+    () => ({ fechaDesde: fromDateMov, fechaHasta: toDateMov }),
+    [fromDateMov, toDateMov],
+  )
+  const { movements, kpis: movKpis, bulkInsert, refetch: refetchMov } = useSekoMovements(sekoFilters)
 
   const fromDate = isoDay(startOfMonth(month))
   const toDate = isoDay(endOfMonth(month))
@@ -308,6 +323,13 @@ export function SekoBillingPage() {
                 <RefreshCw size={14} /> Recargar
               </button>
               <button
+                onClick={() => setShowImport(true)}
+                className="h-10 px-4 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 text-sm font-bold inline-flex items-center justify-center gap-2 hover:bg-emerald-100"
+                title="Sube el Excel de movimientos que comparte el cliente Seko"
+              >
+                <Upload size={15} /> Importar Excel
+              </button>
+              <button
                 onClick={() => {
                   exportSekoBillingXLSX(visibleLines, monthLabel, clientLabel)
                   toast.success('Proforma generada', `${visibleLines.length} conceptos exportados`)
@@ -401,6 +423,82 @@ export function SekoBillingPage() {
             </div>
           </div>
 
+          {/* ─── Movimientos importados de Excels Seko 365 ─── */}
+          <div className="mt-6 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <h2 className="text-sm font-bold text-[#1e3a5f] inline-flex items-center gap-2">
+                  <FileSpreadsheet size={15} /> Movimientos importados de Seko ({movements.length})
+                </h2>
+                <p className="text-[11px] text-gray-400 mt-0.5">
+                  Movimientos del período tomados de los Excels que comparte el cliente Seko 365.
+                  Eventualmente se empujan a Extensiv junto con los datos del TMS.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-[11px]">
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold">
+                  <ArrowDown size={11} /> {movKpis.entradas} entradas
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-blue-700 font-bold">
+                  <ArrowUp size={11} /> {movKpis.salidas} salidas
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 text-amber-700 font-bold">
+                  {movKpis.pendientes} sin facturar
+                </span>
+              </div>
+            </div>
+            {movements.length === 0 ? (
+              <div className="py-8 text-center text-xs text-gray-400">
+                Sin movimientos importados. Click en "Importar Excel" arriba para subir el archivo de Seko.
+              </div>
+            ) : (
+              <div className="overflow-x-auto max-h-[40vh]">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr className="text-left text-gray-500 uppercase text-[10px]">
+                      <th className="px-3 py-2">Fecha</th>
+                      <th className="px-3 py-2">Cliente</th>
+                      <th className="px-3 py-2">Tipo</th>
+                      <th className="px-3 py-2">Referencia</th>
+                      <th className="px-3 py-2">SKU</th>
+                      <th className="px-3 py-2 text-right">Cantidad</th>
+                      <th className="px-3 py-2">Origen</th>
+                      <th className="px-3 py-2">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {movements.map(m => (
+                      <tr key={m.id} className="border-b border-gray-50 hover:bg-gray-50/40">
+                        <td className="px-3 py-1.5 whitespace-nowrap text-gray-600">{fmtDate(m.fecha)}</td>
+                        <td className="px-3 py-1.5 text-gray-700 font-semibold">{m.cliente_codigo ?? '—'}</td>
+                        <td className="px-3 py-1.5">
+                          {m.tipo === 'entrada' ? (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold">
+                              <ArrowDown size={10} /> Entrada
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-bold">
+                              <ArrowUp size={10} /> Salida
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-3 py-1.5 font-mono text-[11px]">{m.referencia ?? '—'}</td>
+                        <td className="px-3 py-1.5 font-mono text-[11px]">{m.sku ?? '—'}</td>
+                        <td className="px-3 py-1.5 text-right tabular-nums">{Number(m.cantidad).toLocaleString('es-MX')}</td>
+                        <td className="px-3 py-1.5 text-[10px] text-gray-400 truncate max-w-[160px]" title={m.source_file ?? ''}>{m.source_file ?? '—'}</td>
+                        <td className="px-3 py-1.5">
+                          {m.billed
+                            ? <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold">Facturado</span>
+                            : <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-bold">Pendiente</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
           {loading && (
             <div className="fixed bottom-4 right-4 rounded-xl bg-white border border-gray-100 shadow-lg px-4 py-3 text-sm text-gray-500 inline-flex items-center gap-2">
               <Loader2 size={16} className="animate-spin" /> Actualizando
@@ -408,6 +506,21 @@ export function SekoBillingPage() {
           )}
         </main>
       </div>
+
+      <SekoImportModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        clientes={clients.map(c => ({ id: c.id, codigo: c.codigo ?? '', nombre: c.name }))}
+        importedBy={user?.email ?? user?.name ?? null}
+        onConfirm={async (rows: CreateSekoMovementData[], fileName: string) => {
+          const inserted = await bulkInsert(rows)
+          toast.success(
+            `${inserted} movimientos importados`,
+            `de ${fileName} — ya forman parte del histórico para el billing`,
+          )
+          await refetchMov()
+        }}
+      />
     </div>
   )
 }
