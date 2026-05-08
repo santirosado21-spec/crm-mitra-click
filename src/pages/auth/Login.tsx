@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
+import { useToast } from '../../hooks/useToast'
 import { Loader2 } from 'lucide-react'
 
 type Mode = 'signin' | 'reset'
@@ -8,6 +9,7 @@ type Mode = 'signin' | 'reset'
 export function Login() {
   const { signIn, sendPasswordReset } = useAuthContext()
   const navigate = useNavigate()
+  const toast = useToast()
 
   const [mode, setMode] = useState<Mode>('signin')
   const [email, setEmail] = useState('')
@@ -21,7 +23,15 @@ export function Login() {
     setError(''); setInfo(''); setLoading(true)
     try {
       if (mode === 'signin') {
-        await signIn(email, password)
+        const u = await signIn(email, password)
+        // Saludo personalizado: el toast aparece al cargar la home y se
+        // autodescarta. Usamos el `name` resuelto desde team_members (cae a
+        // la parte local del email si no hay registro).
+        const greetName = u?.name?.trim() || u?.email?.split('@')[0] || ''
+        toast.success(
+          greetName ? `¡Bienvenido, ${greetName}!` : '¡Bienvenido!',
+          'Sesión iniciada correctamente.',
+        )
         navigate('/')
       } else {
         await sendPasswordReset(email)

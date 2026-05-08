@@ -131,12 +131,20 @@ export function Sidebar() {
       <aside
         className={`
           ${open ? 'fixed inset-y-0 left-0 z-40 flex' : 'hidden lg:flex lg:static'}
-          w-[220px] shrink-0 flex-col border-r
+          relative w-[220px] shrink-0 flex-col
         `}
-        style={{ background: 'var(--sidebar-bg)', borderColor: 'var(--card-border)' }}
+        style={{ background: 'var(--sidebar-bg)' }}
         role="navigation"
         aria-label="Navegación principal"
       >
+        {/* Borde derecho animado (mismo gradient azul↔rojo del login-frame que
+             usa la home en sus tiles). Reemplaza el border-r estático para que
+             el sidebar comparta identidad visual con los módulos. */}
+        <span
+          aria-hidden="true"
+          className="login-frame absolute top-0 right-0 h-full w-[3px] pointer-events-none"
+        />
+
         {/* Botón cerrar — solo móvil */}
         <button
           type="button"

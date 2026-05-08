@@ -40,8 +40,10 @@ export function Header() {
       style={{ boxShadow: '0 1px 0 #e8edf2' }}
     >
       {/* ModuleSwitcher: hamburger clickable que abre dropdown con home + módulos.
-          En homepage muestra una casita al lado del icono trigger. */}
-      <ModuleSwitcher label={pathname === '/' ? <HouseIcon size={20} className="text-[#1e3a5f]" /> : null} />
+          En todas las páginas mostramos la misma casita que la homepage para
+          que el acceso al menú principal sea visualmente idéntico en cualquier
+          módulo. */}
+      <ModuleSwitcher label={<HouseIcon size={20} className="text-[#1e3a5f]" />} />
 
       {/* Hamburger del sidebar móvil — solo en móvil + cuando hay sidebar (no homepage).
           Esto es DISTINTO al ModuleSwitcher: abre la nav contextual del módulo actual. */}
