@@ -1,10 +1,12 @@
-import { LogOut, Menu, Home } from 'lucide-react'
+import { LogOut, Menu } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { GlobalSearch } from './GlobalSearch'
 import { NotificationBell } from './NotificationBell'
 import { TimerPill } from './TimerPill'
 import { ModuleSwitcher } from './ModuleSwitcher'
+import { HDArrows } from '../icons/HDArrows'
+import { HouseIcon } from '../icons/HouseIcon'
 import { useAuthContext } from '../../context/AuthContext'
 import { useActiveTimer } from '../../hooks/useActiveTimer'
 import { useToast } from '../../hooks/useToast'
@@ -40,7 +42,7 @@ export function Header() {
     >
       {/* ModuleSwitcher: hamburger clickable que abre dropdown con home + módulos.
           En homepage muestra una casita al lado del icono trigger. */}
-      <ModuleSwitcher label={pathname === '/' ? <Home size={18} aria-label="Inicio" /> : null} />
+      <ModuleSwitcher label={pathname === '/' ? <HouseIcon size={20} className="text-[#1e3a5f]" /> : null} />
 
       {/* Hamburger del sidebar móvil — solo en móvil + cuando hay sidebar (no homepage).
           Esto es DISTINTO al ModuleSwitcher: abre la nav contextual del módulo actual. */}
@@ -82,19 +84,15 @@ export function Header() {
         <TimerPill />
         <NotificationBell />
         <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600 font-medium">
-          {/* Avatar = solo las flechas del logo HD (parte izquierda del PNG
-               1484×689). Uso background-image con position+size para recortar
-               con precisión solo las flechas y omitir el texto "Supply Chain MX". */}
+          {/* Avatar = solo las flechas del logo HD reproducidas como SVG inline.
+               Mismo gráfico para todos los usuarios. Pixel-perfect a cualquier
+               tamaño sin depender del cropping del PNG. */}
           <div
-            className="w-9 h-9 rounded-full bg-white shrink-0 overflow-hidden"
-            style={{
-              backgroundImage: 'url(/hd-logo.png)',
-              backgroundSize: '215% auto',
-              backgroundPosition: 'left center',
-              backgroundRepeat: 'no-repeat',
-            }}
+            className="w-9 h-9 rounded-full bg-white shrink-0 flex items-center justify-center overflow-hidden"
             aria-label="Avatar"
-          />
+          >
+            <HDArrows size={28} />
+          </div>
           <span>{user?.name ?? 'Usuario'}</span>
         </div>
         <button
