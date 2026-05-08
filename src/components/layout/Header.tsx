@@ -83,13 +83,17 @@ export function Header() {
         <NotificationBell />
         <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600 font-medium">
           <div
-            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden"
+            className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden"
             aria-hidden="true"
           >
+            {/* Logo HD como foto de perfil — misma para todos los usuarios.
+                 object-cover + scale lo zoomea sobre el centro del PNG para
+                 que el "HD" se vea claro dentro del círculo. */}
             <img
               src="/hd-logo.png"
               alt=""
-              className="w-full h-full object-contain p-1"
+              className="w-full h-full object-cover"
+              style={{ transform: 'scale(1.4)', transformOrigin: 'center' }}
             />
           </div>
           <span>{user?.name ?? 'Usuario'}</span>

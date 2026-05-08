@@ -87,15 +87,14 @@ export function HomePage() {
       <Header />
       <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y">
         <div className="max-w-7xl mx-auto px-6 py-10">
-          {/* Welcome — logo HD en white card. El fondo blanco del PNG se
-               funde naturalmente con el card blanco (sin necesidad de
-               mix-blend-mode), evitando halos en mobile y desktop. */}
+          {/* Welcome — logo HD en white card, grande y visible.
+               Padding reducido para que el logo ocupe más espacio (zoom in). */}
           <div className="mb-10 flex flex-col items-center text-center">
-            <div className="bg-white rounded-2xl shadow-md px-8 py-5 sm:px-12 sm:py-6 inline-flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-md px-6 py-3 sm:px-10 sm:py-4 inline-flex items-center justify-center">
               <img
                 src="/hd-logo.png"
                 alt="Supply Chain MX"
-                className="h-16 sm:h-24 w-auto object-contain select-none"
+                className="h-28 sm:h-40 w-auto object-contain select-none"
               />
             </div>
             <p className="text-sm text-gray-500 mt-4">
@@ -116,20 +115,21 @@ export function HomePage() {
                   {/* Marco animado tipo login (gradient navy↔red en flujo). El
                        interior blanco mantiene la legibilidad de cada tile. */}
                   <div className="bg-white rounded-[calc(1rem-4px)] flex flex-col flex-1 overflow-hidden">
-                  {/* Header strip — refuerza el color del frame en el interior */}
+                  {/* Header strip — gradient navy ↔ red en TODOS los módulos
+                       (mismos colores que el borde animado para combinar). */}
                   <div
                     className="h-1.5 w-full shrink-0"
-                    style={{ background: m.color }}
+                    style={{ background: 'linear-gradient(90deg, #1e3a5f 0%, #1e3a5f 35%, #c8373c 65%, #c8373c 100%)' }}
                   />
 
                   <div className="p-5 flex flex-col flex-1">
-                    {/* Icon */}
+                    {/* Icon — color unificado navy con accent red claro */}
                     <div className="flex items-start mb-3 shrink-0">
                       <div
                         className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                        style={{ background: m.accentColor }}
+                        style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #fef2f2 100%)' }}
                       >
-                        <Icon size={28} style={{ color: m.color }} />
+                        <Icon size={28} style={{ color: '#1e3a5f' }} />
                       </div>
                     </div>
 
@@ -137,7 +137,7 @@ export function HomePage() {
                     <h2 className="text-base font-bold text-gray-900 mb-1 leading-tight min-h-[2.6rem] line-clamp-2">
                       {m.title}
                     </h2>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-3 min-h-[1rem] truncate" style={{ color: m.color }}>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-3 min-h-[1rem] truncate text-[#1e3a5f]">
                       {m.subtitle}
                     </p>
 
@@ -154,21 +154,15 @@ export function HomePage() {
                       <ul className="space-y-1">
                         {m.tools.map(tool => (
                           <li key={tool} className="flex items-center gap-2 text-[11px] text-gray-600 h-4 leading-4">
-                            <span
-                              className="w-1 h-1 rounded-full shrink-0"
-                              style={{ background: m.color }}
-                            />
+                            <span className="w-1 h-1 rounded-full shrink-0 bg-[#c8373c]" />
                             <span className="truncate">{tool}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
 
-                    {/* CTA — al fondo de la tile gracias al flex column */}
-                    <div
-                      className="flex items-center justify-between text-sm font-semibold shrink-0"
-                      style={{ color: m.color }}
-                    >
+                    {/* CTA — color navy unificado en TODOS los módulos */}
+                    <div className="flex items-center justify-between text-sm font-semibold shrink-0 text-[#1e3a5f]">
                       <span>Entrar al módulo</span>
                       <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </div>
