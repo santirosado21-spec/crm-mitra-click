@@ -83,17 +83,20 @@ export function Header() {
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <TimerPill />
         <NotificationBell />
-        <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600 font-medium">
+        <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600 font-medium max-w-[260px]">
           {/* Avatar = solo las flechas del logo HD reproducidas como SVG inline.
-               Mismo gráfico para todos los usuarios. Pixel-perfect a cualquier
-               tamaño sin depender del cropping del PNG. */}
+               Mismo gráfico para todos los usuarios. */}
           <div
             className="w-9 h-9 rounded-full bg-white shrink-0 flex items-center justify-center overflow-hidden"
             aria-label="Avatar"
           >
-            <HDArrows size={28} />
+            <HDArrows size={34} />
           </div>
-          <span>{user?.name ?? 'Usuario'}</span>
+          {/* Mostramos el email del usuario en lugar del nombre — identifica
+               de forma única a cada cuenta. */}
+          <span className="truncate" title={user?.email ?? ''}>
+            {user?.email ?? 'usuario@supplychain.mx'}
+          </span>
         </div>
         <button
           className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-red-500 transition-colors px-2 py-1.5 rounded-lg hover:bg-red-50"
