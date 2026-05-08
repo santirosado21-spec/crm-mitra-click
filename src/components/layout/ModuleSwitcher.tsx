@@ -77,8 +77,11 @@ export function ModuleSwitcher({ label }: Props) {
           open ? 'bg-gray-100 text-[#1e3a5f]' : 'text-[#1e3a5f] hover:bg-gray-100'
         }`}
       >
-        <PackingPerson size={22} aria-hidden="true" />
-        {label && <span className="inline-flex items-center">{label}</span>}
+        {/* Si hay label (ej. casita en homepage) lo usamos como único gráfico
+             del trigger. Si no, fallback al icono PackingPerson para módulos. */}
+        {label
+          ? <span className="inline-flex items-center">{label}</span>
+          : <PackingPerson size={22} aria-hidden="true" />}
       </button>
 
       {open && (

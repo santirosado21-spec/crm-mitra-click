@@ -5,7 +5,6 @@ import { GlobalSearch } from './GlobalSearch'
 import { NotificationBell } from './NotificationBell'
 import { TimerPill } from './TimerPill'
 import { ModuleSwitcher } from './ModuleSwitcher'
-import { HDArrows } from '../icons/HDArrows'
 import { HouseIcon } from '../icons/HouseIcon'
 import { useAuthContext } from '../../context/AuthContext'
 import { useActiveTimer } from '../../hooks/useActiveTimer'
@@ -84,14 +83,20 @@ export function Header() {
         <TimerPill />
         <NotificationBell />
         <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600 font-medium max-w-[260px]">
-          {/* Avatar = solo las flechas del logo HD reproducidas como SVG inline.
-               Mismo gráfico para todos los usuarios. */}
+          {/* Avatar = recorte preciso del PNG /public/hd-logo.png centrado en la
+               sección de flechas (parte superior central, omitiendo "SupplyChain
+               México"). El PNG es 1484×689; con backgroundSize 530% y position
+               center 14% el círculo muestra solo el icono original tal cual. */}
           <div
-            className="w-9 h-9 rounded-full bg-white shrink-0 flex items-center justify-center overflow-hidden"
+            className="w-9 h-9 rounded-full bg-white shrink-0 overflow-hidden"
+            style={{
+              backgroundImage: 'url(/hd-logo.png)',
+              backgroundSize: '530% auto',
+              backgroundPosition: 'center 14%',
+              backgroundRepeat: 'no-repeat',
+            }}
             aria-label="Avatar"
-          >
-            <HDArrows size={34} />
-          </div>
+          />
           {/* Mostramos el email del usuario en lugar del nombre — identifica
                de forma única a cada cuenta. */}
           <span className="truncate" title={user?.email ?? ''}>
