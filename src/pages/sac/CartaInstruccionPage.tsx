@@ -392,13 +392,6 @@ function DocumentPreview({ data }: { data: any }) {
         <p className="text-xs whitespace-pre-wrap"><b>Seguridad:</b> {data.seguridad || '—'}</p>
       </Section>
 
-      <div className="grid grid-cols-3 gap-8 mt-10 text-center text-xs">
-        {['SAC', 'Transportes', 'Operador / Receptor'].map(label => (
-          <div key={label}>
-            <div className="border-t border-gray-400 pt-2">{label}</div>
-          </div>
-        ))}
-      </div>
     </article>
   )
 }

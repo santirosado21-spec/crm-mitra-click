@@ -28,8 +28,9 @@ const MODULES: ModuleEntry[] = [
 ]
 
 interface Props {
-  /** Texto a mostrar al lado del icono. Si es null, solo se muestra el icono. */
-  label?: string | null
+  /** Contenido a mostrar al lado del icono trigger. Acepta string o JSX
+   *  (ej. <Home /> para una casita). Si es null, solo se muestra el icono. */
+  label?: React.ReactNode | null
 }
 
 /**
@@ -77,7 +78,7 @@ export function ModuleSwitcher({ label }: Props) {
         }`}
       >
         <PackingPerson size={22} aria-hidden="true" />
-        {label && <span className="hidden sm:inline">{label}</span>}
+        {label && <span className="inline-flex items-center">{label}</span>}
       </button>
 
       {open && (
