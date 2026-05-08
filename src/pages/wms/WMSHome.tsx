@@ -71,10 +71,11 @@ const tools: Tool[] = [
   },
 ]
 
+// Identidad visual unificada: todas las categorías navy.
 const categories = [
   { key: 'sac', label: 'SAC', color: '#1e3a5f' },
-  { key: 'facturacion', label: 'Facturación', color: '#059669' },
-  { key: 'catalogo', label: 'Catálogos', color: '#7c3aed' },
+  { key: 'facturacion', label: 'Facturación', color: '#1e3a5f' },
+  { key: 'catalogo', label: 'Catálogos', color: '#1e3a5f' },
 ] as const
 
 export function WMSHome() {
@@ -158,7 +159,7 @@ export function WMSHome() {
           {/* ─── Inventory health ─── */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
-              <span className="w-1 h-4 rounded-full bg-[#d97706]" />
+              <span className="w-1 h-4 rounded-full bg-[#1e3a5f]" />
               <h2 className="text-[11px] font-bold uppercase tracking-widest text-gray-500">Salud de inventario</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -193,7 +194,7 @@ export function WMSHome() {
           {ops.topClientes.length > 0 && (
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
-                <span className="w-1 h-4 rounded-full bg-[#059669]" />
+                <span className="w-1 h-4 rounded-full bg-[#1e3a5f]" />
                 <h2 className="text-[11px] font-bold uppercase tracking-widest text-gray-500">Top clientes por ocupación</h2>
               </div>
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">

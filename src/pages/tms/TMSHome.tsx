@@ -25,10 +25,12 @@ const tools: Tool[] = [
   { to: '/tramites',      title: 'Trámites',   description: 'Vencimientos, verificaciones y trámites pendientes.',  icon: CalendarClock,   category: 'com' },
 ]
 
+// Identidad visual unificada: todas las categorías comparten el navy
+// brand. La diferenciación visual viene del label, no del color.
 const categories = [
   { key: 'ops', label: 'Operaciones', color: '#1e3a5f' },
-  { key: 'tms', label: 'Transporte',  color: '#c8373c' },
-  { key: 'com', label: 'Comercial',   color: '#059669' },
+  { key: 'tms', label: 'Transporte',  color: '#1e3a5f' },
+  { key: 'com', label: 'Comercial',   color: '#1e3a5f' },
 ] as const
 
 export function TMSHome() {

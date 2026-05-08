@@ -15,12 +15,16 @@ interface ModuleEntry {
   color: string
 }
 
+// Todos los módulos usan el mismo color (navy) para mantener identidad
+// visual unificada con el resto de la plataforma.
+const NAVY = '#1e3a5f'
+
 const MODULES: ModuleEntry[] = [
-  { id: 'wms',     to: '/wms',                   label: 'Herramientas de WMS',        icon: Package,        color: '#1e3a5f' },
-  { id: 'tms',     to: '/tms',                   label: 'Transportes',                icon: Truck,          color: '#c8373c' },
-  { id: 'parcel',  to: '/tms/guias-paqueteria',  label: 'TMS Guías de Paquetería',    icon: PackingPerson,  color: '#0ea5e9' },
-  { id: 'almacen', to: '/almacen',               label: 'Almacén CEDIS Lerma',        icon: Warehouse,      color: '#059669' },
-  { id: 'tasks',   to: '/tasks',                 label: 'Task Tracker',               icon: ClipboardList,  color: '#7c3aed' },
+  { id: 'wms',     to: '/wms',                   label: 'Herramientas de WMS',     icon: Package,       color: NAVY },
+  { id: 'tms',     to: '/tms',                   label: 'Transportes',             icon: Truck,         color: NAVY },
+  { id: 'parcel',  to: '/tms/guias-paqueteria',  label: 'TMS Guías de Paquetería', icon: PackingPerson, color: NAVY },
+  { id: 'almacen', to: '/almacen',               label: 'Almacén CEDIS Lerma',     icon: Warehouse,     color: NAVY },
+  { id: 'tasks',   to: '/tasks',                 label: 'Task Tracker',            icon: ClipboardList, color: NAVY },
 ]
 
 interface Props {
