@@ -4,8 +4,6 @@ import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { GlobalSearch } from './GlobalSearch'
 import { NotificationBell } from './NotificationBell'
 import { TimerPill } from './TimerPill'
-import { ModuleSwitcher } from './ModuleSwitcher'
-import { HouseIcon } from '../icons/HouseIcon'
 import { useAuthContext } from '../../context/AuthContext'
 import { useActiveTimer } from '../../hooks/useActiveTimer'
 import { useToast } from '../../hooks/useToast'
@@ -39,14 +37,27 @@ export function Header() {
     <header className="bg-white h-16 sm:h-24 flex items-center gap-2 sm:gap-4 px-3 sm:px-6 shrink-0 relative z-20 border-b border-gray-200/80"
       style={{ boxShadow: '0 1px 0 #e8edf2' }}
     >
-      {/* ModuleSwitcher: hamburger clickable que abre dropdown con home + módulos.
-          En todas las páginas mostramos la misma casita que la homepage para
-          que el acceso al menú principal sea visualmente idéntico en cualquier
-          módulo. */}
-      <ModuleSwitcher label={<HouseIcon size={20} className="text-[#1e3a5f]" />} />
+      {/* Logo HD — leftmost. Click → /, que es el menú principal de módulos.
+          Reemplazó al ModuleSwitcher (icono trigger) que vivía aquí antes. */}
+      {pathname !== '/' && (
+        <div className="flex items-center shrink-0">
+          <Link
+            to="/"
+            className="flex items-center focus-visible:outline-none rounded-lg hover:opacity-90 transition-opacity"
+            title="Volver al menú principal"
+          >
+            <img
+              src="/hd-logo.png"
+              alt="Supply Chain MX"
+              className="h-12 sm:h-20 w-auto object-contain"
+            />
+          </Link>
+        </div>
+      )}
 
       {/* Hamburger del sidebar móvil — solo en móvil + cuando hay sidebar (no homepage).
-          Esto es DISTINTO al ModuleSwitcher: abre la nav contextual del módulo actual. */}
+          Abre la nav contextual del módulo actual; desde ahí también hay un
+          link "Menú principal" para volver a la home. */}
       {showHamburger && (
         <button
           type="button"
@@ -57,19 +68,6 @@ export function Header() {
         >
           <Menu size={18} />
         </button>
-      )}
-
-      {/* Logo HD (solo fuera de homepage — en homepage el logo grande vive en el centro de la página) */}
-      {pathname !== '/' && (
-        <div className="flex items-center shrink-0">
-          <Link to="/" className="flex items-center focus-visible:outline-none rounded-lg hover:opacity-90 transition-opacity">
-            <img
-              src="/hd-logo.png"
-              alt="Supply Chain MX"
-              className="h-12 sm:h-20 w-auto object-contain"
-            />
-          </Link>
-        </div>
       )}
 
       {/* Divider */}
