@@ -1,9 +1,10 @@
-import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet, Package, MapPin } from 'lucide-react'
+import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet, Package, MapPin, Menu } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
 import { useSidebar } from '../../context/SidebarContext'
 import { canAccessPath } from '../../config/permissions'
+import { ModuleSwitcher } from './ModuleSwitcher'
 
 interface Link {
   to: string
@@ -154,15 +155,19 @@ export function Sidebar() {
           <X size={18} />
         </button>
       <nav className="flex-1 flex flex-col gap-4 p-3 pt-5 overflow-y-auto">
-        {/* "Back to home" — forces module switch via the main menu */}
-        <NavLink
-          to="/"
-          end
-          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-        >
-          <Home size={16} className="shrink-0 text-gray-400 group-hover:text-[#1e3a5f] group-hover:scale-110 transition-all" />
-          <span>Menú principal</span>
-        </NavLink>
+        {/* Trigger hamburger (3 rallitas) que abre el dropdown de módulos
+             — reemplaza al "Menú principal" simple para que desde aquí se
+             pueda saltar a cualquier módulo sin pasar por la home. */}
+        <div className="px-1">
+          <ModuleSwitcher
+            label={
+              <span className="inline-flex items-center gap-2.5 text-sm font-medium text-gray-700">
+                <Menu size={18} className="text-gray-500" />
+                <span>Menú principal</span>
+              </span>
+            }
+          />
+        </div>
 
         <div className="border-t border-gray-100 -mx-3" />
 

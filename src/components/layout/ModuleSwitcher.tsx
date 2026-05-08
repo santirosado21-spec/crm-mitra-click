@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  Home, Package, Truck, Warehouse, ClipboardList, ChevronRight,
+  Home, Package, Truck, Warehouse, ClipboardList, ChevronRight, Menu,
 } from 'lucide-react'
 import { PackingPerson } from '../icons/PackingPerson'
 import { useAuthContext } from '../../context/AuthContext'
@@ -77,11 +77,11 @@ export function ModuleSwitcher({ label }: Props) {
           open ? 'bg-gray-100 text-[#1e3a5f]' : 'text-[#1e3a5f] hover:bg-gray-100'
         }`}
       >
-        {/* Si hay label (ej. casita en homepage) lo usamos como único gráfico
-             del trigger. Si no, fallback al icono PackingPerson para módulos. */}
+        {/* Si hay label la usamos. Si no, fallback al icono Menu (3 líneas
+             hamburger) para que el trigger sea visualmente "abre menú". */}
         {label
           ? <span className="inline-flex items-center">{label}</span>
-          : <PackingPerson size={22} aria-hidden="true" />}
+          : <Menu size={20} aria-hidden="true" />}
       </button>
 
       {open && (
