@@ -25,9 +25,17 @@ export type ChargeType =
   | 'MANIOBRA_DESCARGA'
   | 'SERVICIO_VALOR_AGREGADO'
   | 'ALMACENAJE_DIA'
+  | 'MOVIMIENTO_SEKO_ENTRADA'
+  | 'MOVIMIENTO_SEKO_SALIDA'
+
+export type SourceTable =
+  | 'viajes'
+  | 'operations'
+  | 'servicios_adicionales'
+  | 'seko_movements'
 
 export interface PushChargeInput {
-  sourceTable:     'viajes' | 'operations' | 'servicios_adicionales'
+  sourceTable:     SourceTable
   sourceId:        string
   customerId:      number
   chargeType:      ChargeType
@@ -159,9 +167,9 @@ export interface ChargeStatus {
   attempted_at:        string
 }
 
-/** Trae el status de los charges de un set de viajes/operations. */
+/** Trae el status de los charges de un set de viajes/operations/seko. */
 export async function getChargeStatusForSources(
-  sourceTable: 'viajes' | 'operations' | 'servicios_adicionales',
+  sourceTable: SourceTable,
   sourceIds:   string[],
 ): Promise<Map<string, ChargeStatus[]>> {
   if (sourceIds.length === 0) return new Map()
@@ -222,5 +230,89 @@ export async function voidCharge(logId: string, reason: string): Promise<void> {
     p_log_id: logId,
     p_reason: reason,
   })
+  if (error) throw new Error(error.message)
+}
+
+/* ─── Seko movements → Extensiv ─────────────────────────────────────────── */
+
+export interface SekoMovementChargeInput {
+  movementId:      string
+  movementTipo:    'entrada' | 'salida'
+  customerId:      number                  // extensiv_customer_id del cliente
+  cantidad:        number
+  unitPrice:       number                  // tarifario.precio (MXN)
+  fecha:           string                  // YYYY-MM-DD
+  referencia:      string | null           // PO/SO/folio del cliente
+  sku:             string | null
+  clienteCodigo:   string                  // BSF | KST | BB | LUL
+}
+
+/**
+ * Empuja un movimiento de Seko 365 a Extensiv como charge. Idempotente vía el
+ * UNIQUE (source_table, source_id, charge_type) del log: reintenta sin duplicar
+ * si el primer push falló.
+ */
+export async function pushSekoMovementToExtensiv(
+  input: SekoMovementChargeInput,
+): Promise<PushChargeResult> {
+  const amount = Number((input.cantidad * input.unitPrice).toFixed(2))
+  const chargeType: ChargeType = input.movementTipo === 'entrada'
+    ? 'MOVIMIENTO_SEKO_ENTRADA'
+    : 'MOVIMIENTO_SEKO_SALIDA'
+
+  const refParts = [input.referencia, input.sku].filter(Boolean) as string[]
+  const description =
+    `Seko 365 ${input.movementTipo} · ${input.clienteCodigo}` +
+    (input.sku ? ` · SKU ${input.sku}` : '') +
+    ` · ${input.cantidad} u`
+  const referenceNumber = refParts.length > 0
+    ? refParts.join(' / ')
+    : `SEKO-${input.movementId.slice(0, 8)}`
+
+  return pushChargeToExtensiv({
+    sourceTable:     'seko_movements',
+    sourceId:        input.movementId,
+    customerId:      input.customerId,
+    chargeType,
+    amount,
+    description,
+    referenceNumber,
+    chargeDate:      input.fecha,
+  })
+}
+
+/**
+ * Resuelve la tarifa unitaria (MXN) de entrada/salida para un cliente Seko a
+ * partir de la tabla `tarifarios`. Busca el primer concepto activo cuyo texto
+ * contenga "entrada" o "salida" (case-insensitive). Devuelve 0 si no hay match.
+ */
+export async function getSekoUnitTariffs(clienteCodigo: string): Promise<{
+  entrada: number
+  salida:  number
+}> {
+  const { data, error } = await supabase
+    .from('tarifarios')
+    .select('concepto, precio, activo')
+    .eq('cliente_codigo', clienteCodigo)
+    .eq('activo', true)
+
+  if (error) throw new Error(error.message)
+
+  let entrada = 0, salida = 0
+  for (const row of (data ?? []) as { concepto: string; precio: number }[]) {
+    const c = row.concepto.toLowerCase()
+    if (entrada === 0 && c.includes('entrada') && !c.includes('salida')) entrada = Number(row.precio || 0)
+    if (salida  === 0 && c.includes('salida')  && !c.includes('entrada')) salida  = Number(row.precio || 0)
+  }
+  return { entrada, salida }
+}
+
+/** Marca un set de seko_movements como facturados (billed=true). */
+export async function markSekoMovementsBilled(ids: string[]): Promise<void> {
+  if (ids.length === 0) return
+  const { error } = await supabase
+    .from('seko_movements')
+    .update({ billed: true, billed_at: new Date().toISOString() })
+    .in('id', ids)
   if (error) throw new Error(error.message)
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
-import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, Loader2, RefreshCw, Search, Upload, ArrowDown, ArrowUp } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, Loader2, RefreshCw, Search, Upload, ArrowDown, ArrowUp, Send } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { Spinner } from '../../components/ui/Spinner'
@@ -13,6 +13,11 @@ import { PAQUETERIA_LABEL } from '../../types/guias'
 import { useSekoMovements } from '../../hooks/useSekoMovements'
 import { SekoImportModal } from './SekoImportModal'
 import type { CreateSekoMovementData } from '../../types/seko'
+import {
+  pushSekoMovementToExtensiv,
+  getSekoUnitTariffs,
+  markSekoMovementsBilled,
+} from '../../lib/extensivBilling'
 
 const SEKO_CODES = ['BSF', 'KST', 'BB', 'LUL']
 
@@ -141,9 +146,12 @@ function exportSekoBillingXLSX(lines: BillingLine[], monthLabel: string, clientL
   XLSX.writeFile(wb, `Billing_Seko365_${safe}.xlsx`)
 }
 
+type TariffMap = Record<string, { entrada: number; salida: number }>
+
 export function SekoBillingPage() {
   const toast = useToast()
   const { user } = useAuthContext()
+  const isAdmin = user?.role === 'admin'
   const [month, setMonth] = useState(() => startOfMonth(new Date()))
   const [clientFilter, setClientFilter] = useState('todos')
   const [search, setSearch] = useState('')
@@ -152,6 +160,14 @@ export function SekoBillingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showImport, setShowImport] = useState(false)
+  // Tarifas unitarias entrada/salida por código de cliente (BSF/KST/BB/LUL).
+  // Se cargan desde `tarifarios` cada vez que cambia la lista de clientes.
+  const [tariffs, setTariffs] = useState<TariffMap>({})
+  // Estado del push masivo a Extensiv
+  const [pushing, setPushing] = useState(false)
+  const [pushProgress, setPushProgress] = useState<{ done: number; total: number; sent: number; failed: number }>({
+    done: 0, total: 0, sent: 0, failed: 0,
+  })
 
   // Movimientos importados de los Excels de Seko 365 — filtrados por mes
   const fromDateMov = isoDay(startOfMonth(month))
@@ -272,6 +288,124 @@ export function SekoBillingPage() {
 
   useEffect(() => { loadData() }, [fromDate, toDate])
 
+  // Carga tarifas unitarias entrada/salida desde `tarifarios` para los clientes
+  // Seko activos. Se invoca cuando `clients` cambia.
+  useEffect(() => {
+    if (clients.length === 0) { setTariffs({}); return }
+    let cancelled = false
+    Promise.all(
+      clients
+        .filter(c => c.codigo)
+        .map(async c => ({ codigo: c.codigo!, t: await getSekoUnitTariffs(c.codigo!) })),
+    ).then(results => {
+      if (cancelled) return
+      const map: TariffMap = {}
+      for (const { codigo, t } of results) map[codigo] = t
+      setTariffs(map)
+    }).catch(e => {
+      if (!cancelled) console.warn('No se pudieron cargar tarifarios Seko:', e)
+    })
+    return () => { cancelled = true }
+  }, [clients])
+
+  // Calcula precio unitario para un movimiento (cantidad × tarifa).
+  const movementPrice = (codigo: string | null, tipo: 'entrada' | 'salida', cantidad: number): number => {
+    if (!codigo) return 0
+    const t = tariffs[codigo]
+    if (!t) return 0
+    const unit = tipo === 'entrada' ? t.entrada : t.salida
+    return unit * (Number(cantidad) || 0)
+  }
+
+  // KPIs específicos del bloque "Push a Extensiv"
+  const pushTargets = useMemo(() => {
+    const ready: typeof movements = []
+    let totalAmount = 0
+    let missingTariff = 0
+    let missingExtensivId = 0
+    for (const m of movements) {
+      if (m.billed) continue
+      const client = clients.find(c => c.id === m.cliente_id || c.codigo === m.cliente_codigo)
+      if (!client?.extensiv_customer_id) { missingExtensivId++; continue }
+      const price = movementPrice(m.cliente_codigo, m.tipo, Number(m.cantidad))
+      if (price <= 0) { missingTariff++; continue }
+      ready.push(m)
+      totalAmount += price
+    }
+    return { ready, totalAmount, missingTariff, missingExtensivId }
+  }, [movements, clients, tariffs])
+
+  // Push masivo a Extensiv: itera secuencial para no saturar el proxy y
+  // actualiza progreso. Tras un push exitoso se marca billed=true vía RPC
+  // (ya pasa internamente en el log; replicamos en seko_movements para que
+  // el filtro "Pendiente / Facturado" de la UI sea consistente).
+  async function handlePushToExtensiv() {
+    if (!isAdmin) {
+      toast.error('Solo admin', 'Este push requiere rol admin.')
+      return
+    }
+    if (pushTargets.ready.length === 0) {
+      toast.info('Sin pendientes', 'No hay movimientos listos para enviar.')
+      return
+    }
+    if (!window.confirm(
+      `Vas a enviar ${pushTargets.ready.length} movimientos a Extensiv por ` +
+      `${fmtMXN(pushTargets.totalAmount)}. ¿Continuar?`,
+    )) return
+
+    setPushing(true)
+    setPushProgress({ done: 0, total: pushTargets.ready.length, sent: 0, failed: 0 })
+    const sentIds: string[] = []
+    let sent = 0, failed = 0
+
+    for (let i = 0; i < pushTargets.ready.length; i++) {
+      const m = pushTargets.ready[i]
+      const client = clients.find(c => c.id === m.cliente_id || c.codigo === m.cliente_codigo)
+      const customerId = client?.extensiv_customer_id
+      const codigo = m.cliente_codigo ?? client?.codigo ?? ''
+      const t = tariffs[codigo]
+      if (!customerId || !t) {
+        failed++
+        setPushProgress(p => ({ ...p, done: i + 1, failed }))
+        continue
+      }
+      const unitPrice = m.tipo === 'entrada' ? t.entrada : t.salida
+      try {
+        const res = await pushSekoMovementToExtensiv({
+          movementId:    m.id,
+          movementTipo:  m.tipo,
+          customerId,
+          cantidad:      Number(m.cantidad) || 0,
+          unitPrice,
+          fecha:         m.fecha,
+          referencia:    m.referencia,
+          sku:           m.sku,
+          clienteCodigo: codigo,
+        })
+        if (res.ok) { sent++; sentIds.push(m.id) }
+        else        { failed++ }
+      } catch {
+        failed++
+      }
+      setPushProgress({ done: i + 1, total: pushTargets.ready.length, sent, failed })
+    }
+
+    if (sentIds.length > 0) {
+      try { await markSekoMovementsBilled(sentIds) } catch (e) { console.warn(e) }
+    }
+
+    setPushing(false)
+    if (failed === 0) {
+      toast.success(`${sent} movimientos enviados a Extensiv`, 'Marcados como facturados.')
+    } else {
+      toast.error(
+        `${sent} OK · ${failed} fallaron`,
+        'Revisa el log de Extensiv Billing para ver detalle.',
+      )
+    }
+    await Promise.all([refetchMov(), loadData()])
+  }
+
   const visibleLines = useMemo(() => {
     const q = normalize(search)
     return lines.filter(l => {
@@ -305,7 +439,7 @@ export function SekoBillingPage() {
                 <FileSpreadsheet size={20} /> Billing Seko 365
               </h1>
               <p className="text-xs text-gray-400 mt-0.5">
-                Admin / SAC · BASF, KST, Burberry y Lululemon · TMS + guías sin enviar a Extensiv
+                Admin / SAC · BASF, KST, Burberry y Lululemon · TMS, guías y movimientos importados — push a Extensiv
               </p>
             </div>
 
@@ -432,10 +566,10 @@ export function SekoBillingPage() {
                 </h2>
                 <p className="text-[11px] text-gray-400 mt-0.5">
                   Movimientos del período tomados de los Excels que comparte el cliente Seko 365.
-                  Eventualmente se empujan a Extensiv junto con los datos del TMS.
+                  Listos para empujar a Extensiv como charges (entrada/salida × tarifa).
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-[11px]">
+              <div className="flex items-center gap-2 text-[11px] flex-wrap">
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold">
                   <ArrowDown size={11} /> {movKpis.entradas} entradas
                 </span>
@@ -445,8 +579,49 @@ export function SekoBillingPage() {
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 text-amber-700 font-bold">
                   {movKpis.pendientes} sin facturar
                 </span>
+                {pushTargets.ready.length > 0 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 font-bold">
+                    {pushTargets.ready.length} listos · {fmtMXN(pushTargets.totalAmount)}
+                  </span>
+                )}
+                {(pushTargets.missingTariff > 0 || pushTargets.missingExtensivId > 0) && (
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-50 text-rose-700 font-bold"
+                    title={[
+                      pushTargets.missingTariff > 0 ? `${pushTargets.missingTariff} sin tarifa en tarifarios` : '',
+                      pushTargets.missingExtensivId > 0 ? `${pushTargets.missingExtensivId} sin extensiv_customer_id en clients` : '',
+                    ].filter(Boolean).join(' · ')}
+                  >
+                    {pushTargets.missingTariff + pushTargets.missingExtensivId} sin tarifa o ID
+                  </span>
+                )}
+                <button
+                  onClick={handlePushToExtensiv}
+                  disabled={!isAdmin || pushing || pushTargets.ready.length === 0}
+                  className="h-8 px-3 rounded-lg bg-[#1e3a5f] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 disabled:opacity-40 hover:bg-[#163049]"
+                  title={
+                    !isAdmin
+                      ? 'Requiere rol admin'
+                      : pushTargets.ready.length === 0
+                      ? 'No hay movimientos pendientes con tarifa + extensiv_customer_id'
+                      : `Enviar ${pushTargets.ready.length} movimientos a Extensiv`
+                  }
+                >
+                  {pushing ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+                  {pushing
+                    ? `Enviando ${pushProgress.done}/${pushProgress.total}`
+                    : 'Enviar a Extensiv'}
+                </button>
               </div>
             </div>
+            {pushing && (
+              <div className="px-4 py-2 border-b border-gray-100 bg-indigo-50/50 text-[11px] text-indigo-700 inline-flex items-center gap-2">
+                <Loader2 size={12} className="animate-spin" />
+                {pushProgress.done}/{pushProgress.total} procesados ·
+                <span className="text-emerald-700 font-bold">{pushProgress.sent} OK</span> ·
+                <span className="text-rose-700 font-bold">{pushProgress.failed} fallidos</span>
+              </div>
+            )}
             {movements.length === 0 ? (
               <div className="py-8 text-center text-xs text-gray-400">
                 Sin movimientos importados. Click en "Importar Excel" arriba para subir el archivo de Seko.
@@ -462,12 +637,15 @@ export function SekoBillingPage() {
                       <th className="px-3 py-2">Referencia</th>
                       <th className="px-3 py-2">SKU</th>
                       <th className="px-3 py-2 text-right">Cantidad</th>
+                      <th className="px-3 py-2 text-right">Precio</th>
                       <th className="px-3 py-2">Origen</th>
                       <th className="px-3 py-2">Estado</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {movements.map(m => (
+                    {movements.map(m => {
+                      const price = movementPrice(m.cliente_codigo, m.tipo, Number(m.cantidad))
+                      return (
                       <tr key={m.id} className="border-b border-gray-50 hover:bg-gray-50/40">
                         <td className="px-3 py-1.5 whitespace-nowrap text-gray-600">{fmtDate(m.fecha)}</td>
                         <td className="px-3 py-1.5 text-gray-700 font-semibold">{m.cliente_codigo ?? '—'}</td>
@@ -485,6 +663,10 @@ export function SekoBillingPage() {
                         <td className="px-3 py-1.5 font-mono text-[11px]">{m.referencia ?? '—'}</td>
                         <td className="px-3 py-1.5 font-mono text-[11px]">{m.sku ?? '—'}</td>
                         <td className="px-3 py-1.5 text-right tabular-nums">{Number(m.cantidad).toLocaleString('es-MX')}</td>
+                        <td className={`px-3 py-1.5 text-right tabular-nums font-semibold ${price > 0 ? 'text-[#1e3a5f]' : 'text-rose-500'}`}
+                            title={price > 0 ? '' : 'Falta tarifa en tarifarios para este cliente/tipo'}>
+                          {price > 0 ? fmtMXN(price) : '—'}
+                        </td>
                         <td className="px-3 py-1.5 text-[10px] text-gray-400 truncate max-w-[160px]" title={m.source_file ?? ''}>{m.source_file ?? '—'}</td>
                         <td className="px-3 py-1.5">
                           {m.billed
@@ -492,7 +674,8 @@ export function SekoBillingPage() {
                             : <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-bold">Pendiente</span>}
                         </td>
                       </tr>
-                    ))}
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>

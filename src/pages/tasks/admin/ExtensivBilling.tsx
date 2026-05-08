@@ -20,6 +20,8 @@ import {
   pushChargeToExtensiv,
   voidCharge,
   type BillingChargeRow,
+  type SourceTable,
+  type ChargeType,
 } from '../../../lib/extensivBilling'
 import { supabase } from '../../../lib/supabase'
 
@@ -169,10 +171,10 @@ export function ExtensivBilling() {
       const c = failed[i]
       try {
         await pushChargeToExtensiv({
-          sourceTable:     c.source_table as 'viajes' | 'operations' | 'servicios_adicionales',
+          sourceTable:     c.source_table as SourceTable,
           sourceId:        c.source_id,
           customerId:      c.customer_id,
-          chargeType:      c.charge_type as 'FLETE_INTERNO' | 'FLETE_EXTERNO' | 'MANIOBRA_CARGA' | 'MANIOBRA_DESCARGA' | 'SERVICIO_VALOR_AGREGADO' | 'ALMACENAJE_DIA',
+          chargeType:      c.charge_type as ChargeType,
           amount:          Number(c.amount),
           description:     c.description,
           referenceNumber: c.reference_number,
