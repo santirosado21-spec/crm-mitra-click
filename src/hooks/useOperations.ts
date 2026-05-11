@@ -65,16 +65,30 @@ export function useOperations(filters?: OperationFilters) {
 
   useEffect(() => { fetchOperations() }, [fetchOperations])
 
-  // Realtime: pick up new rows inserted by extensiv-webhook / extensiv-sync without a manual refresh.
+  // Realtime: refleja INSERT/UPDATE/DELETE de operations sin refresh manual.
+  // El webhook de Extensiv hace UPSERT (no solo INSERT), así que necesitamos
+  // escuchar '*' para que ediciones del SAC y refreshes de Extensiv aparezcan
+  // en vivo. DELETEs (raros, solo admin) también se reflejan.
   useEffect(() => {
     const channel = supabase
-      .channel('operations-insert')
+      .channel('operations-realtime')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'operations' },
+        { event: '*', schema: 'public', table: 'operations' },
         (payload) => {
+          if (payload.eventType === 'DELETE') {
+            const old = payload.old as Operation
+            setAllOps(prev => prev.filter(o => o.id !== old.id))
+            return
+          }
           const op = payload.new as Operation
-          setAllOps(prev => (prev.some(o => o.id === op.id) ? prev : [op, ...prev]))
+          setAllOps(prev => {
+            const idx = prev.findIndex(o => o.id === op.id)
+            if (idx === -1) return [op, ...prev]
+            const next = [...prev]
+            next[idx] = op
+            return next
+          })
         },
       )
       .subscribe()
