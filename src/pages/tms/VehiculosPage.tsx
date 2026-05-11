@@ -159,7 +159,7 @@ export function VehiculosPage() {
                       {fromCotizador ? (
                         <span className="text-[9px] font-semibold text-amber-600 px-1.5 py-0.5 rounded bg-amber-50" title="Definido en código del Cotizador">Cotizador</span>
                       ) : v.motive_vehicle_id ? (
-                        <Zap size={14} className="text-green-500 mx-auto" title="Sincronizado con Motive" />
+                        <Zap size={14} className="text-green-500 mx-auto" aria-label="Sincronizado con Motive" />
                       ) : (
                         <span className="text-[10px] text-gray-300">—</span>
                       )}

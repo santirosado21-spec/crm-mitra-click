@@ -122,6 +122,22 @@ Cada uno es 1-2 semanas. Prioridad solo si volumen lo justifica.
 
 ## 🟢 P3 — Hygiene técnica
 
+### Resolver ~10 type errors latentes (build strict bloqueado)
+**Estado**: `npm run type-check` (ahora `tsc -b --noEmit`) reporta errores reales que `tsc --noEmit` ocultaba. El script `build` se mantiene como `vite build` (NO strict) hasta resolver.
+
+**Errores conocidos por archivo**:
+- `src/lib/executiveReportExporter.ts:3` — `import '../types/tms/tms'` debe ser `'../types/tms'` (post rename a index.ts)
+- `src/pages/billing/proformaExport.ts:17,51` — `fmtCurrency`, `makeCell` no usados
+- `src/pages/billing/ProformasPage.tsx:81` y `src/pages/billing/RCPage.tsx:75` — `PromiseLike<void>` no tiene `.catch` (necesita `.then(..., onError)` o `await/try`)
+- `src/pages/billing/RCPage.tsx:3` — `Search` no usado
+- `src/pages/cotizador/CotizadorPage.tsx:636` — `CreateViajeData` faltan props (`fecha_salida`, `fecha_llegada`, `fecha_completado`, `costo_total`, etc.)
+- `src/pages/tms/components/ViajeForm.tsx:55` — `setOperacionId` no usado
+- `src/pages/tms/CostosTransportePage.tsx:135,152,155` — Recharts v3 types: `Formatter<number, NameType>` espera `number | undefined`
+
+**Cuando se resuelvan**: cambiar `build` a `tsc -b && vite build` en package.json.
+
+---
+
 ### Auditoría RLS por rol/tabla en Supabase
 Con 5 roles + tablas operativas + financieras, mandatorio auditar policies.
 
@@ -137,8 +153,27 @@ Si no, mover claves a Supabase secrets y rotar.
 
 ---
 
-### Mover `API KEY resend 2.md`
-Archivo en `/Users/santiagorosado/CRM SUPPLY CHAIN/API KEY resend 2.md` (fuera del repo). Si tiene una API key real, mover a Supabase secrets y eliminar el archivo plano.
+### 🚨 Rotar Resend API key + eliminar archivo plano
+**Confirmado 2026-05-11**: El archivo `/Users/santiagorosado/CRM SUPPLY CHAIN/API KEY resend 2.md` contiene una clave real Resend (`re_Vou2nYXi...`) en plaintext, en el sistema de archivos del usuario (fuera del repo, pero accesible).
+
+**Acción inmediata**:
+1. Rotar la clave en Resend dashboard (revocar la actual, crear nueva)
+2. Guardar la nueva en Supabase secrets (`supabase secrets set RESEND_API_KEY=<new>`)
+3. Verificar que la edge function `notify-task-email` la lee correctamente
+4. Eliminar el archivo plano `rm "/Users/santiagorosado/CRM SUPPLY CHAIN/API KEY resend 2.md"`
+
+---
+
+### xlsx package — 2 vulnerabilidades sin fix upstream
+**npm audit --omit=dev** reporta:
+- `xlsx@*` — Prototype Pollution + ReDoS, **no fix available**
+
+**Opciones**:
+- Mantener: bajo riesgo en uso server-side controlado, alto riesgo si parsea Excel de usuario externo
+- Reemplazar: `exceljs` (más mantenido, mismas funcionalidades core, mayor bundle)
+- Mover parsing a edge function: aislar el xlsx en server-side
+
+**Decisión pendiente**: medir cuántos paths del CRM pasan input no-confiable a `xlsx`.
 
 ---
 

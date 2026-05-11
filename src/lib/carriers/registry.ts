@@ -2,12 +2,16 @@
 // tabla carrier_credentials. Si ninguno está configurado, devuelve [mock] por
 // default para que el sistema sea funcional desde el primer día (modo demo).
 //
-// Cuando lleguen las credenciales reales, simplemente registrar `easypost.ts`
-// y `skydropx.ts` debajo y actualizar `clientFor()` para devolverlos.
+// Providers conectados:
+// - skydropx (aggregator: Estafeta, FedEx, DHL, UPS, Castores, Paquetexpress)
+// - manual (mock para modo demo)
+//
+// EasyPost queda pendiente — agregar import y entry en clientFor() cuando llegue.
 
 import { supabase } from '../supabase'
 import type { CarrierProviderClient } from './types'
 import { mockProvider } from './mock'
+import { skydropxProvider } from './skydropx'
 
 interface CarrierCredentialRow {
   provider:    string
@@ -16,11 +20,11 @@ interface CarrierCredentialRow {
   api_key:     string | null
 }
 
-/** Cliente para un provider específico (cuando exista la implementación). */
-function clientFor(_provider: string): CarrierProviderClient | null {
-  // TODO cuando lleguen las APIs reales:
+/** Cliente para un provider específico. */
+function clientFor(provider: string): CarrierProviderClient | null {
+  if (provider === 'skydropx') return skydropxProvider
+  // TODO conectar EasyPost cuando lleguen credenciales:
   // if (provider === 'easypost') return easypostProvider
-  // if (provider === 'skydropx') return skydropxProvider
   return null
 }
 

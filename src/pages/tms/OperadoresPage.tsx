@@ -131,7 +131,7 @@ export function OperadoresPage() {
                     <td className="px-4 py-3 text-right text-gray-600">{o.es_propio ? fmtMoney(o.sueldo_diario) : '—'}</td>
                     <td className="px-4 py-3 text-center">
                       {o.motive_user_id ? (
-                        <Zap size={14} className="text-green-500 mx-auto" title="Sincronizado con Motive" />
+                        <Zap size={14} className="text-green-500 mx-auto" aria-label="Sincronizado con Motive" />
                       ) : (
                         <span className="text-[10px] text-gray-300">—</span>
                       )}
