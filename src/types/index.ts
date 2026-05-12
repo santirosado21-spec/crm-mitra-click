@@ -104,6 +104,7 @@ export const CLIENTES_BITACORA = [
   { codigo: '400',    nombre: 'TEQUILA ENEMIGO'                  },
   { codigo: 'IFT',    nombre: 'IFIT'                             },
   { codigo: '071',    nombre: 'TARGET CONSULTING'                },
+  { codigo: 'WB',     nombre: 'WI-BO'                            },
 ] as const
 
 export type ClienteCode = typeof CLIENTES_BITACORA[number]['codigo']

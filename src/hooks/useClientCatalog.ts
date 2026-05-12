@@ -37,6 +37,7 @@ export const FALLBACK_CLIENTES: ClienteCatalog[] = [
   { id: '', codigo: '400',  nombre: 'TEQUILA ENEMIGO' },
   { id: '', codigo: 'IFT',  nombre: 'IFIT' },
   { id: '', codigo: '071',  nombre: 'TARGET CONSULTING' },
+  { id: '', codigo: 'WB',   nombre: 'WI-BO' },
 ]
 
 export function useClientCatalog() {

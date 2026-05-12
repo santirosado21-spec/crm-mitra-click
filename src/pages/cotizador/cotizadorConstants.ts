@@ -20,6 +20,7 @@ export const UNIDADES: Unidad[] = [
   { clave: 'RAB_54AK8K', placa: '54AK8K',  modelo: 'ISUZU Forward',     tipo: 'Rabón',      combustible: 'Diésel',   rendimiento: 3.2,  depreciacion: 346.78 },
   { clave: 'RAB_56AK8K', placa: '56AK8K',  modelo: 'VW Constellation',  tipo: 'Rabón',      combustible: 'Diésel',   rendimiento: 3.8,  depreciacion: 132.87 },
   { clave: 'RAB_57AK8K', placa: '57AK8K',  modelo: 'ISUZU Forward',     tipo: 'Rabón',      combustible: 'Diésel',   rendimiento: 2.0,  depreciacion: 129.43 },
+  { clave: 'RAB_58D1AC', placa: '58D1AC',  modelo: 'Por confirmar',     tipo: 'Rabón',      combustible: 'Diésel',   rendimiento: 3.5,  depreciacion: 200.00 },
   { clave: 'VAN_98D4AA', placa: '98D4AA',  modelo: 'VW Transporter',    tipo: 'Van',        combustible: 'Gasolina', rendimiento: 5.5,  depreciacion: 86.51  },
   { clave: 'VAN_D41BPR', placa: 'D41BPR',  modelo: 'VW Caddy',          tipo: 'Van ligera', combustible: 'Gasolina', rendimiento: 9.5,  depreciacion: 122.13 },
   { clave: 'AUT_MGP230A',placa: 'MGP230A', modelo: 'KIA Rio',           tipo: 'Auto chico', combustible: 'Gasolina', rendimiento: 14,   depreciacion: 35.96  },
