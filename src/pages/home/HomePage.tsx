@@ -137,7 +137,11 @@ export function HomePage() {
                     <h2 className="text-base font-bold text-gray-900 mb-1 leading-tight min-h-[2.6rem] line-clamp-2">
                       {m.title}
                     </h2>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-3 min-h-[1rem] truncate text-[#1e3a5f]">
+                    {/* Subtitle — wrap a 2 líneas con leading apretado en lugar de truncate
+                         para que "Transport Management System", "Rate shopping · Auto-pick · Etiquetas"
+                         y "Coordinación · Tiempo · Costos" no se corten en cards angostas (xl:grid-cols-5).
+                         min-h-[2rem] reserva espacio para 2 líneas en todas las cards (consistencia) */}
+                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-3 min-h-[2rem] leading-[1rem] line-clamp-2 text-[#1e3a5f]">
                       {m.subtitle}
                     </p>
 
