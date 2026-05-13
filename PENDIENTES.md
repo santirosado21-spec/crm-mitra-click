@@ -120,6 +120,33 @@ Cada uno es 1-2 semanas. Prioridad solo si volumen lo justifica.
 
 ---
 
+### Mapa CEDIS — ubicaciones de LINET (Wissner-Bosserhoff) no renderizables
+**Estado**: el filtro visual del CEDIS ya rinde 89 de las 90 ubicaciones de LINET tras el fix en `useExtensivWarehouseData.ts` (commit `b3eda69`). Lo que queda:
+
+**1. `MX-Pasillo-G-H` no existe en el SVG del CEDIS**
+- 7 unidades de LINET están en esta ubicación según Extensiv
+- El mapa estático solo tiene `MX-Pasillo-A-B` y `MX-Pasillo-C-D`
+- **Acciones posibles**:
+  - **A**: actualizar el SVG en `public/cedis-layout/` para agregar celdas Pasillo G-H
+  - **B**: el equipo de almacén reubica esos 7 items a una posición existente en Extensiv
+- **Decisión pendiente**: ¿G-H existe físicamente en el CEDIS? Si sí, actualizar SVG. Si no, mover en piso.
+
+**2. Ubicaciones formato `A1_XX_YY` (LINET tiene 4 unidades en estas)**
+- `A1_01_01`, `A1_01_03`, `A1_01_04`, `A1_02_15`
+- Total: 21 unidades de LINET (incluyendo qty=14 en `A1_01_01`)
+- Este formato no existe en `public/cedis-layout/data/locations.json` (todas las ubicaciones del mapa usan prefix `MX-`)
+- **Decisión pendiente**: ¿qué zona del CEDIS representa "A1_*"? Se necesita confirmar con jefe de almacén y o actualizar el SVG o renombrar en Extensiv.
+
+**3. 85 items de LINET sin ubicación asignada en Extensiv**
+- De los 371 inventory items consultados via API, 85 no tienen `locationIdentifier.nameKey.name`
+- Estos items fueron recibidos pero el putaway no se ha completado
+- **Acción operativa** (no código): pasar lista al jefe de almacén para que asigne ubicación a cada serial number
+- Ver detalle en `/tmp/extensiv-upload/linet_warehouse_data.json` si aún existe
+
+**Quien debe atender**: equipo de almacén (operativo) + Santiago si decide actualizar el SVG
+
+---
+
 ## 🟢 P3 — Hygiene técnica
 
 ### Resolver ~10 type errors latentes (build strict bloqueado)
@@ -196,3 +223,4 @@ No hay `.github/workflows/` hoy. Crear pipeline básico:
 | 2026-05-11 | Mantener `ProformasPage`, `RCPage`, `SekoBillingPage` activas hasta validar Billing Wizard manualmente. |
 | 2026-05-11 | Skydropx como única integración de paquetería (agregador). No integrar Estafeta/UPS/FedEx individual aún. |
 | 2026-05-11 | `bindErpExporter` mantiene formato XLSX genérico hasta confirmar layout con contador ContpaqI. |
+| 2026-05-13 | LINET agregado al CRM (código `LIN`, `extensiv_customer_id=39`, mapeo Wissner-Bosserhoff). Fix de normalización de ubicaciones aplicado. Quedan 3 gaps del lado de almacén (SVG Pasillo G-H, formato A1_*, 85 items sin putaway) — ver sección Mapa CEDIS arriba. |
