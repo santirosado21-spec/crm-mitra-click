@@ -32,6 +32,39 @@ const BLACKLIST_PATTERNS = [
 function isBlacklisted(name: string): boolean {
   return BLACKLIST_PATTERNS.some(re => re.test(name))
 }
+
+/*
+  Normaliza nombres de ubicación de Extensiv al formato del mapa CEDIS.
+  El mapa estático (public/cedis-layout/data/locations.json) usa formato
+  "MX-A-1-1" (una posición por celda). Extensiv permite "MX-G-4-19/20" para
+  representar inventory que ocupa 2 posiciones contiguas — sin esta
+  normalización el filtro visual no encuentra match (rect.pos[data-ubic]
+  con "19/20" no existe).
+
+  Reglas:
+  - "MX-G-4-19/20" → 2 entradas: "MX-G-4-19" y "MX-G-4-20" (units dividido)
+  - "Costilla-B-C" → "MX-Costilla-B-C" (agrega prefix faltante)
+  - "Pasillo-X-Y"  → "MX-Pasillo-X-Y" (agrega prefix faltante)
+  - Cualquier otro pasa intacto.
+*/
+function normalizeLocations(rawLoc: string, units: number): Array<{ loc: string; units: number }> {
+  // Patrón "X-19/20" → split en 2 posiciones contiguas
+  const slash = rawLoc.match(/^(.+)-(\d+)\/(\d+)$/)
+  if (slash) {
+    const [, prefix, a, b] = slash
+    return [
+      { loc: `${prefix}-${a}`, units: Math.ceil(units / 2) },
+      { loc: `${prefix}-${b}`, units: Math.floor(units / 2) },
+    ]
+  }
+
+  // Patrón "Costilla-*" o "Pasillo-*" sin prefix "MX-"
+  if (/^(Costilla|Pasillo)-/.test(rawLoc)) {
+    return [{ loc: `MX-${rawLoc}`, units }]
+  }
+
+  return [{ loc: rawLoc, units }]
+}
 const WEEK_MS             = 7 * 24 * 60 * 60 * 1000
 const MAX_UNITS_PER_BIN   = 100
 const PAGE_SIZE           = 500
@@ -192,12 +225,16 @@ async function fetchAllInventory(
         continue
       }
 
-      all.push({
-        loc,
-        cid,
-        cname: displayName || 'Sin cliente',
-        units: item.onHandQty ?? 0,
-      })
+      // Normaliza ubicación al formato del mapa (split "X/Y", prefix "MX-").
+      // Ver normalizeLocations() para reglas.
+      for (const norm of normalizeLocations(loc, item.onHandQty ?? 0)) {
+        all.push({
+          loc: norm.loc,
+          cid,
+          cname: displayName || 'Sin cliente',
+          units: norm.units,
+        })
+      }
     }
 
     if (result.items.length < PAGE_SIZE) break
