@@ -34,9 +34,19 @@ export function Header() {
   }
 
   return (
-    <header className="bg-white h-16 sm:h-24 flex items-center gap-2 sm:gap-4 px-3 sm:px-6 shrink-0 relative z-20 border-b border-gray-200/80"
+    <header className="bg-white shrink-0 relative z-20 border-b border-gray-200/80"
       style={{ boxShadow: '0 1px 0 #e8edf2' }}
     >
+      {/* Safe-area spacer: en iPhone standalone (app desde home screen),
+          env(safe-area-inset-top) ≈ 47-59px y reserva el espacio del notch /
+          Dynamic Island. En Safari normal o desktop es 0px (sin efecto). */}
+      <div
+        aria-hidden="true"
+        className="bg-white"
+        style={{ height: 'env(safe-area-inset-top, 0px)' }}
+      />
+
+      <div className="h-16 sm:h-24 flex items-center gap-2 sm:gap-4 px-3 sm:px-6">
       {/* Logo HD — leftmost. Click → /, que es el menú principal de módulos.
           Reemplazó al ModuleSwitcher (icono trigger) que vivía aquí antes. */}
       {pathname !== '/' && (
@@ -111,6 +121,8 @@ export function Header() {
           <LogOut size={16} aria-hidden="true" />
           <span className="hidden sm:inline">Salir</span>
         </button>
+      </div>
+
       </div>
 
       {/* Confirmación si hay timer activo ────────────────────────────────── */}
