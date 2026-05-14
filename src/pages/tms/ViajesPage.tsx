@@ -186,7 +186,7 @@ export function ViajesPage() {
       <Header />
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar />
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y p-6">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y p-3 sm:p-6">
           <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className="text-xl font-bold text-[#1e3a5f]">Viajes</h1>
@@ -198,8 +198,8 @@ export function ViajesPage() {
             </button>
           </div>
 
-          {/* KPIs */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          {/* KPIs — 2x2 en móvil, 4 columnas en tablet+ */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
               <p className="text-2xl font-bold text-[#1e3a5f]" style={{ fontFamily: 'Nunito, sans-serif' }}>{stats.total}</p>
               <p className="text-xs text-gray-400 mt-1">Total viajes</p>

@@ -737,9 +737,9 @@ export function CotizadorPage() {
                   )}
                 </div>
 
-                {/* Viaje Simple */}
+                {/* Viaje Simple — 1 col en móvil, 3 en tablet+ */}
                 {!modoMultiparadas && (
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                       <label className={`${lbl} text-center block`}>KM (ida)</label>
                       <input type="number" min={0} value={kmIda || ''} placeholder="0"
@@ -861,7 +861,7 @@ export function CotizadorPage() {
                     {viajeRedondo && (
                       <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4">
                         <span className="font-bold text-amber-800 text-sm">↩️ Datos del Regreso (al origen)</span>
-                        <div className="grid grid-cols-3 gap-3 mt-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
                           <div>
                             <label className={lbl}>KM Regreso</label>
                             {numInp(kmRegreso, setKmRegreso)}
@@ -887,10 +887,10 @@ export function CotizadorPage() {
                 )}
               </div>
 
-              {/* 2. Cliente y Unidad */}
+              {/* 2. Cliente y Unidad — 1 col móvil, 2 desktop */}
               <div className={sec}>
                 <p className={secTitle}><Truck size={16} /> Cliente y Unidad</p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className={lbl}>Nombre del cliente</label>
                     <select className={inp} value={cliente} onChange={e => setCliente(e.target.value)}>
@@ -978,7 +978,7 @@ export function CotizadorPage() {
 
               {/* 4. Maniobra */}
               <Collapsible title="Maniobra (opcional)" icon="🏗️">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className={lbl}>Horas</label>
                     <div className="flex gap-1 items-center">
@@ -1020,7 +1020,7 @@ export function CotizadorPage() {
 
               {/* 6. Días especiales */}
               <Collapsible title="Días Especiales / Bonos Extra" icon="⏰">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {[
                     { label: 'Matutino', rate: HE_TARIFAS.MATUTINO, val: dMatutino, set: setDMatutino },
                     { label: 'Nocturno', rate: HE_TARIFAS.NOCTURNO, val: dNocturno, set: setDNocturno },

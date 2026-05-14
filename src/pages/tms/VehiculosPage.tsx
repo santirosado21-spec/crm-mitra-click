@@ -83,7 +83,7 @@ export function VehiculosPage() {
       <Header />
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar />
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y p-6">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden touch-pan-y p-3 sm:p-6">
           <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className="text-xl font-bold text-[#1e3a5f]">Vehículos</h1>
@@ -114,9 +114,10 @@ export function VehiculosPage() {
             </div>
           </div>
 
-          {/* Tabla */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
+          {/* Tabla — wrapper con overflow-x-auto para móvil; tabla mantiene
+              min-width para que columnas no se compriman ilegiblemente. */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
+            <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60">
                   <th className="text-left px-4 py-3 font-semibold text-gray-600">Placa</th>
