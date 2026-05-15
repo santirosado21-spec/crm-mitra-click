@@ -222,19 +222,22 @@ export const skydropxProvider: CarrierProviderClient = {
     }
   },
 
-  async buyLabel(rateId: string): Promise<Label> {
+  async buyLabel(rateId: string, shipment?: RateInput): Promise<Label> {
     const cred = await loadCredential()
     if (!cred) throw new Error('Skydropx not configured')
 
     // El rate_id local viene con prefix; recortar para mandar a Skydropx.
     const upstreamRateId = rateId.startsWith(RATE_ID_PREFIX) ? rateId.slice(RATE_ID_PREFIX.length) : rateId
 
-    // NOTA: para crear un shipment Skydropx necesita addresses + parcels también.
-    // En el flujo actual del CRM el rate_id ya tiene esa info asociada en su
-    // backend; si la API exige re-mandar los datos, la página debe pasar el
-    // RateInput original aquí. Por ahora hacemos POST sólo con rate_id y
-    // dejamos que Skydropx resuelva — si falla, se devuelve error claro.
+    // Skydropx v1 crea el shipment con rate_id + addresses + parcels. Si el
+    // caller pasó el RateInput original lo incluimos; si no, mandamos solo el
+    // rate_id (Skydropx lo resuelve cuando la cotización ya tenía la dirección).
     const body: Partial<SkydropxShipmentRequest> = { rate_id: upstreamRateId }
+    if (shipment) {
+      body.address_from = addressToSkydropx(shipment.from)
+      body.address_to   = addressToSkydropx(shipment.to)
+      body.parcels      = [parcelToSkydropx(shipment.parcel)]
+    }
 
     const res = await authedFetch(`${baseUrl(cred.test_mode)}/shipments`, cred.api_key, {
       method: 'POST',
@@ -255,6 +258,7 @@ export const skydropxProvider: CarrierProviderClient = {
       carrier:       (attrs.carrier ?? 'skydropx').toLowerCase(),
       service:       attrs.service ?? '',
       cost_mxn:      parsePrice(attrs.total_pricing),
+      provider_shipment_id: json?.data?.id ?? attrs.tracking_number ?? undefined,
       raw:           json,
     }
   },

@@ -85,18 +85,21 @@ export const mockProvider: CarrierProviderClient = {
     return rates
   },
 
-  async buyLabel(rateId: string): Promise<Label> {
+  async buyLabel(rateId: string, _shipment?: RateInput): Promise<Label> {
+    void _shipment
     // En modo mock no hay carrier real; devolvemos un Label sintético. El
     // tracking se genera en la página al registrar el shipment.
+    const tracking = `MOCK${Date.now().toString().slice(-8)}`
     return {
       rate_id:        rateId,
       provider:       'manual',
-      tracking_code:  `MOCK${Date.now().toString().slice(-8)}`,
+      tracking_code:  tracking,
       label_url:      '',          // la página llena este campo con un Blob URL del PDF generado vía jsPDF
       label_format:   'pdf',
       carrier:        'mock',
       service:        'mock',
       cost_mxn:       0,
+      provider_shipment_id: tracking,
       raw: { mock: true },
     }
   },

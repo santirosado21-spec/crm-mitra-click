@@ -56,6 +56,8 @@ export interface Label {
   carrier:        string
   service:        string
   cost_mxn:       number
+  /** ID del shipment en el provider (para manifiestos y tracking). */
+  provider_shipment_id?: string
   raw?:           unknown
 }
 
@@ -67,6 +69,10 @@ export interface CarrierProviderClient {
   isAvailable():  Promise<boolean>
   /** Cotiza con todos los carriers que el provider expone. */
   getRates(input: RateInput): Promise<Rate[]>
-  /** Compra la etiqueta y retorna tracking + URL. */
-  buyLabel(rateId: string): Promise<Label>
+  /**
+   * Compra la etiqueta y retorna tracking + URL. El RateInput original es
+   * opcional: algunos providers (Skydropx v1) lo requieren para crear el
+   * shipment; otros (mock) lo ignoran.
+   */
+  buyLabel(rateId: string, shipment?: RateInput): Promise<Label>
 }
