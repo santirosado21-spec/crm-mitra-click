@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import * as XLSX from 'xlsx'
-import { Search, Download, FileSpreadsheet, RefreshCw, Printer, Info, Loader2, CloudDownload } from 'lucide-react'
+import { Download, FileSpreadsheet, RefreshCw, Printer, Info, Loader2, CloudDownload } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { RCDocument, newItem } from './components/RCDocument'
@@ -68,11 +68,13 @@ export function RCPage() {
       .eq('name', clienteF)
       .eq('is_active', true)
       .single()
-      .then(({ data }) => {
-        setExtensivId(data?.extensiv_customer_id ?? null)
-        setLoadingExtId(false)
-      })
-      .catch(() => setLoadingExtId(false))
+      .then(
+        ({ data }) => {
+          setExtensivId(data?.extensiv_customer_id ?? null)
+          setLoadingExtId(false)
+        },
+        () => setLoadingExtId(false),
+      )
   }, [clienteF])
 
   // ── Generate RC from Extensiv API ───────────────────────────────────────

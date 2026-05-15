@@ -132,7 +132,7 @@ export function CostosTransportePage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v: number) => fmtMoney(v)} />
+                    <Tooltip formatter={(v) => fmtMoney(Number(v) || 0)} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
                     <Bar dataKey="costo" name="Costo" fill="#c41e3a" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="ingreso" name="Ingreso" fill="#1e3a5f" radius={[4, 4, 0, 0]} />
@@ -149,10 +149,10 @@ export function CostosTransportePage() {
               {costBreakdown.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
-                    <Pie data={costBreakdown} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                    <Pie data={costBreakdown} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
                       {costBreakdown.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                     </Pie>
-                    <Tooltip formatter={(v: number) => fmtMoney(v)} />
+                    <Tooltip formatter={(v) => fmtMoney(Number(v) || 0)} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (

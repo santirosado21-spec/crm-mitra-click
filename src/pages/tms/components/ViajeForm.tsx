@@ -52,7 +52,7 @@ export function ViajeForm({ onSave, onClose, editData }: Props) {
   const { operadores } = useOperadores()
   const { clientes, loading: loadingClientes } = useClientCatalog()
 
-  const [operacionId, setOperacionId] = useState(editData?.operacion_id ?? '')
+  const [operacionId] = useState(editData?.operacion_id ?? '')
   const [vehiculoId, setVehiculoId] = useState(editData?.vehiculo_id ?? '')
   const [operadorId, setOperadorId] = useState(editData?.operador_id ?? '')
   const [cliente, setCliente] = useState(notaValue(editData?.notas, 'Cliente'))

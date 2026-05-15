@@ -74,11 +74,13 @@ export function ProformasPage() {
       .eq('name', clienteF)
       .eq('is_active', true)
       .single()
-      .then(({ data }) => {
-        setExtensivId(data?.extensiv_customer_id ?? null)
-        setLoadingExtId(false)
-      })
-      .catch(() => setLoadingExtId(false))
+      .then(
+        ({ data }) => {
+          setExtensivId(data?.extensiv_customer_id ?? null)
+          setLoadingExtId(false)
+        },
+        () => setLoadingExtId(false),
+      )
   }, [clienteF])
 
   const hasExtensivId = !!extensivId

@@ -141,11 +141,6 @@ async function fetchPageWithRetry(page: number): Promise<{ items: unknown[]; tot
   return null
 }
 
-interface RegisteredClient {
-  extensivId: number
-  name: string
-}
-
 /*
   Loads the WMS "clients" catalog from Supabase.
   Only these registered, active clients will be included in the warehouse

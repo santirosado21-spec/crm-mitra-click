@@ -14,9 +14,6 @@ import type { ExtensivOrderDetail, ExtensivReceiverDetail } from '../../lib/exte
 
 /* ─── helpers ──────────────────────────────────────────────────────── */
 
-const fmtCurrency = (n: number) =>
-  n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-
 const MONTHS_ES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
@@ -45,21 +42,6 @@ function dayKey(d: Date): string {
 /* ─── column widths ───────────────────────────────────────────────── */
 function setColWidths(ws: XLSX.WorkSheet, widths: number[]) {
   ws['!cols'] = widths.map(w => ({ wch: w }))
-}
-
-/* ─── cell styling helpers ────────────────────────────────────────── */
-function makeCell(v: string | number, opts?: { bold?: boolean; numFmt?: string }) {
-  const cell: XLSX.CellObject = typeof v === 'number'
-    ? { t: 'n', v }
-    : { t: 's', v }
-  if (opts?.bold || opts?.numFmt) {
-    cell.s = {}
-    if (opts.bold) cell.s = { font: { bold: true } }
-  }
-  if (opts?.numFmt && typeof v === 'number') {
-    cell.z = opts.numFmt
-  }
-  return cell
 }
 
 /* ─── 1. ProForma sheet ───────────────────────────────────────────── */

@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import { supabase } from './supabase'
-import type { Viaje } from '../types/tms/tms'
+import type { Viaje } from '../types/tms'
 import type { Operation } from '../types'
 import type { Task } from '../types/tasks'
 import type { TaskAuditEntry } from '../types/tasks'
