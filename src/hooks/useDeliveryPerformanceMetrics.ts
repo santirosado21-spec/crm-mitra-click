@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { evaluateSLA, slaPct } from '../lib/sla'
 import type { GuiaPaqueteria } from '../types/guias'
 import type { Bucket } from './useShipmentProfileMetrics'
 
@@ -14,41 +15,6 @@ export interface DeliveryFilters {
 }
 
 const DAY_MS = 86_400_000
-
-function addDays(iso: string, days: number): number {
-  return new Date(iso).getTime() + days * DAY_MS
-}
-
-// SLA por guía. promised/actual/induction son fechas YYYY-MM-DD.
-interface GuiaSLA {
-  hasDelivery:     boolean
-  onTime:          boolean
-  delayed:         boolean
-  hasInduction:    boolean
-  onTimeInduction: boolean
-  returned:        boolean
-  inTransit:       boolean
-  exception:       boolean
-}
-
-function evalSLA(g: GuiaRow): GuiaSLA {
-  const promised = g.promised_delivery_date
-  const actual   = g.actual_delivery_date
-  const induction = g.induction_date
-  const hasDelivery = !!(promised && actual)
-  const onTime  = hasDelivery && new Date(actual!).getTime() <= new Date(promised!).getTime()
-  const delayed = hasDelivery && new Date(actual!).getTime() >  new Date(promised!).getTime()
-  const hasInduction = !!(induction && g.created_at)
-  // Inducción a tiempo: induction <= created_at + 1 día.
-  const onTimeInduction = hasInduction &&
-    new Date(induction!).getTime() <= addDays(g.created_at, 1)
-  return {
-    hasDelivery, onTime, delayed, hasInduction, onTimeInduction,
-    returned:  g.tracking_status === 'devuelto',
-    inTransit: g.tracking_status === 'en_transito',
-    exception: g.tracking_status === 'excepcion',
-  }
-}
 
 export function useDeliveryPerformanceMetrics(filters: DeliveryFilters) {
   const [rows, setRows]       = useState<GuiaRow[]>([])
@@ -87,7 +53,7 @@ export function useDeliveryPerformanceMetrics(filters: DeliveryFilters) {
     const byClientMap = new Map<string, { onTime: number; induction: number; delayed: number; returned: number }>()
 
     for (const g of rows) {
-      const sla = evalSLA(g)
+      const sla = evaluateSLA(g)
       if (sla.hasDelivery) {
         deliveries++
         if (sla.onTime) onTime++
@@ -110,7 +76,6 @@ export function useDeliveryPerformanceMetrics(filters: DeliveryFilters) {
       byClientMap.set(cname, bucket)
     }
 
-    const pct = (a: number, b: number) => b > 0 ? Math.round((a / b) * 100) : 0
     const clientEntries = [...byClientMap.entries()]
 
     const toBuckets = (key: 'onTime' | 'induction' | 'delayed' | 'returned'): Bucket[] =>
@@ -120,9 +85,9 @@ export function useDeliveryPerformanceMetrics(filters: DeliveryFilters) {
         .sort((a, b) => b.value - a.value)
 
     return {
-      onTimeDeliveryPct:  pct(onTime, deliveries),
-      onTimeInductionPct: pct(onTimeInduction, inductions),
-      performancePct:     pct(onTime, deliveries + delayed),
+      onTimeDeliveryPct:  slaPct(onTime, deliveries),
+      onTimeInductionPct: slaPct(onTimeInduction, inductions),
+      performancePct:     slaPct(onTime, deliveries + delayed),
       delayed, returned, inTransit, exception,
       deliveries,
       onTimeDeliveryByClient:  toBuckets('onTime'),
