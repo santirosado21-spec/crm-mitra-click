@@ -76,6 +76,13 @@ export interface GuiaPaqueteria {
   provider_shipment_id?: string | null
   provider_rate_id?:    string | null
   tracking_status?:     TrackingStatus | null
+
+  // ── Campos SLA + markup (Techship replica) ──
+  promised_delivery_date?: string | null
+  actual_delivery_date?:   string | null
+  induction_date?:         string | null
+  billing_account?:        string | null
+  markup_pct_applied?:     number | null
 }
 
 export type CreateGuiaData = Omit<GuiaPaqueteria, 'id' | 'margen' | 'created_at' | 'updated_at'>
