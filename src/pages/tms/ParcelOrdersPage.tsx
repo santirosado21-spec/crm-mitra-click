@@ -10,6 +10,7 @@ import { NoPrintFoundIndicator } from '../../components/parcel/NoPrintFoundIndic
 import { ParcelOrderImportModal } from './ParcelOrderImportModal'
 import { useParcelOrders, type ParcelOrder } from '../../hooks/useParcelOrders'
 import { usePrintQueue } from '../../hooks/usePrintQueue'
+import { useOrderTemplates } from '../../hooks/useOrderTemplates'
 import { useClientCatalog } from '../../hooks/useClientCatalog'
 import { useAuthContext } from '../../context/AuthContext'
 import { useToast } from '../../hooks/useToast'
@@ -35,6 +36,7 @@ export function ParcelOrdersPage() {
   const toast = useToast()
   const { orders, loading, kpis, refetch, bulkInsert, processAndPrint, exportXlsx, remove } = useParcelOrders()
   const { enqueue } = usePrintQueue(user?.email)
+  const { templates } = useOrderTemplates()
   const { clientes } = useClientCatalog()
 
   const [search, setSearch]   = useState('')
@@ -253,6 +255,7 @@ export function ParcelOrdersPage() {
         onClose={() => setImportOpen(false)}
         onConfirm={handleImport}
         clientes={clientes}
+        templates={templates}
         creadoPor={user?.email ?? null}
       />
     </div>

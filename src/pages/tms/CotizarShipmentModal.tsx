@@ -11,6 +11,7 @@ import { distanceBetweenCPs } from '../../lib/postal/distance'
 import { printMockLabel } from '../../lib/carriers/labels'
 import { useShippingRules } from '../../hooks/useShippingRules'
 import { useMarkupProfiles } from '../../hooks/useMarkupProfiles'
+import { useOrderTemplates } from '../../hooks/useOrderTemplates'
 import { applyMarkupToRate } from '../../lib/carriers/markup'
 import { AddressPicker } from '../../components/parcel/AddressPicker'
 import type { Address, ParcelDimensions, Rate } from '../../lib/carriers/types'
@@ -46,6 +47,7 @@ export function CotizarShipmentModal({ open, onClose, onSubmit, clientes, creado
   const toast = useToast()
   const { rules } = useShippingRules()
   const { profiles: markupProfiles, rules: markupRules } = useMarkupProfiles()
+  const { create: createTemplate } = useOrderTemplates()
 
   // Form
   const [clienteId, setClienteId] = useState('')
@@ -361,6 +363,39 @@ export function CotizarShipmentModal({ open, onClose, onSubmit, clientes, creado
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 inline-flex items-center gap-2">
               <AlertCircle size={14} /> {error}
             </div>
+          )}
+
+          {/* Guardar la cotización actual como plantilla reutilizable. */}
+          {rates.length > 0 && (
+            <button
+              type="button"
+              onClick={async () => {
+                const nombre = window.prompt('Nombre de la plantilla:')
+                if (!nombre?.trim()) return
+                try {
+                  await createTemplate({
+                    nombre: nombre.trim(), descripcion: 'Creada desde el cotizador',
+                    cliente_id: clienteId || null,
+                    payload: {
+                      carrier: auto.winner?.carrier, service: auto.winner?.service,
+                      from_postal: fromCP, to_postal: toCP,
+                      weight_kg: Number(weightKg) || undefined,
+                      length_cm: Number(lengthCm) || undefined,
+                      width_cm: Number(widthCm) || undefined,
+                      height_cm: Number(heightCm) || undefined,
+                      cliente_id: clienteId || undefined, notas,
+                    },
+                    creado_por: creadoPor,
+                  })
+                  toast.success('Plantilla guardada', nombre.trim())
+                } catch (e) {
+                  toast.error('Error', e instanceof Error ? e.message : '')
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+            >
+              <Sparkles size={13} /> Guardar como plantilla
+            </button>
           )}
 
           {/* Resultados */}
