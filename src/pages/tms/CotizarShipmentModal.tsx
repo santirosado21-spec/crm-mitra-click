@@ -10,6 +10,8 @@ import { applyRules } from '../../lib/carriers/rules'
 import { distanceBetweenCPs } from '../../lib/postal/distance'
 import { printMockLabel } from '../../lib/carriers/labels'
 import { useShippingRules } from '../../hooks/useShippingRules'
+import { useMarkupProfiles } from '../../hooks/useMarkupProfiles'
+import { applyMarkupToRate } from '../../lib/carriers/markup'
 import type { Address, ParcelDimensions, Rate } from '../../lib/carriers/types'
 import type { CreateGuiaData, RateQuote, Paqueteria } from '../../types/guias'
 
@@ -42,6 +44,7 @@ const CARRIER_TO_PAQUETERIA: Record<string, Paqueteria> = {
 export function CotizarShipmentModal({ open, onClose, onSubmit, clientes, creadoPor }: Props) {
   const toast = useToast()
   const { rules } = useShippingRules()
+  const { profiles: markupProfiles, rules: markupRules } = useMarkupProfiles()
 
   // Form
   const [clienteId, setClienteId] = useState('')
@@ -131,7 +134,18 @@ export function CotizarShipmentModal({ open, onClose, onSubmit, clientes, creado
       if (all.length === 0) {
         setError('Ningún provider devolvió cotizaciones. Verifica configuración o intenta de nuevo.')
       }
-      setRates(all)
+      // Aplicar markup configurable: el precio mostrado es el que se cobra al
+      // cliente; base_cost_mxn conserva el costo original del carrier.
+      const ctx = { profiles: markupProfiles, rules: markupRules }
+      const marked = all.map(r => {
+        const result = applyMarkupToRate(r.price_mxn, {
+          clienteId: cliente.id, carrier: r.carrier, service: r.service,
+        }, ctx)
+        return result.markup_amount > 0
+          ? { ...r, base_cost_mxn: r.price_mxn, price_mxn: result.final_price }
+          : r
+      })
+      setRates(marked)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al cotizar')
     } finally {
@@ -405,7 +419,14 @@ export function CotizarShipmentModal({ open, onClose, onSubmit, clientes, creado
                           <p className="text-[10px] text-gray-400 truncate">{reasoning} · score {score.toFixed(2)}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold tabular-nums">{fmtMXN(rate.price_mxn)}</p>
+                          {rate.base_cost_mxn != null && (
+                            <p className="text-[10px] text-gray-400 line-through tabular-nums">
+                              {fmtMXN(rate.base_cost_mxn)}
+                            </p>
+                          )}
+                          <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--brand-navy)' }}>
+                            {fmtMXN(rate.price_mxn)}
+                          </p>
                           <p className="text-[10px] text-gray-400">{rate.delivery_days}d</p>
                         </div>
                         <button

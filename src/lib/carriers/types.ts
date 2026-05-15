@@ -40,7 +40,8 @@ export interface Rate {
   carrier_label:   string                // 'Estafeta', 'DHL Express', ...
   service:         string                // 'SDS', 'Ground', 'Express Saver'...
   service_label:   string                // legible para humanos
-  price_mxn:       number                // costo total en MXN
+  price_mxn:       number                // precio final en MXN (con markup si aplica)
+  base_cost_mxn?:  number                // costo del carrier antes de markup
   delivery_days:   number                // ETA estimado en días
   currency:        string                // 'MXN' por default
   is_local:        boolean               // true si es carrier nacional MX
