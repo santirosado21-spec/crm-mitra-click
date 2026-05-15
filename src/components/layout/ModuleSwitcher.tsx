@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { PackingPerson } from '../icons/PackingPerson'
 import { useAuthContext } from '../../context/AuthContext'
-import { canAccessModule, type AppModule } from '../../config/permissions'
+import { canAccessModule, moduleFromPath, type AppModule } from '../../config/permissions'
 
 interface ModuleEntry {
   id:    AppModule
@@ -64,16 +64,19 @@ export function ModuleSwitcher({ label }: Props) {
   useEffect(() => { setOpen(false) }, [pathname])
 
   const visibleModules = MODULES.filter(m => canAccessModule(user?.role, m.id))
+  // Módulo activo real — moduleFromPath distingue tms vs parcel (ambos viven
+  // bajo /tms/*), cosa que un simple startsWith del primer segmento no hace.
+  const activeModule = moduleFromPath(pathname)
 
   return (
-    <div ref={containerRef} className="relative shrink-0 max-w-full">
+    <div ref={containerRef} className="relative w-full">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Abrir menú principal"
-        className={`flex max-w-full items-center gap-2 px-2 sm:px-3 py-2 rounded-xl text-sm sm:text-base font-bold transition-colors focus-visible:outline-none ${
+        className={`flex w-full max-w-full items-center gap-2 px-2 sm:px-3 py-2 rounded-xl text-sm sm:text-base font-bold transition-colors focus-visible:outline-none ${
           open ? 'bg-gray-100 text-[#1e3a5f]' : 'text-[#1e3a5f] hover:bg-gray-100'
         }`}
       >
@@ -87,7 +90,7 @@ export function ModuleSwitcher({ label }: Props) {
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-[calc(100%+4px)] z-50 w-[min(calc(100vw-2rem),22rem)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden animate-fade-in"
+          className="absolute left-0 top-[calc(100%+4px)] z-50 w-[min(calc(100vw-1.5rem),20rem)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden animate-fade-in"
         >
           {/* Home */}
           <Link
@@ -113,7 +116,7 @@ export function ModuleSwitcher({ label }: Props) {
             ) : (
               visibleModules.map(m => {
                 const Icon = m.icon
-                const active = pathname.startsWith(m.to.split('/')[1] ? `/${m.to.split('/')[1]}` : m.to)
+                const active = activeModule === m.id
                 return (
                   <Link
                     key={m.id}
