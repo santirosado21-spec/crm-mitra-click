@@ -115,9 +115,9 @@ export function ParcelOrdersPage() {
 
   const kpiCards = [
     { label: t('common.total'), value: kpis.total },
-    { label: 'Cotizadas', value: kpis.cotizadas },
-    { label: 'Compradas', value: kpis.compradas },
-    { label: 'Entregadas', value: kpis.entregadas },
+    { label: t('orders.quoted'), value: kpis.cotizadas },
+    { label: t('orders.purchased'), value: kpis.compradas },
+    { label: t('orders.delivered'), value: kpis.entregadas },
   ]
 
   return (
@@ -236,8 +236,8 @@ export function ParcelOrdersPage() {
                           </td>
                           <td className="px-3 py-2">
                             {o.label_url
-                              ? <span className="text-green-600 font-semibold">Listo</span>
-                              : <span className="text-gray-400">Pendiente</span>}
+                              ? <span className="text-green-600 font-semibold">{t('orders.ready')}</span>
+                              : <span className="text-gray-400">{t('orders.pending')}</span>}
                           </td>
                         </tr>
                       )

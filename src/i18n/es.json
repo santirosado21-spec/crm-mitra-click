@@ -57,7 +57,12 @@
     "processedOn": "Procesado",
     "printStatus": "Impresión",
     "processPrint": "PROCESAR E IMPRIMIR",
-    "noPrintFound": "NO SE ENCONTRARON CLIENTES PARA IMPRIMIR"
+    "noPrintFound": "NO SE ENCONTRARON CLIENTES PARA IMPRIMIR",
+    "quoted": "Cotizadas",
+    "purchased": "Compradas",
+    "delivered": "Entregadas",
+    "ready": "Listo",
+    "pending": "Pendiente"
   },
   "markup": {
     "title": "Perfiles de markup",

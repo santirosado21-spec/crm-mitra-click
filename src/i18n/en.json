@@ -57,7 +57,12 @@
     "processedOn": "Processed on",
     "printStatus": "Print status",
     "processPrint": "PROCESS & PRINT",
-    "noPrintFound": "NO PRINT CLIENTS FOUND"
+    "noPrintFound": "NO PRINT CLIENTS FOUND",
+    "quoted": "Quoted",
+    "purchased": "Purchased",
+    "delivered": "Delivered",
+    "ready": "Ready",
+    "pending": "Pending"
   },
   "markup": {
     "title": "Markup profiles",
