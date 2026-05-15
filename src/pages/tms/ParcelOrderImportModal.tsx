@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { X, Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, Trash2, Save } from 'lucide-react'
 import { useToast } from '../../hooks/useToast'
 import { parseParcelExcel, type ParsedParcelRow } from '../../lib/parcelExcelParser'
+import { AddressPicker } from '../../components/parcel/AddressPicker'
 import type { CreateGuiaData, Paqueteria } from '../../types/guias'
 import type { OrderTemplate } from '../../types/techship'
 
@@ -36,6 +37,7 @@ export function ParcelOrderImportModal({ open, onClose, onConfirm, clientes, tem
   const [rows, setRows]         = useState<EditableRow[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [templateId, setTemplateId] = useState('')
+  const [senderCP, setSenderCP] = useState('52000')
 
   if (!open) return null
 
@@ -120,7 +122,7 @@ export function ParcelOrderImportModal({ open, onClose, onConfirm, clientes, tem
           manual_reference: r.order_num ?? `IMPORT-${r.source_row}`,
           notas:            r.destinatario ? `Destinatario: ${r.destinatario}` : '',
           creado_por:       creadoPor,
-          from_postal_code: '52000',
+          from_postal_code: senderCP,
           to_postal_code:   r.to_cp,
           to_country:       r.to_country,
           weight_kg:        r.weight_kg,
@@ -172,6 +174,12 @@ export function ParcelOrderImportModal({ open, onClose, onConfirm, clientes, tem
                 {parsing ? 'Leyendo…' : (fileName || 'Subir Excel (.xlsx, .xls, .csv)')}
               </button>
             </div>
+            <AddressPicker
+              tipo="sender"
+              value={null}
+              label="Remitente (CP origen)"
+              onChange={(_id, addr) => { if (addr) setSenderCP(addr.codigo_postal.replace(/\D/g, '').slice(0, 5)) }}
+            />
             {templates.length > 0 && (
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5 block">

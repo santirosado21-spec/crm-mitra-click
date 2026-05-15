@@ -12,6 +12,7 @@ import { printMockLabel } from '../../lib/carriers/labels'
 import { useShippingRules } from '../../hooks/useShippingRules'
 import { useMarkupProfiles } from '../../hooks/useMarkupProfiles'
 import { applyMarkupToRate } from '../../lib/carriers/markup'
+import { AddressPicker } from '../../components/parcel/AddressPicker'
 import type { Address, ParcelDimensions, Rate } from '../../lib/carriers/types'
 import type { CreateGuiaData, RateQuote, Paqueteria } from '../../types/guias'
 
@@ -302,6 +303,19 @@ export function CotizarShipmentModal({ open, onClose, onSubmit, clientes, creado
                 placeholder="06700"
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none font-mono"
               />
+              <div className="mt-1.5">
+                <AddressPicker
+                  tipo="recipient"
+                  value={null}
+                  label="o elige de la libreta"
+                  onChange={(_id, addr) => {
+                    if (addr) {
+                      setToCP(addr.codigo_postal.replace(/\D/g, '').slice(0, 5))
+                      setToCountry(addr.pais || 'MX')
+                    }
+                  }}
+                />
+              </div>
             </div>
             <div>
               <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5 block">País destino</label>
