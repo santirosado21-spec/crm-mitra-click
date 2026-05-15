@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import {
   Home, Package, Truck, Warehouse, ClipboardList, ChevronRight, Menu,
@@ -27,6 +28,9 @@ const MODULES: ModuleEntry[] = [
   { id: 'tasks',   to: '/tasks',                 label: 'Task Tracker',            icon: ClipboardList, color: NAVY },
 ]
 
+// Ancho del panel: 22rem (352px) o el viewport menos 2rem, lo que sea menor.
+const MENU_WIDTH = 352
+
 interface Props {
   /** Contenido a mostrar al lado del icono trigger. Acepta string o JSX
    *  (ej. <Home /> para una casita). Si es null, solo se muestra el icono. */
@@ -42,23 +46,52 @@ export function ModuleSwitcher({ label }: Props) {
   const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number; width: number } | null>(null)
 
-  // Click fuera + tecla Escape para cerrar
+  // Posiciona el dropdown justo debajo del trigger con coordenadas de viewport
+  // (position: fixed, vía portal). Es necesario porque el sidebar contenedor
+  // usa overflow-y-auto: eso hace que el navegador recorte también el overflow
+  // horizontal, y un panel absolute más ancho que el sidebar (220px) quedaba
+  // cortado. Con fixed + portal el panel escapa de ese clipping.
+  const updatePos = useCallback(() => {
+    const btn = triggerRef.current
+    if (!btn) return
+    const r = btn.getBoundingClientRect()
+    const width = Math.min(window.innerWidth - 32, MENU_WIDTH)
+    let left = r.left
+    if (left + width > window.innerWidth - 8) left = window.innerWidth - 8 - width
+    if (left < 8) left = 8
+    setMenuPos({ top: r.bottom + 4, left, width })
+  }, [])
+
+  useLayoutEffect(() => {
+    if (open) updatePos()
+  }, [open, updatePos])
+
+  // Click fuera + tecla Escape para cerrar. Reposiciona en scroll/resize.
   useEffect(() => {
     if (!open) return
     const onClick = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+      const t = e.target as Node
+      if (containerRef.current?.contains(t)) return
+      if (menuRef.current?.contains(t)) return
+      setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    const onReflow = () => updatePos()
     document.addEventListener('mousedown', onClick)
     document.addEventListener('keydown', onKey)
+    window.addEventListener('resize', onReflow)
+    window.addEventListener('scroll', onReflow, true)
     return () => {
       document.removeEventListener('mousedown', onClick)
       document.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', onReflow)
+      window.removeEventListener('scroll', onReflow, true)
     }
-  }, [open])
+  }, [open, updatePos])
 
   // Cerrar al cambiar de ruta
   useEffect(() => { setOpen(false) }, [pathname])
@@ -68,6 +101,7 @@ export function ModuleSwitcher({ label }: Props) {
   return (
     <div ref={containerRef} className="relative shrink-0 max-w-full">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-haspopup="menu"
@@ -84,10 +118,12 @@ export function ModuleSwitcher({ label }: Props) {
           : <Menu size={20} aria-hidden="true" />}
       </button>
 
-      {open && (
+      {open && menuPos && createPortal(
         <div
+          ref={menuRef}
           role="menu"
-          className="absolute left-0 top-[calc(100%+4px)] z-50 w-[min(calc(100vw-2rem),22rem)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden animate-fade-in"
+          className="fixed z-50 bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden animate-fade-in"
+          style={{ top: menuPos.top, left: menuPos.left, width: menuPos.width }}
         >
           {/* Home */}
           <Link
@@ -135,7 +171,8 @@ export function ModuleSwitcher({ label }: Props) {
               })
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
