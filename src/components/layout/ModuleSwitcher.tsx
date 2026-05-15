@@ -128,15 +128,15 @@ export function ModuleSwitcher({ label }: Props) {
           {/* Home */}
           <Link
             to="/"
-            className={`flex items-center gap-3 px-4 py-3 text-sm border-b border-gray-100 transition-colors ${
+            className={`flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] border-b border-gray-100 transition-colors ${
               pathname === '/' ? 'bg-blue-50 text-[#1e3a5f]' : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <span className="w-8 h-8 rounded-lg bg-[#1e3a5f] text-white flex items-center justify-center shrink-0">
-              <Home size={15} />
+            <span className="w-7 h-7 rounded-lg bg-[#1e3a5f] text-white flex items-center justify-center shrink-0">
+              <Home size={14} />
             </span>
             <span className="min-w-0 flex-1 font-semibold leading-snug break-words">Página principal</span>
-            {pathname === '/' && <ChevronRight size={14} className="shrink-0 text-[#1e3a5f]" />}
+            {pathname === '/' && <ChevronRight size={13} className="shrink-0 text-[#1e3a5f]" />}
           </Link>
 
           {/* Módulos */}
@@ -154,18 +154,18 @@ export function ModuleSwitcher({ label }: Props) {
                   <Link
                     key={m.id}
                     to={m.to}
-                    className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                    className={`flex items-center gap-2.5 px-3.5 py-2 text-[13px] transition-colors ${
                       active ? 'bg-blue-50 text-[#1e3a5f]' : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
                     <span
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-white shrink-0"
                       style={{ background: m.color }}
                     >
-                      <Icon size={15} />
+                      <Icon size={14} />
                     </span>
                     <span className="min-w-0 flex-1 whitespace-normal break-words font-semibold leading-snug">{m.label}</span>
-                    {active && <ChevronRight size={14} className="shrink-0 text-[#1e3a5f]" />}
+                    {active && <ChevronRight size={13} className="shrink-0 text-[#1e3a5f]" />}
                   </Link>
                 )
               })
