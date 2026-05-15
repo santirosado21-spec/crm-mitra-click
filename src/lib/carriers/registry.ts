@@ -12,6 +12,7 @@ import { supabase } from '../supabase'
 import type { CarrierProviderClient } from './types'
 import { mockProvider } from './mock'
 import { skydropxProvider } from './skydropx'
+import { fedexProvider } from './fedex'
 
 interface CarrierCredentialRow {
   provider:    string
@@ -22,7 +23,8 @@ interface CarrierCredentialRow {
 
 /** Cliente para un provider específico. */
 function clientFor(provider: string): CarrierProviderClient | null {
-  if (provider === 'skydropx') return skydropxProvider
+  if (provider === 'skydropx')    return skydropxProvider
+  if (provider === 'direct_fedex') return fedexProvider
   // TODO conectar EasyPost cuando lleguen credenciales:
   // if (provider === 'easypost') return easypostProvider
   return null
@@ -45,7 +47,9 @@ export async function getActiveProviders(): Promise<ActiveProvidersResult> {
   }
   const rows = data as CarrierCredentialRow[]
   const real = rows
-    .filter(r => r.api_key && r.provider !== 'manual')
+    // direct_fedex autentica vía secrets del edge function fedex-proxy, así que
+    // no requiere api_key en la fila — basta con que esté activo.
+    .filter(r => r.provider !== 'manual' && (r.api_key || r.provider === 'direct_fedex'))
     .map(r => clientFor(r.provider))
     .filter((c): c is CarrierProviderClient => !!c)
   if (real.length === 0) {
