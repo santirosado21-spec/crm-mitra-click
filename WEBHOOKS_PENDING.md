@@ -1,9 +1,12 @@
 # WEBHOOKS_PENDING — Sprint Techship
 
-El edge function `carrier-tracking-webhook` esta listo. Falta desplegarlo y
-registrar las URLs en los portales de cada carrier.
+El edge function `carrier-tracking-webhook` esta DESPLEGADO y funcional.
+Falta registrar las URLs en los portales de cada carrier.
 
-## Deploy
+## Deploy: HECHO (2026-05-15)
+
+Desplegado en el proyecto `uifrgmiqpkbgyvzbcldn` con `--no-verify-jwt`.
+Smoke-test OK: HTTP 200, parsea el payload y busca la guia por tracking number.
 
 ```bash
 npx supabase functions deploy carrier-tracking-webhook --no-verify-jwt
@@ -41,7 +44,7 @@ Sin secret el webhook acepta el payload sin validar firma (util en pruebas).
 
 ## Estado
 
-- [ ] `carrier-tracking-webhook` desplegado
+- [x] `carrier-tracking-webhook` desplegado (2026-05-15, smoke-test OK)
 - [ ] URL Skydropx registrada
 - [ ] URL FedEx registrada
 - [ ] SKYDROPX_WEBHOOK_SECRET configurado

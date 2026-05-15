@@ -15,13 +15,17 @@ npx supabase secrets set FEDEX_ACCOUNT=xxx
 npx supabase secrets set FEDEX_BASE_URL=https://apis-sandbox.fedex.com
 ```
 
-Despues desplegar el edge function:
+El edge function `fedex-proxy` YA ESTA DESPLEGADO (2026-05-15, proyecto
+`uifrgmiqpkbgyvzbcldn`). Smoke-test confirma que corre — responde
+"FedEx credentials missing" mientras no se configuren los 3 secrets de arriba.
 
 ```bash
+# (deploy ya hecho — re-ejecutar solo si se cambia el codigo)
 npx supabase functions deploy fedex-proxy
 ```
 
-Y en `/tms/carriers` marcar el provider **FedEx directo** como activo.
+Tras configurar los secrets, en `/tms/carriers` marcar el provider
+**FedEx directo** como activo.
 
 Origen de credenciales: portal FedEx Developer -> My Projects -> API key + secret.
 El Account Number es el de la cuenta comercial FedEx MX.
@@ -33,8 +37,8 @@ de Supabase). El `buyLabel` real ya esta implementado en `src/lib/carriers/skydr
 
 ## Estado
 
+- [x] `fedex-proxy` desplegado (2026-05-15, smoke-test OK)
 - [ ] FEDEX_CLIENT_ID configurado
 - [ ] FEDEX_CLIENT_SECRET configurado
 - [ ] FEDEX_ACCOUNT configurado
-- [ ] `fedex-proxy` desplegado
 - [ ] Provider FedEx activado en `/tms/carriers`
