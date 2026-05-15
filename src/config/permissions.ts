@@ -102,7 +102,12 @@ export function moduleFromPath(path: string): AppModule | null {
     path === '/tms/parcel-map' ||
     path === '/tms/parcel-dashboard' ||
     path === '/tms/carriers' ||
-    path.startsWith('/tms/carriers/')
+    path.startsWith('/tms/carriers/') ||
+    path.startsWith('/tms/orders') ||
+    path.startsWith('/tms/manifests') ||
+    path.startsWith('/tms/insights') ||
+    path.startsWith('/tms/addresses') ||
+    path.startsWith('/tms/markup-profiles')
   ) return 'parcel'
   if (path.startsWith('/tms') || path === '/cotizador' || path === '/tramites') return 'tms'
   if (
@@ -125,8 +130,13 @@ const PATH_ROLE_OVERRIDES: { prefix: string; roles: UserRole[] }[] = [
   { prefix: '/tms/guias-paqueteria', roles: PARCEL_ROLES },
   { prefix: '/tms/parcel-map',       roles: PARCEL_ROLES },
   { prefix: '/tms/parcel-dashboard', roles: PARCEL_ROLES },
-  // /tms/carriers (config de credenciales) y /tms/carriers/reglas (routing)
-  // son admin-only — credenciales sensibles + reglas que afectan a todos.
+  { prefix: '/tms/orders',           roles: PARCEL_ROLES },
+  { prefix: '/tms/manifests',        roles: PARCEL_ROLES },
+  { prefix: '/tms/insights',         roles: PARCEL_ROLES },
+  { prefix: '/tms/addresses',        roles: PARCEL_ROLES },
+  // /tms/carriers (credenciales), /tms/carriers/reglas (routing) y
+  // /tms/markup-profiles (precios) son admin-only.
+  { prefix: '/tms/markup-profiles',  roles: ['admin'] },
   { prefix: '/tms/carriers',         roles: ['admin'] },
 ]
 

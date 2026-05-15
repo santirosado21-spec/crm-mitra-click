@@ -1,4 +1,4 @@
-import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet, Package, MapPin, Menu } from 'lucide-react'
+import { Home, Users, FileText, FileCheck, ScanBarcode, Truck, Warehouse, LayoutDashboard, UserCheck, Route, PieChart, Calculator, CalendarClock, FileInput, Inbox, Calendar, Repeat, UserCog, BarChart3, X, Receipt, History, FileSpreadsheet, Package, MapPin, Menu, ClipboardList, FileStack, Gauge, Percent } from 'lucide-react'
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
@@ -10,6 +10,8 @@ interface Link {
   to: string
   label: string
   icon: typeof Home
+  /** Sub-grupo opcional dentro del módulo (ej. Insights / Operaciones). */
+  section?: string
 }
 
 /*
@@ -41,11 +43,21 @@ const TMS_LINKS: Link[] = [
 ]
 
 const PARCEL_LINKS: Link[] = [
-  { to: '/tms/guias-paqueteria', label: 'Guías paquetería',    icon: Package },
-  { to: '/tms/parcel-map',       label: 'Mapa de tracking',    icon: MapPin },
-  { to: '/tms/parcel-dashboard', label: 'Dashboard paquetes',  icon: LayoutDashboard },
-  { to: '/tms/carriers',         label: 'Configurar carriers', icon: UserCog },
-  { to: '/tms/carriers/reglas',  label: 'Reglas de routing',   icon: FileSpreadsheet },
+  // Operaciones
+  { to: '/tms/orders',           label: 'Órdenes',             icon: Package,         section: 'Operaciones' },
+  { to: '/tms/guias-paqueteria', label: 'Guías paquetería',    icon: FileCheck,       section: 'Operaciones' },
+  { to: '/tms/manifests',        label: 'Manifiestos',         icon: ClipboardList,   section: 'Operaciones' },
+  { to: '/tms/parcel-map',       label: 'Mapa de tracking',    icon: MapPin,          section: 'Operaciones' },
+  // Insights
+  { to: '/tms/parcel-dashboard', label: 'Dashboard paquetes',  icon: LayoutDashboard, section: 'Insights' },
+  { to: '/tms/insights/shipment-profile',     label: 'Perfil de envíos',     icon: PieChart, section: 'Insights' },
+  { to: '/tms/insights/delivery-performance', label: 'Desempeño de entrega', icon: Gauge,    section: 'Insights' },
+  // Catálogos
+  { to: '/tms/orders/templates', label: 'Plantillas de orden', icon: FileStack,       section: 'Catálogos' },
+  { to: '/tms/addresses',        label: 'Direcciones',         icon: MapPin,          section: 'Catálogos' },
+  { to: '/tms/markup-profiles',  label: 'Perfiles de markup',  icon: Percent,         section: 'Catálogos' },
+  { to: '/tms/carriers',         label: 'Configurar carriers', icon: UserCog,         section: 'Catálogos' },
+  { to: '/tms/carriers/reglas',  label: 'Reglas de routing',   icon: FileSpreadsheet, section: 'Catálogos' },
 ]
 
 const ALMACEN_LINKS: Link[] = [
@@ -79,7 +91,12 @@ function detectModule(pathname: string): ModuleKey {
       pathname === '/tms/parcel-map' ||
       pathname === '/tms/parcel-dashboard' ||
       pathname === '/tms/carriers' ||
-      pathname.startsWith('/tms/carriers/'))                                     return 'parcel'
+      pathname.startsWith('/tms/carriers/') ||
+      pathname.startsWith('/tms/orders') ||
+      pathname.startsWith('/tms/manifests') ||
+      pathname.startsWith('/tms/insights') ||
+      pathname.startsWith('/tms/addresses') ||
+      pathname.startsWith('/tms/markup-profiles'))                               return 'parcel'
   if (pathname.startsWith('/tms') || pathname === '/cotizador' || pathname === '/tramites')
     return 'tms'
   // Default: WMS (/, /wms, /sac/*, /rc, /proformas, /clients, etc.)
@@ -115,6 +132,54 @@ export function Sidebar() {
   const showAdminTasks = currentModule === 'tasks' && (isAdmin || isCobranza)
   const visibleAdminLinks = TASKS_ADMIN_LINKS.filter(l =>
     isAdmin || l.to === '/tasks/admin/extensiv-billing' || l.to === '/tasks/admin/seko-billing'
+  )
+
+  // Agrupa los links por sub-grupo (section). Si el módulo no usa sections,
+  // todo cae bajo un único grupo con el nombre del módulo.
+  const linkSections: { title: string; items: Link[] }[] = (() => {
+    if (!visibleLinks.some(l => l.section)) return [{ title: label, items: visibleLinks }]
+    const order: string[] = []
+    const map = new Map<string, Link[]>()
+    for (const l of visibleLinks) {
+      const sec = l.section ?? label
+      if (!map.has(sec)) { map.set(sec, []); order.push(sec) }
+      map.get(sec)!.push(l)
+    }
+    return order.map(title => ({ title, items: map.get(title)! }))
+  })()
+
+  const renderLink = ({ to, label: linkLabel, icon: Icon }: Link) => (
+    <NavLink
+      key={to}
+      to={to}
+      end={to === '/wms' || to === '/tms' || to === '/almacen'}
+      aria-label={linkLabel}
+      className={({ isActive }) =>
+        `flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium leading-snug transition-all duration-150 group
+        ${isActive
+          ? 'text-white shadow-sm'
+          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        }`
+      }
+      style={({ isActive }) => isActive
+        ? { background: 'var(--brand-navy)', boxShadow: '0 2px 8px rgba(30,58,95,0.25)' }
+        : undefined
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <Icon
+            size={16}
+            aria-hidden="true"
+            className={`shrink-0 transition-all ${isActive
+              ? 'text-white'
+              : 'text-gray-400 group-hover:text-[#1e3a5f] group-hover:scale-110'
+            }`}
+          />
+          <span className="min-w-0 flex-1 whitespace-normal break-words">{linkLabel}</span>
+        </>
+      )}
+    </NavLink>
   )
 
   return (
@@ -171,46 +236,16 @@ export function Sidebar() {
 
         <div className="border-t border-gray-100 -mx-3" />
 
-        <div>
-          <p className="text-[9px] font-bold tracking-widest uppercase px-3 mb-1.5" style={{ color: '#94a3b8' }}>
-            {label}
-          </p>
-          <div className="flex flex-col gap-0.5">
-            {visibleLinks.map(({ to, label: linkLabel, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={to === '/wms' || to === '/tms' || to === '/almacen'}
-                aria-label={linkLabel}
-                className={({ isActive }) =>
-                  `flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium leading-snug transition-all duration-150 group
-                  ${isActive
-                    ? 'text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`
-                }
-                style={({ isActive }) => isActive
-                  ? { background: 'var(--brand-navy)', boxShadow: '0 2px 8px rgba(30,58,95,0.25)' }
-                  : undefined
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <Icon
-                      size={16}
-                      aria-hidden="true"
-                      className={`shrink-0 transition-all ${isActive
-                        ? 'text-white'
-                        : 'text-gray-400 group-hover:text-[#1e3a5f] group-hover:scale-110'
-                      }`}
-                    />
-                    <span className="min-w-0 flex-1 whitespace-normal break-words">{linkLabel}</span>
-                  </>
-                )}
-              </NavLink>
-            ))}
+        {linkSections.map(({ title, items }) => (
+          <div key={title}>
+            <p className="text-[9px] font-bold tracking-widest uppercase px-3 mb-1.5" style={{ color: '#94a3b8' }}>
+              {title}
+            </p>
+            <div className="flex flex-col gap-0.5">
+              {items.map(renderLink)}
+            </div>
           </div>
-        </div>
+        ))}
 
         {showAdminTasks && (
           <div>

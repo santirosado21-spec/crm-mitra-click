@@ -4,6 +4,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { GlobalSearch } from './GlobalSearch'
 import { NotificationBell } from './NotificationBell'
 import { TimerPill } from './TimerPill'
+import { LanguageToggle } from './LanguageToggle'
 import { useAuthContext } from '../../context/AuthContext'
 import { useActiveTimer } from '../../hooks/useActiveTimer'
 import { useToast } from '../../hooks/useToast'
@@ -90,6 +91,7 @@ export function Header() {
 
       {/* Actions */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <LanguageToggle />
         <TimerPill />
         <NotificationBell />
         <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600 font-medium max-w-[260px]">

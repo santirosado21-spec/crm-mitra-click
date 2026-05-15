@@ -33,6 +33,13 @@ import { CarriersConfigPage } from './pages/tms/CarriersConfigPage'
 import { ShippingRulesPage } from './pages/tms/ShippingRulesPage'
 import { ParcelTrackingMapPage } from './pages/tms/ParcelTrackingMapPage'
 import { ParcelDashboardPage } from './pages/tms/ParcelDashboardPage'
+import { ParcelOrdersPage } from './pages/tms/ParcelOrdersPage'
+import { OrderTemplatesPage } from './pages/tms/OrderTemplatesPage'
+import { ManifestsPage } from './pages/tms/ManifestsPage'
+import { ShipmentProfilePage } from './pages/tms/ShipmentProfilePage'
+import { DeliveryPerformancePage } from './pages/tms/DeliveryPerformancePage'
+import { MarkupProfilesPage } from './pages/tms/MarkupProfilesPage'
+import { AddressesPage } from './pages/tms/AddressesPage'
 import { TaskInbox } from './pages/tasks/TaskInbox'
 import { TaskCalendar } from './pages/tasks/TaskCalendar'
 import { TaskCreate } from './pages/tasks/TaskCreate'
@@ -146,6 +153,28 @@ function App() {
           } />
           <Route path="/tms/parcel-dashboard" element={
             <ProtectedRoute allowedRoles={PARCEL_ROLES}><ParcelDashboardPage /></ProtectedRoute>
+          } />
+          {/* TMS Paquetería · Techship replica */}
+          <Route path="/tms/orders" element={
+            <ProtectedRoute allowedRoles={PARCEL_ROLES}><ParcelOrdersPage /></ProtectedRoute>
+          } />
+          <Route path="/tms/orders/templates" element={
+            <ProtectedRoute allowedRoles={PARCEL_ROLES}><OrderTemplatesPage /></ProtectedRoute>
+          } />
+          <Route path="/tms/manifests" element={
+            <ProtectedRoute allowedRoles={PARCEL_ROLES}><ManifestsPage /></ProtectedRoute>
+          } />
+          <Route path="/tms/insights/shipment-profile" element={
+            <ProtectedRoute allowedRoles={PARCEL_ROLES}><ShipmentProfilePage /></ProtectedRoute>
+          } />
+          <Route path="/tms/insights/delivery-performance" element={
+            <ProtectedRoute allowedRoles={PARCEL_ROLES}><DeliveryPerformancePage /></ProtectedRoute>
+          } />
+          <Route path="/tms/addresses" element={
+            <ProtectedRoute allowedRoles={PARCEL_ROLES}><AddressesPage /></ProtectedRoute>
+          } />
+          <Route path="/tms/markup-profiles" element={
+            <ProtectedRoute allowedRoles={['admin']}><MarkupProfilesPage /></ProtectedRoute>
           } />
           <Route path="/tms/carriers" element={
             <ProtectedRoute allowedRoles={['admin']}><CarriersConfigPage /></ProtectedRoute>
