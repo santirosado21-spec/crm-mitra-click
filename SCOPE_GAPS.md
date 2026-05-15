@@ -6,10 +6,12 @@ funcional; son decisiones de pragmatismo dentro del modo autonomo.
 ## Fase 5 — Shipment Profile Dashboard
 
 - **PackagesByCountryMap**: el spec pedia un mapa SVG con `react-simple-maps`.
-  La libreria se instalo pero el panel "Paquetes por pais" usa una grafica de
-  dona (Recharts). Razon: sourcing fiable de un topojson mundial agrega riesgo;
-  para un negocio mayoritariamente domestico MX el mapa aporta poco. El cambio
-  a mapa real es aislado al componente `PiePanel` de "Paquetes por pais".
+  Decision final: el panel "Paquetes por pais" usa una grafica de dona
+  (Recharts) — apropiado para una operacion mayoritariamente domestica MX, y
+  evita la dependencia de un topojson mundial via CDN. `react-simple-maps`
+  (que habia requerido `--legacy-peer-deps` con React 19 y no traia tipos) se
+  DESINSTALO para dejar el arbol de dependencias limpio. Reintroducir un mapa
+  real solo requiere reinstalar la libreria y reemplazar ese unico `PiePanel`.
 - **TopStatesBarChart**: no existe lookup CP->estado eficiente en el cliente
   (la tabla mx_postal_codes solo tiene ~100 CPs seed). Se reemplazo por
   "Top destinos (CP)" agrupando por codigo postal destino. Para estados reales
