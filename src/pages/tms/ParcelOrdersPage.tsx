@@ -15,6 +15,7 @@ import { useClientCatalog } from '../../hooks/useClientCatalog'
 import { useAuthContext } from '../../context/AuthContext'
 import { useToast } from '../../hooks/useToast'
 import { PAQUETERIA_LABEL, type TrackingStatus } from '../../types/guias'
+import { mergeLabels } from '../../lib/carriers/mergeLabels'
 
 const fmtMXN = (n: number) =>
   new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n)
@@ -44,6 +45,7 @@ export function ParcelOrdersPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [importOpen, setImportOpen] = useState(false)
   const [processing, setProcessing] = useState(false)
+  const [printingRowId, setPrintingRowId] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -97,6 +99,38 @@ export function ParcelOrdersPage() {
       toast.success(`${printable.length} etiquetas enviadas a la cola de impresión`)
     } catch (e) {
       toast.error('Error', e instanceof Error ? e.message : '')
+    }
+  }
+
+  // Imprime la etiqueta real de una sola orden — atajo que no toca la cola.
+  const handlePrintRow = async (o: ParcelOrder) => {
+    if (!o.label_url || printingRowId) return
+    // La pestaña se abre antes del await para no caer en el bloqueador de popups.
+    const win = window.open('', '_blank')
+    if (!win) {
+      toast.error('Permite las ventanas emergentes para imprimir la etiqueta')
+      return
+    }
+    setPrintingRowId(o.id)
+    try {
+      const result = await mergeLabels([{
+        id: o.id, label_url: o.label_url,
+        tracking_number: o.tracking_number, carrier: o.paqueteria,
+      }])
+      if (!result.blob) {
+        win.close()
+        toast.error('No se pudo descargar la etiqueta', result.failed[0]?.reason ?? '')
+        return
+      }
+      const url = URL.createObjectURL(result.blob)
+      win.location.href = url
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+      toast.success('Etiqueta abierta para impresión')
+    } catch (e) {
+      win.close()
+      toast.error('Error al imprimir', e instanceof Error ? e.message : '')
+    } finally {
+      setPrintingRowId(null)
     }
   }
 
@@ -216,6 +250,7 @@ export function ParcelOrdersPage() {
                       <th className="px-3 py-2.5">{t('orders.createdOn')}</th>
                       <th className="px-3 py-2.5">{t('common.status')}</th>
                       <th className="px-3 py-2.5">{t('orders.printStatus')}</th>
+                      <th className="px-3 py-2.5 w-10" />
                     </tr>
                   </thead>
                   <tbody>
@@ -244,6 +279,19 @@ export function ParcelOrdersPage() {
                             {o.label_url
                               ? <span className="text-green-600 font-semibold">{t('orders.ready')}</span>
                               : <span className="text-gray-400">{t('orders.pending')}</span>}
+                          </td>
+                          <td className="px-3 py-2">
+                            <button
+                              type="button"
+                              onClick={() => handlePrintRow(o)}
+                              disabled={!o.label_url || printingRowId === o.id}
+                              title={o.label_url ? 'Imprimir etiqueta' : 'Sin etiqueta'}
+                              className="p-1 rounded text-gray-400 hover:bg-gray-100 hover:text-[#1e3a5f] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                            >
+                              {printingRowId === o.id
+                                ? <Loader2 size={13} className="animate-spin" />
+                                : <Printer size={13} />}
+                            </button>
                           </td>
                         </tr>
                       )

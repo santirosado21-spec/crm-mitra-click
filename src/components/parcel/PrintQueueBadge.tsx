@@ -1,47 +1,66 @@
 import { useState } from 'react'
-import { Printer, X, Check, Trash2 } from 'lucide-react'
-import { jsPDF } from 'jspdf'
+import { Printer, X, Check, Trash2, Loader2 } from 'lucide-react'
 import { usePrintQueue } from '../../hooks/usePrintQueue'
 import { useAuthContext } from '../../context/AuthContext'
 import { useToast } from '../../hooks/useToast'
+import { mergeLabels } from '../../lib/carriers/mergeLabels'
 
 // Badge de cola de impresión para el Header del módulo paquetería.
 // Muestra el conteo de etiquetas pendientes y un dropdown para imprimirlas
-// en lote (combina los PDFs en uno solo).
+// en lote (combina los PDFs reales de las etiquetas en uno solo).
 export function PrintQueueBadge() {
   const { user } = useAuthContext()
   const toast = useToast()
   const { items, pendingCount, markPrinted, remove, clearPrinted } = usePrintQueue(user?.email)
   const [open, setOpen] = useState(false)
+  const [printing, setPrinting] = useState(false)
 
   const pending = items.filter(i => i.status === 'pendiente')
 
-  // Combina las etiquetas pendientes en un único PDF (una página por etiqueta).
+  // Descarga las etiquetas reales de los carriers, las combina en un PDF y lo
+  // abre para imprimir. Solo marca como impresas las que sí se descargaron.
   const handlePrintAll = async () => {
-    if (pending.length === 0) return
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-    pending.forEach((item, idx) => {
-      if (idx > 0) doc.addPage()
-      doc.setFontSize(14)
-      doc.text('Etiqueta de envío', 20, 25)
-      doc.setFontSize(10)
-      doc.text(`Carrier: ${item.carrier ?? '—'}`, 20, 38)
-      doc.text(`Tracking: ${item.tracking_number ?? '—'}`, 20, 46)
-      doc.text(`Generada: ${new Date(item.created_at).toLocaleString('es-MX')}`, 20, 54)
-      if (item.label_url) doc.text(`Label URL: ${item.label_url}`, 20, 62)
-    })
-    // Abre el PDF en una pestaña. Si el navegador bloquea el popup NO se marca
-    // como impreso — de lo contrario se perderían etiquetas sin imprimir.
-    const win = window.open(doc.output('bloburl'), '_blank')
+    if (pending.length === 0 || printing) return
+    // La pestaña se abre ANTES del await — si se abre después, el bloqueador
+    // de popups la mata (ya no está en el stack del gesto del usuario).
+    const win = window.open('', '_blank')
     if (!win) {
       toast.error('Permite las ventanas emergentes para imprimir las etiquetas')
       return
     }
+    setPrinting(true)
     try {
-      await markPrinted(pending.map(i => i.id))
-      toast.success(`${pending.length} etiquetas enviadas a impresión`)
+      const result = await mergeLabels(pending.map(i => ({
+        id: i.id, label_url: i.label_url,
+        tracking_number: i.tracking_number, carrier: i.carrier,
+      })))
+      if (!result.blob) {
+        win.close()
+        toast.error('No se pudo descargar ninguna etiqueta',
+          result.failed.slice(0, 3).map(f => f.item.tracking_number ?? f.item.id).join(' · '))
+        return
+      }
+      const url = URL.createObjectURL(result.blob)
+      win.location.href = url
+      // Revocar tras un margen — que la pestaña termine de cargar el blob.
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+
+      try {
+        await markPrinted(result.succeeded.map(s => s.id))
+      } catch (e) {
+        toast.error('Etiquetas abiertas, pero no se pudieron marcar impresas',
+          e instanceof Error ? e.message : '')
+      }
+      toast.success(`${result.succeeded.length} etiquetas enviadas a impresión`)
+      if (result.failed.length > 0) {
+        toast.error(`${result.failed.length} etiqueta(s) no se pudieron imprimir`,
+          result.failed.slice(0, 3).map(f => f.item.tracking_number ?? f.item.id).join(' · '))
+      }
     } catch (e) {
-      toast.error('Error al marcar impresas', e instanceof Error ? e.message : '')
+      win.close()
+      toast.error('Error al imprimir', e instanceof Error ? e.message : '')
+    } finally {
+      setPrinting(false)
     }
   }
 
@@ -96,11 +115,13 @@ export function PrintQueueBadge() {
               <button
                 type="button"
                 onClick={handlePrintAll}
-                disabled={pending.length === 0}
+                disabled={pending.length === 0 || printing}
                 className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold text-white disabled:opacity-40"
                 style={{ background: 'var(--brand-navy)' }}
               >
-                <Printer size={13} /> Imprimir {pending.length > 0 ? `(${pending.length})` : ''}
+                {printing
+                  ? <><Loader2 size={13} className="animate-spin" /> Preparando...</>
+                  : <><Printer size={13} /> Imprimir {pending.length > 0 ? `(${pending.length})` : ''}</>}
               </button>
               <button
                 type="button"
