@@ -53,6 +53,16 @@ export function MarkupProfilesPage() {
     }
   }
 
+  // Persiste un cambio de perfil con manejo de error — evita rechazos de
+  // promesa sin capturar cuando el update a la BD falla.
+  const handleUpdateProfile = async (id: string, patch: Parameters<typeof updateProfile>[1]) => {
+    try {
+      await updateProfile(id, patch)
+    } catch (e) {
+      toast.error('No se pudo actualizar el perfil', e instanceof Error ? e.message : '')
+    }
+  }
+
   const handleSaveRules = async () => {
     if (!selectedId) return
     setSaving(true)
@@ -140,11 +150,16 @@ export function MarkupProfilesPage() {
                         <p className="text-sm font-bold text-[#1e3a5f]">{selected.nombre}</p>
                         <label className="text-xs text-gray-500 inline-flex items-center gap-1.5 mt-1">
                           <input type="checkbox" checked={selected.activo}
-                            onChange={e => updateProfile(selected.id, { activo: e.target.checked })} />
+                            onChange={e => handleUpdateProfile(selected.id, { activo: e.target.checked })} />
                           {t('markup.active')}
                           <span className="ml-2">· {t('markup.priority')}:</span>
-                          <input type="number" value={selected.prioridad}
-                            onChange={e => updateProfile(selected.id, { prioridad: Number(e.target.value) || 100 })}
+                          {/* key fuerza remount al cambiar de perfil para refrescar
+                              defaultValue; persiste onBlur en vez de cada tecla. */}
+                          <input type="number" key={selected.id} defaultValue={selected.prioridad}
+                            onBlur={e => {
+                              const v = Number(e.target.value) || 100
+                              if (v !== selected.prioridad) handleUpdateProfile(selected.id, { prioridad: v })
+                            }}
                             className="w-14 px-1.5 py-0.5 border border-gray-200 rounded outline-none tabular-nums" />
                         </label>
                       </div>

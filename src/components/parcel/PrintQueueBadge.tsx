@@ -30,7 +30,13 @@ export function PrintQueueBadge() {
       doc.text(`Generada: ${new Date(item.created_at).toLocaleString('es-MX')}`, 20, 54)
       if (item.label_url) doc.text(`Label URL: ${item.label_url}`, 20, 62)
     })
-    doc.output('dataurlnewwindow')
+    // Abre el PDF en una pestaña. Si el navegador bloquea el popup NO se marca
+    // como impreso — de lo contrario se perderían etiquetas sin imprimir.
+    const win = window.open(doc.output('bloburl'), '_blank')
+    if (!win) {
+      toast.error('Permite las ventanas emergentes para imprimir las etiquetas')
+      return
+    }
     try {
       await markPrinted(pending.map(i => i.id))
       toast.success(`${pending.length} etiquetas enviadas a impresión`)

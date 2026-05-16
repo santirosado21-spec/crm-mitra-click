@@ -103,9 +103,15 @@ export function ParcelOrdersPage() {
   const handleDelete = async () => {
     if (selected.size === 0) return
     if (!window.confirm(`¿Eliminar ${selected.size} órdenes?`)) return
-    for (const id of selected) { try { await remove(id) } catch { /* skip */ } }
+    let ok = 0
+    let failed = 0
+    for (const id of selected) {
+      try { await remove(id); ok++ } catch { failed++ }
+    }
     setSelected(new Set())
-    toast.success('Órdenes eliminadas')
+    if (failed === 0)      toast.success(`${ok} órdenes eliminadas`)
+    else if (ok === 0)     toast.error('No se pudo eliminar', `${failed} órdenes fallaron`)
+    else                   toast.error('Eliminación parcial', `${ok} eliminadas · ${failed} fallaron`)
   }
 
   const handleImport = async (rows: Parameters<typeof bulkInsert>[0], fileName: string) => {

@@ -46,7 +46,9 @@ const HEADER_SYNONYMS = {
 }
 
 function normalize(s: string): string {
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+  // \u0300-\u036f = bloque de diacríticos combinables (acentos tras NFD).
+  // Se usan escapes en vez de los caracteres literales — invisibles y frágiles.
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
 }
 
 function findColumn(headers: string[], synonyms: string[]): number {

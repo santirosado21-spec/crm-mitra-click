@@ -47,16 +47,14 @@ export function useOrderTemplates() {
     setTemplates(prev => prev.filter(t => t.id !== id))
   }, [])
 
-  /** Marca una plantilla como usada: incrementa use_count y sella last_used_at. */
+  /** Marca una plantilla como usada: incrementa use_count y sella last_used_at.
+   *  Usa un RPC para que el incremento sea atómico (evita lost-updates entre
+   *  usuarios concurrentes — el patrón read-then-write del cliente los pierde). */
   const markUsed = useCallback(async (id: string) => {
-    const tpl = templates.find(t => t.id === id)
-    const { error: err } = await supabase
-      .from('parcel_order_templates')
-      .update({ use_count: (tpl?.use_count ?? 0) + 1, last_used_at: new Date().toISOString() })
-      .eq('id', id)
+    const { error: err } = await supabase.rpc('increment_template_use_count', { p_id: id })
     if (err) throw new Error(err.message)
     await fetchAll()
-  }, [templates, fetchAll])
+  }, [fetchAll])
 
   return { templates, loading, error, refetch: fetchAll, create, update, remove, markUsed }
 }

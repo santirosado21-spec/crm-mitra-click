@@ -13,8 +13,10 @@ import type { CarrierProvider } from '../../types/guias'
 import { supabase } from '../supabase'
 
 const PROVIDER_NAME: CarrierProvider = 'skydropx'
-const SANDBOX_URL = 'https://pro.skydropx.com/api/v1'
-const PRODUCTION_URL = 'https://pro.skydropx.com/api/v1'
+// Skydropx Pro v1 usa el mismo host para pruebas y producción — el entorno lo
+// determina la API key (de test o live), no la URL. Antes había dos constantes
+// idénticas + un baseUrl(testMode) que aparentaba un sandbox inexistente.
+const API_URL = 'https://pro.skydropx.com/api/v1'
 
 interface SkydropxCredential {
   api_key:   string
@@ -104,10 +106,6 @@ async function loadCredential(): Promise<SkydropxCredential | null> {
   return data as SkydropxCredential
 }
 
-function baseUrl(testMode: boolean): string {
-  return testMode ? SANDBOX_URL : PRODUCTION_URL
-}
-
 function addressToSkydropx(a: Address): SkydropxAddress {
   return {
     name:     a.name,
@@ -192,7 +190,7 @@ export const skydropxProvider: CarrierProviderClient = {
     }
 
     try {
-      const res = await authedFetch(`${baseUrl(cred.test_mode)}/quotations`, cred.api_key, {
+      const res = await authedFetch(`${API_URL}/quotations`, cred.api_key, {
         method: 'POST',
         body:   JSON.stringify(body),
       })
@@ -239,7 +237,7 @@ export const skydropxProvider: CarrierProviderClient = {
       body.parcels      = [parcelToSkydropx(shipment.parcel)]
     }
 
-    const res = await authedFetch(`${baseUrl(cred.test_mode)}/shipments`, cred.api_key, {
+    const res = await authedFetch(`${API_URL}/shipments`, cred.api_key, {
       method: 'POST',
       body:   JSON.stringify(body),
     })
