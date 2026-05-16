@@ -6,7 +6,9 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // dist: build output. scripts: utilidades extraídas, no app. supabase/functions:
+  // edge functions Deno — tienen su propio tooling y runtime, no la config del app.
+  globalIgnores(['dist', 'scripts', 'supabase/functions']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -20,9 +22,15 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      // Permite el patrón de destructuring para omitir campos:
-      // `const { omitir, ...resto } = obj` no marca `omitir` como no usado.
-      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
+      // - ignoreRestSiblings: permite `const { omitir, ...resto } = obj`.
+      // - patrones ^_ : variables/argumentos con prefijo _ se consideran
+      //   intencionalmente sin usar (convención ya usada en el código).
+      '@typescript-eslint/no-unused-vars': ['error', {
+        ignoreRestSiblings: true,
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
     },
   },
 ])

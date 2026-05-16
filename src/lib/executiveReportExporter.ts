@@ -386,7 +386,9 @@ export function buildExecutiveWorkbook(data: ExecutiveData): XLSX.WorkBook {
   const guiasRows = data.guias.map(g => {
     const quotes = (g.rate_quotes ?? []) as { price_mxn?: number }[]
     const sortedPrices = quotes.map(q => Number(q.price_mxn ?? 0)).filter(p => p > 0).sort((a, b) => a - b)
-    const cheapest = sortedPrices[0] ?? Number(g.costo) ?? 0
+    // Number(g.costo) puede ser NaN (costo undefined / no numérico); `?? 0` no
+    // lo atrapaba — `|| 0` sí, evitando que NaN se propague al reporte.
+    const cheapest = sortedPrices[0] ?? (Number(g.costo) || 0)
     const second   = sortedPrices[1] ?? cheapest
     const chosen   = Number(g.costo) || cheapest
     const ahorro   = chosen <= cheapest ? Math.max(0, second - cheapest) : 0
