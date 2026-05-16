@@ -65,6 +65,14 @@ async function hmacHex(secret: string, body: string): Promise<string> {
   return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
+// Comparación en tiempo constante — evita timing attacks sobre la firma.
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return diff === 0
+}
+
 // ── Parsers por provider ─────────────────────────────────────────────────────
 function parseSkydropx(json: Record<string, unknown>): ParsedEvent | null {
   const data = (json.data ?? json) as Record<string, unknown>
@@ -110,16 +118,23 @@ serve(async (req: Request) => {
   const provider = (url.searchParams.get('provider') ?? '').toLowerCase()
   const rawBody = await req.text()
 
-  // Validación HMAC (si hay secret configurado para ese provider).
+  // Autenticidad: el endpoint es público (los carriers no mandan JWT de
+  // Supabase), así que la ÚNICA defensa es la firma HMAC. Fail-closed: sin un
+  // secret configurado para el provider, o sin una firma válida presente, la
+  // petición se rechaza. Nunca se acepta un payload sin verificar.
   const secret = provider === 'skydropx' ? SKYDROPX_SECRET
                : provider === 'fedex'    ? FEDEX_SECRET : ''
-  if (secret) {
-    const sigHeader = req.headers.get('x-webhook-signature')
-      ?? req.headers.get('x-signature') ?? ''
-    const expected = await hmacHex(secret, rawBody)
-    if (sigHeader && sigHeader.replace(/^sha256=/, '') !== expected) {
-      return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401, headers: CORS })
-    }
+  if (!secret) {
+    return new Response(
+      JSON.stringify({ error: 'Webhook signature secret not configured for this provider' }),
+      { status: 503, headers: CORS },
+    )
+  }
+  const sigHeader = (req.headers.get('x-webhook-signature')
+    ?? req.headers.get('x-signature') ?? '').replace(/^sha256=/, '')
+  const expected = await hmacHex(secret, rawBody)
+  if (!sigHeader || !timingSafeEqual(sigHeader, expected)) {
+    return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401, headers: CORS })
   }
 
   let json: Record<string, unknown>
