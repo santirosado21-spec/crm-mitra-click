@@ -62,10 +62,29 @@ function findColumn(headers: string[], synonyms: string[]): number {
   return -1
 }
 
+// El encabezado no siempre es la fila 0 — los exports reales suelen traer
+// filas de título/logo arriba. Escanea las primeras filas y elige la que mejor
+// coincida con los sinónimos de columna conocidos.
+function detectHeaderRow(aoa: unknown[][]): number {
+  const allSynonyms = Object.values(HEADER_SYNONYMS)
+  const maxScan = Math.min(10, aoa.length)
+  let bestRow = 0
+  let bestScore = -1
+  for (let r = 0; r < maxScan; r++) {
+    const headers = (aoa[r] ?? []).map(h => String(h ?? '').trim())
+    let score = 0
+    for (const syns of allSynonyms) {
+      if (findColumn(headers, syns) >= 0) score++
+    }
+    if (score > bestScore) { bestScore = score; bestRow = r }
+  }
+  return bestRow
+}
+
 function parseNumber(value: unknown): number {
   if (value == null || value === '') return 0
   if (typeof value === 'number') return value
-  const cleaned = String(value).replace(/[^\d.\-]/g, '')
+  const cleaned = String(value).replace(/[^\d.-]/g, '')
   const n = Number(cleaned)
   return isNaN(n) ? 0 : n
 }
@@ -98,7 +117,8 @@ export async function parseParcelExcel(file: File): Promise<ParcelParseResult> {
     return { rows: [], totalRows: 0, validRows: 0, invalidRows: 0, fileName: file.name }
   }
 
-  const headers = (aoa[0] as unknown[]).map(h => String(h ?? '').trim())
+  const headerRow = detectHeaderRow(aoa as unknown[][])
+  const headers = (aoa[headerRow] as unknown[]).map(h => String(h ?? '').trim())
   const col = {
     cliente:      findColumn(headers, HEADER_SYNONYMS.cliente),
     order_num:    findColumn(headers, HEADER_SYNONYMS.order_num),
@@ -114,7 +134,7 @@ export async function parseParcelExcel(file: File): Promise<ParcelParseResult> {
   }
 
   const rows: ParsedParcelRow[] = []
-  for (let i = 1; i < aoa.length; i++) {
+  for (let i = headerRow + 1; i < aoa.length; i++) {
     const row = aoa[i] as unknown[]
     if (row.every(cell => cell === '' || cell == null)) continue
 

@@ -53,7 +53,12 @@ export function useManifests() {
     if (input.guiaIds.length > 0) {
       const links = input.guiaIds.map(gid => ({ manifest_id: manifest.id, guia_id: gid }))
       const linkRes = await supabase.from('manifest_guias').insert(links)
-      if (linkRes.error) throw new Error(linkRes.error.message)
+      if (linkRes.error) {
+        // Rollback compensatorio: sin sus guías el manifiesto queda huérfano
+        // (total_guias > 0 pero cero líneas).
+        await supabase.from('manifests').delete().eq('id', manifest.id)
+        throw new Error(linkRes.error.message)
+      }
     }
     await fetchAll()
     return manifest

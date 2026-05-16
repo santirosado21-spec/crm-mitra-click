@@ -160,8 +160,9 @@ serve(async (req: Request) => {
       { status: 200, headers: CORS })
   }
 
-  // Inserta el evento de tracking.
-  await supabase.from('shipment_tracking_events').insert({
+  // Inserta el evento de tracking. Si falla, devuelve 500 para que el carrier
+  // reintente — no se debe perder el evento en silencio.
+  const evtRes = await supabase.from('shipment_tracking_events').insert({
     guia_id:       guia.id,
     provider,
     status:        event.status,
@@ -170,13 +171,23 @@ serve(async (req: Request) => {
     occurred_at:   event.occurred_at,
     raw_payload:   json,
   })
+  if (evtRes.error) {
+    console.error('[webhook] insert tracking event failed:', evtRes.error.message)
+    return new Response(JSON.stringify({ error: 'Failed to record tracking event' }),
+      { status: 500, headers: CORS })
+  }
 
   // Actualiza la guía.
   const update: Record<string, unknown> = { tracking_status: event.status }
   if (event.status === 'entregado') {
     update.actual_delivery_date = (event.occurred_at ?? new Date().toISOString()).slice(0, 10)
   }
-  await supabase.from('guias_paqueteria').update(update).eq('id', guia.id)
+  const updRes = await supabase.from('guias_paqueteria').update(update).eq('id', guia.id)
+  if (updRes.error) {
+    console.error('[webhook] update guia failed:', updRes.error.message)
+    return new Response(JSON.stringify({ error: 'Failed to update guia status' }),
+      { status: 500, headers: CORS })
+  }
 
   return new Response(JSON.stringify({ ok: true, guia_id: guia.id, status: event.status }), { headers: CORS })
 })

@@ -123,10 +123,22 @@ export const fedexProvider: CarrierProviderClient = {
         },
       })
       const details = reply?.output?.rateReplyDetails ?? []
-      return details.map((d, idx) => {
-        const charge = d.ratedShipmentDetails?.[0]?.totalNetCharge ?? 0
+      return details.flatMap((d, idx) => {
+        // FedEx puede devolver varios ratedShipmentDetails (ACCOUNT, LIST) en
+        // distintas monedas. price_mxn solo es válido si la tarifa está en MXN,
+        // así que se prefiere el detalle denominado en MXN.
+        const rated = d.ratedShipmentDetails ?? []
+        const picked = rated.find(r => r.currency === 'MXN') ?? rated[0]
+        const currency = picked?.currency ?? 'MXN'
+        // Sin un detalle en MXN no se puede comparar el precio — se descarta la
+        // tarifa en vez de mostrarla con un price_mxn engañoso (USD ≠ MXN).
+        if (currency !== 'MXN') {
+          console.warn(`[fedex] descartando tarifa ${d.serviceType ?? idx}: sin detalle en MXN (moneda: ${currency})`)
+          return []
+        }
+        const charge = picked?.totalNetCharge ?? 0
         const transit = d.operationalDetail?.transitTime ?? ''
-        return {
+        return [{
           rate_id:       `${RATE_ID_PREFIX}${d.serviceType ?? idx}`,
           provider:      PROVIDER_NAME,
           carrier:       'fedex',
@@ -135,10 +147,10 @@ export const fedexProvider: CarrierProviderClient = {
           service_label: d.serviceName ?? d.serviceType ?? 'FedEx',
           price_mxn:     Math.round(charge),
           delivery_days: TRANSIT_DAYS[transit] ?? 3,
-          currency:      d.ratedShipmentDetails?.[0]?.currency ?? 'MXN',
+          currency,
           is_local:      input.from.country === input.to.country,
           raw:           d,
-        }
+        }]
       })
     } catch (e) {
       console.error('[fedex] getRates error:', e)

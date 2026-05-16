@@ -10,6 +10,7 @@ import { useGuiasPaqueteria } from '../../hooks/useGuiasPaqueteria'
 import { useAuthContext } from '../../context/AuthContext'
 import { useToast } from '../../hooks/useToast'
 import { finalizeManifest } from '../../lib/carriers/manifests'
+import { supabase } from '../../lib/supabase'
 
 type Tab = 'finalize' | 'history'
 
@@ -47,9 +48,20 @@ export function ManifestsPage() {
     if (!m) return
     setFinalizing(manifestId)
     try {
-      const guiaLines = guias
-        .filter(g => m.guia_ids.includes(g.id))
-        .map(g => ({ tracking_number: g.tracking_number, cliente: g.cliente_codigo ?? '—', destino: g.to_postal_code ?? '—' }))
+      // Carga las guías del manifiesto por id — no por estado. El hook
+      // useGuiasPaqueteria solo trae las 'comprado', y un manifiesto puede
+      // contener guías ya avanzadas (en tránsito/entregado) que de otro modo
+      // se caerían del PDF.
+      const { data: guiaRows, error: guiaErr } = await supabase
+        .from('guias_paqueteria')
+        .select('tracking_number, cliente_codigo, to_postal_code')
+        .in('id', m.guia_ids)
+      if (guiaErr) throw guiaErr
+      const guiaLines = (guiaRows ?? []).map(g => ({
+        tracking_number: g.tracking_number,
+        cliente: g.cliente_codigo ?? '—',
+        destino: g.to_postal_code ?? '—',
+      }))
       const result = await finalizeManifest({
         folio: m.folio, carrier: m.carrier, provider: m.provider,
         fecha: m.fecha, guias: guiaLines, trackingNumbers: guiaLines.map(g => g.tracking_number),

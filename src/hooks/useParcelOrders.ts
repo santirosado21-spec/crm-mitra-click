@@ -82,13 +82,19 @@ export function useParcelOrders() {
 
     for (const order of targets) {
       try {
+        // El destinatario real se guarda en notas ("Destinatario: X") al
+        // importar; el tracking_number NO es un nombre y no debe ir al carrier.
+        const recipientName =
+          order.notas?.match(/Destinatario:\s*(.+)/)?.[1]?.trim()
+          || order.clients?.name
+          || 'Destinatario'
         const input: RateInput = {
           from: {
             name: 'Supply Chain MX', street1: 'Lerma', city: 'Lerma',
             state: 'México', postal_code: order.from_postal_code ?? '52000', country: 'MX',
           },
           to: {
-            name: order.tracking_number ?? 'Destino', street1: '—', city: '—',
+            name: recipientName, street1: '—', city: '—',
             state: '—', postal_code: order.to_postal_code ?? '00000',
             country: order.to_country ?? 'MX',
           },
@@ -99,7 +105,7 @@ export function useParcelOrders() {
             height_cm: Number(order.height_cm) || 10,
           },
         }
-        let rates = (await Promise.all(clients.map(c => c.getRates(input).catch(() => [])))).flat()
+        const rates = (await Promise.all(clients.map(c => c.getRates(input).catch(() => [])))).flat()
         if (rates.length === 0) throw new Error('Sin tarifas disponibles')
         // Preferir el carrier ya asignado a la orden; si no, el más barato.
         const preferred = rates.filter(r => r.carrier === order.paqueteria)

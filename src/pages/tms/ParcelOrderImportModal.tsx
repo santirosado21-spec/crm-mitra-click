@@ -103,13 +103,16 @@ export function ParcelOrderImportModal({ open, onClose, onConfirm, clientes, tem
   const handleConfirm = async () => {
     setSubmitting(true)
     try {
-      const payload: CreateGuiaData[] = selectedRows.map((r, i) => {
+      const payload: CreateGuiaData[] = selectedRows.map((r) => {
         const carrier = (r.carrier && VALID_CARRIERS.includes(r.carrier as Paqueteria))
           ? r.carrier as Paqueteria : 'estafeta'
         const codigo = clientes.find(c => c.id === r.cliente_id)?.codigo ?? null
         return {
           paqueteria:      carrier,
-          tracking_number: `ORD-${Date.now()}-${r.source_row}-${i}`,
+          // Placeholder único hasta que la compra de etiqueta asigne el
+          // tracking real. Date.now() es idéntico para todo el batch — un UUID
+          // evita colisiones entre filas e importaciones simultáneas.
+          tracking_number: `ORD-${crypto.randomUUID()}`,
           cliente_id:      r.cliente_id!,
           cliente_codigo:  codigo,
           costo:           0,
