@@ -73,7 +73,8 @@ export function ProformasPage() {
       .select('extensiv_customer_id')
       .eq('name', clienteF)
       .eq('is_active', true)
-      .single()
+      // maybeSingle: no lanza con 0 filas ni con nombres de cliente duplicados.
+      .maybeSingle()
       .then(
         ({ data }) => {
           setExtensivId(data?.extensiv_customer_id ?? null)
