@@ -91,7 +91,7 @@ export function getModulesForRole(role: UserRole | undefined): AppModule[] {
 }
 
 export function moduleFromPath(path: string): AppModule | null {
-  if (path === '/almacen') return 'almacen'
+  if (path === '/almacen' || path.startsWith('/almacen/')) return 'almacen'
   if (path.startsWith('/tasks') || path.startsWith('/admin')) return 'tasks'
   // TMS de Paqueterías es un módulo separado aunque sus URLs vivan bajo /tms/*
   if (

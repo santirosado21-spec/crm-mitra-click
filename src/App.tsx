@@ -9,6 +9,7 @@ import { WMSHome } from './pages/wms/WMSHome'
 import { StorageBridgePage } from './pages/wms/StorageBridgePage'
 import { EmisorConfigPage } from './pages/wms/EmisorConfigPage'
 import { AlmacenPage } from './pages/almacen/AlmacenPage'
+import { DistributionInboxPage } from './pages/almacen/DistributionInboxPage'
 import { TMSHome } from './pages/tms/TMSHome'
 import { TMSDashboard } from './pages/tms/TMSDashboard'
 import { VehiculosPage } from './pages/tms/VehiculosPage'
@@ -24,7 +25,7 @@ import { RCPage } from './pages/billing/RCPage'
 import { TarifariosPage } from './pages/tarifarios/TarifariosPage'
 import { ServiciosPage } from './pages/servicios/ServiciosPage'
 import { ValidadorSKUPage } from './pages/sac/ValidadorSKUPage'
-import { ReceiptGeneratorPage } from './pages/sac/ReceiptGeneratorPage'
+import { ReceiptGeneratorPage } from './pages/almacen/ReceiptGeneratorPage'
 import { CartaInstruccionPage } from './pages/sac/CartaInstruccionPage'
 import { GuiasPaqueteriaPage } from './pages/tms/GuiasPaqueteriaPage'
 import { CartaPortePage } from './pages/tms/CartaPortePage'
@@ -81,6 +82,12 @@ function App() {
           {/* Almacén */}
           <Route path="/almacen" element={
             <ProtectedRoute allowedRoles={ALMACEN_ROLES}><AlmacenPage /></ProtectedRoute>
+          } />
+          <Route path="/almacen/receipt-generator" element={
+            <ProtectedRoute allowedRoles={ALMACEN_ROLES}><ReceiptGeneratorPage /></ProtectedRoute>
+          } />
+          <Route path="/almacen/distribucion" element={
+            <ProtectedRoute allowedRoles={ALMACEN_ROLES}><DistributionInboxPage /></ProtectedRoute>
           } />
 
           {/* TMS */}
@@ -139,9 +146,8 @@ function App() {
           <Route path="/sac/validador" element={
             <ProtectedRoute allowedRoles={WMS_ROLES}><ValidadorSKUPage /></ProtectedRoute>
           } />
-          <Route path="/sac/receipt-generator" element={
-            <ProtectedRoute allowedRoles={WMS_ROLES}><ReceiptGeneratorPage /></ProtectedRoute>
-          } />
+          {/* Compat redirect: ruta vieja /sac/receipt-generator → /almacen */}
+          <Route path="/sac/receipt-generator" element={<Navigate to="/almacen/receipt-generator" replace />} />
           <Route path="/sac/carta-instruccion" element={
             <ProtectedRoute allowedRoles={WMS_ROLES}><CartaInstruccionPage /></ProtectedRoute>
           } />

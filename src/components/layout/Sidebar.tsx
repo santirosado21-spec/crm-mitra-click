@@ -21,7 +21,6 @@ interface Link {
 const WMS_LINKS: Link[] = [
   { to: '/wms',                    label: 'Herramientas de WMS', icon: Warehouse },
   { to: '/sac/validador',          label: 'Validador SKU',        icon: ScanBarcode },
-  { to: '/sac/receipt-generator',  label: 'Generador Receipt',    icon: FileInput },
   { to: '/sac/carta-instruccion', label: 'Carta Instrucción', icon: FileText },
   { to: '/seko-billing',           label: 'Billing Seko 365',     icon: Receipt },
   { to: '/rc',                     label: 'Rendición RC',         icon: FileCheck },
@@ -61,7 +60,9 @@ const PARCEL_LINKS: Link[] = [
 ]
 
 const ALMACEN_LINKS: Link[] = [
-  { to: '/almacen',        label: 'CEDIS Lerma',          icon: Warehouse },
+  { to: '/almacen',                   label: 'CEDIS Lerma',         icon: Warehouse },
+  { to: '/almacen/receipt-generator', label: 'Generador Receipt',   icon: FileInput },
+  { to: '/almacen/distribucion',      label: 'Distribución tareas', icon: UserCheck },
 ]
 
 const TASKS_LINKS: Link[] = [
@@ -83,7 +84,7 @@ type ModuleKey = 'home' | 'wms' | 'tms' | 'almacen' | 'tasks' | 'parcel'
 
 function detectModule(pathname: string): ModuleKey {
   if (pathname === '/')                                                          return 'home'
-  if (pathname === '/almacen')                                                   return 'almacen'
+  if (pathname === '/almacen' || pathname.startsWith('/almacen/'))               return 'almacen'
   if (pathname.startsWith('/tasks') || pathname.startsWith('/admin'))            return 'tasks'
   // TMS de Paqueterías es módulo separado aunque vive bajo /tms/* por ahora.
   if (pathname === '/tms/guias-paqueteria' ||
