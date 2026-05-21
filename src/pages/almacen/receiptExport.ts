@@ -52,6 +52,6 @@ export function generateReceiptExcel(ref: string, items: PTLineItem[]): void {
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Receipt Import Template')
 
-  const safeRef = (ref || 'PT').replace(/[^\w\-]/g, '_')
+  const safeRef = (ref || 'PT').replace(/[^\w-]/g, '_')
   XLSX.writeFile(wb, `Receipt_${safeRef}.xlsx`)
 }
