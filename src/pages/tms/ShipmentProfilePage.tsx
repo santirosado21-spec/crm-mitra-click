@@ -5,6 +5,7 @@ import { Header } from '../../components/layout/Header'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { Spinner } from '../../components/ui/Spinner'
 import { BarPanel, PiePanel } from '../../components/parcel/MetricPanels'
+import { MexicoChoropleth } from '../../components/parcel/MexicoChoropleth'
 import { useShipmentProfileMetrics, type ShipmentProfileFilters, type DateRangePreset } from '../../hooks/useShipmentProfileMetrics'
 import { useClientCatalog } from '../../hooks/useClientCatalog'
 import { PAQUETERIA_LABEL } from '../../types/guias'
@@ -122,10 +123,15 @@ export function ShipmentProfilePage() {
           ) : (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 mb-3">
+                <MexicoChoropleth
+                  title="Paquetes por estado (destino)"
+                  data={metrics.byStateMap}
+                  className="lg:col-span-2"
+                />
+                <BarPanel title="Top estados (destino)" data={metrics.byState} />
                 <BarPanel title="Paquetes por carrier" data={metrics.byCarrier} />
                 <BarPanel title="Paquetes por servicio" data={metrics.byService} />
                 <BarPanel title="Paquetes por cuenta de facturación" data={metrics.byCarrierAccount} />
-                <PiePanel title="Paquetes por país" data={metrics.byCountry} />
                 <BarPanel title="Top destinos (CP)" data={metrics.byDestination} />
                 <BarPanel title="Costo por carrier" data={metrics.costByCarrier} />
                 <PiePanel title="Términos de pago" data={metrics.paymentTerms} />

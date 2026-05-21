@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import type { GuiaPaqueteria } from '../types/guias'
+import { estadoFromCp } from '../lib/postal/cpEstado'
 
 export type DateRangePreset = 'mtd' | 'l7' | 'l30' | 'custom'
 
@@ -95,12 +96,28 @@ export function useShipmentProfileMetrics(filters: ShipmentProfileFilters) {
       if (idx >= 0) weightBuckets[idx].value++
     }
 
+    // Agregado por estado de destino — derivado del CP vía prefijo SEPOMEX.
+    const stateAgg = new Map<string, { iso: string; nombre: string; value: number }>()
+    for (const g of rows) {
+      const e = estadoFromCp(g.to_postal_code)
+      if (!e) continue
+      const cur = stateAgg.get(e.iso)
+      if (cur) cur.value++
+      else stateAgg.set(e.iso, { iso: e.iso, nombre: e.nombre, value: 1 })
+    }
+    const byStateMap = [...stateAgg.values()]
+    const byState: Bucket[] = byStateMap
+      .map(s => ({ label: s.nombre, value: s.value }))
+      .sort((a, b) => b.value - a.value)
+
     return {
       totalPackages, totalPaid, totalCost, avgCost,
       byCarrier:        tally(rows, g => g.paqueteria),
       byService:        tally(rows, g => g.auto_pick_service ?? 'Sin servicio'),
       byCarrierAccount: tally(rows, g => g.billing_account ?? 'Sin cuenta'),
       byCountry:        tally(rows, g => g.to_country ?? 'MX'),
+      byStateMap,
+      byState:          byState.slice(0, 10),
       byDestination:    tally(rows, g => g.to_postal_code ?? '—').slice(0, 10),
       costByCarrier:    tally(rows, g => g.paqueteria, g => Number(g.costo) || 0),
       paymentTerms:     tally(rows, g => g.origen === 'extensiv' ? 'Extensiv' : 'Manual'),
