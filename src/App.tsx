@@ -10,6 +10,9 @@ import { StorageBridgePage } from './pages/wms/StorageBridgePage'
 import { EmisorConfigPage } from './pages/wms/EmisorConfigPage'
 import { AlmacenPage } from './pages/almacen/AlmacenPage'
 import { DistributionInboxPage } from './pages/almacen/DistributionInboxPage'
+import { PizarronPage } from './pages/almacen/PizarronPage'
+import { PizarronKioskPage } from './pages/almacen/PizarronKioskPage'
+import { PizarronAdminPage } from './pages/almacen/PizarronAdminPage'
 import { TMSHome } from './pages/tms/TMSHome'
 import { TMSDashboard } from './pages/tms/TMSDashboard'
 import { VehiculosPage } from './pages/tms/VehiculosPage'
@@ -88,6 +91,14 @@ function App() {
           } />
           <Route path="/almacen/distribucion" element={
             <ProtectedRoute allowedRoles={ALMACEN_ROLES}><DistributionInboxPage /></ProtectedRoute>
+          } />
+          <Route path="/almacen/pizarron" element={
+            <ProtectedRoute allowedRoles={ALMACEN_ROLES}><PizarronPage /></ProtectedRoute>
+          } />
+          {/* Kiosk: sin ProtectedRoute — pantalla compartida en LAN del CEDIS */}
+          <Route path="/almacen/pizarron-kiosk" element={<PizarronKioskPage />} />
+          <Route path="/almacen/pizarron-admin" element={
+            <ProtectedRoute allowedRoles={['admin', 'almacen']}><PizarronAdminPage /></ProtectedRoute>
           } />
 
           {/* TMS */}

@@ -63,6 +63,8 @@ const ALMACEN_LINKS: Link[] = [
   { to: '/almacen',                   label: 'CEDIS Lerma',         icon: Warehouse },
   { to: '/almacen/receipt-generator', label: 'Generador Receipt',   icon: FileInput },
   { to: '/almacen/distribucion',      label: 'Distribución tareas', icon: UserCheck },
+  { to: '/almacen/pizarron',          label: 'Pizarrón Operaciones', icon: LayoutDashboard },
+  { to: '/almacen/pizarron-admin',    label: 'Pizarrón Admin',       icon: BarChart3 },
 ]
 
 const TASKS_LINKS: Link[] = [
