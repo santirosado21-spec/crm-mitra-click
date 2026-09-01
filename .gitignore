@@ -38,6 +38,7 @@ dist-ssr
 .claude
 .agent
 .zed
+.hermes/
 
 # Vite cache
 .vite

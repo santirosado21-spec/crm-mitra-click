@@ -225,3 +225,21 @@ h1, h2, h3, .font-display { font-family: 'Nunito', sans-serif; letter-spacing: -
   }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* ── MitraClick Intelligence ─────────────────────────────────────────────── */
+@keyframes drawerIn {
+  from { opacity: 0; transform: translateX(36px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+button, input, select, textarea { font: inherit; }
+button:disabled { cursor: not-allowed; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
