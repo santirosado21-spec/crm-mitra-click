@@ -2,27 +2,27 @@
 
 /* ── Tokens de diseño ─────────────────────────────────────────────────────── */
 :root {
-  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   font-feature-settings: 'cv02', 'cv03', 'cv04';
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
   /* Colores corporativos */
-  --brand-navy:    #1e3a5f;
+  --brand-navy:    #454a49;
   --brand-red:     #dc3545;
   --brand-green:   #28a745;
-  --brand-amber:   #ffc107;
+  --brand-amber:   #ffc62a;
 
   /* Light theme */
-  --page-bg:       #f5f7fa;
+  --page-bg:       #f7f7f3;
   --card-bg:       #ffffff;
-  --card-border:   #e8edf2;
+  --card-border:   #e2e2dc;
   --card-shadow:   0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
   --sidebar-bg:    #ffffff;
   --header-bg:     #ffffff;
-  --text-primary:  #1e2d3d;
-  --text-muted:    #64748b;
+  --text-primary:  #303536;
+  --text-muted:    #676b69;
 }
 
 * { box-sizing: border-box; }
@@ -113,14 +113,14 @@ button { font-family: inherit; cursor: pointer; }
   overscroll-behavior: contain;
 }
 
-/* Nunito para headings también — misma familia que el logo "SupplyChain" */
-h1, h2, h3, .font-display { font-family: 'Nunito', sans-serif; letter-spacing: -0.01em; font-weight: 800; }
+/* Poppins replica el carácter geométrico y pesado del wordmark MitraClick. */
+h1, h2, h3, .font-display { font-family: 'Poppins', sans-serif; letter-spacing: -0.02em; font-weight: 800; }
 
 /* ── Scrollbar ────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d9e0; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #9eaab8; }
+::-webkit-scrollbar-thumb { background: #d4d4ce; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #a1a4a2; }
 
 /* ── Animaciones ──────────────────────────────────────────────────────────── */
 @keyframes fadeUp {
@@ -199,7 +199,7 @@ h1, h2, h3, .font-display { font-family: 'Nunito', sans-serif; letter-spacing: -
 
 /* ── KPI número ───────────────────────────────────────────────────────────── */
 .kpi-number {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -207,7 +207,7 @@ h1, h2, h3, .font-display { font-family: 'Nunito', sans-serif; letter-spacing: -
 
 /* ── Focus visible ────────────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--brand-navy);
+  outline: 3px solid #8a6500;
   outline-offset: 2px;
 }
 
