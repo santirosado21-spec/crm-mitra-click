@@ -18,6 +18,7 @@ import { SalesRepsPage } from './mitraclick/pages/SalesRepsPage'
 import { SalesRepDetailPage } from './mitraclick/pages/SalesRepDetailPage'
 import { MitraWholesalePage } from './mitraclick/pages/MitraWholesalePage'
 import { MitraClickPage } from './mitraclick/pages/MitraClickPage'
+import { ReportCapturePage, ReportViewPage } from './mitraclick/pages/ReportViewPage'
 
 function DataGate() {
   const { data, error, loading, resetMocks } = useMitraClick()
@@ -42,7 +43,9 @@ function DataGate() {
         <Route path="automatizaciones" element={<AutomationsPage />} />
         <Route path="agentes" element={<AgentsPage />} />
         <Route path="reportes" element={<ReportsPage />} />
+        <Route path="reportes/:tipo" element={<ReportViewPage />} />
       </Route>
+      <Route path="reportes/:tipo/captura" element={<ReportCapturePage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

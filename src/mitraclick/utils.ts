@@ -3,6 +3,7 @@ export const formatCurrency = (value: number, compact = false) =>
     style: 'currency',
     currency: 'MXN',
     maximumFractionDigits: compact && Math.abs(value) >= 1_000_000 ? 1 : 0,
+    minimumFractionDigits: compact && Math.abs(value) >= 1_000_000 ? 1 : 0,
     notation: compact ? 'compact' : 'standard',
   }).format(value)
 

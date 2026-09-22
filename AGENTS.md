@@ -101,17 +101,27 @@ Responsabilidades:
 
 ## 5. Módulos y rutas activas
 
-- `/`: Dashboard ejecutivo
+Dirección y negocios (datos comerciales de `src/mitraclick/commercial/`):
+
+- `/`: Resumen (avance del mes contra meta, vendedores, material, alertas)
+- `/vendedores` y `/vendedores/:repId`: ranking contra cuota y detalle por vendedor
+- `/productos`: material más y menos vendido, agotados con demanda, sin movimiento
+- `/mitra`: Mitra mayorista (categorías, clientes, cotizaciones por vendedor)
+- `/mitra-click`: Mitra Click (canales, embudo, más vendidos)
+- `/reportes`, `/reportes/:tipo` y `/reportes/:tipo/captura`: reportes para WhatsApp
+
+Todas aceptan `?periodo=hoy|semana|mes|30d|90d`; Productos también `?unidad=mitra|mitraclick` y `?sin-movimiento=30|60|90`.
+
+CRM y sistema:
+
 - `/leads`: Leads
 - `/empresas`: Empresas B2B y contactos
 - `/oportunidades`: Pipeline comercial
 - `/cotizaciones`: Seguimiento de cotizaciones
-- `/productos`: Inteligencia comercial de productos
 - `/atribucion`: Recorrido y atribución demostrativa
 - `/actividad`: Timeline y seguimiento
 - `/automatizaciones`: Reglas en modo simulación
 - `/agentes`: Vista previa de agentes IA
-- `/reportes`: Reportes comerciales
 
 Límites funcionales importantes:
 
