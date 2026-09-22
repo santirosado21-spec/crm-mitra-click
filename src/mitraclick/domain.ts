@@ -165,6 +165,121 @@ export interface AiAgent {
   accent: string
 }
 
+// ── Inteligencia comercial: vendedores, productos y ventas ──────────────────
+// Fechas de negocio en formato 'YYYY-MM-DD' (día calendario de México).
+
+/** Mitra = mayorista B2B con vendedores; Mitra Click = e-commerce B2C. */
+export type BusinessUnit = 'mitra' | 'mitraclick'
+
+export const BUSINESS_UNIT_LABEL: Record<BusinessUnit, string> = {
+  mitra: 'Mitra mayorista',
+  mitraclick: 'Mitra Click',
+}
+
+/** Semáforo de vendedores: cumple su cuota, va en riesgo o no ha vendido en el periodo. */
+export type PerformanceStatus = 'cumple' | 'riesgo' | 'sin-ventas'
+
+export type PeriodKey = 'hoy' | 'semana' | 'mes' | '30d' | '90d'
+
+export interface SalesRep {
+  id: string
+  name: string
+  zone: string
+  /** Cuota mensual en MXN. */
+  monthlyQuota: number
+  active: boolean
+}
+
+export interface CommercialProduct {
+  id: string
+  sku: string
+  name: string
+  brand: string
+  category: string
+  businessUnit: BusinessUnit
+  unitPrice: number
+  /** Unidad de venta: pieza, tramo, rollo, caja… */
+  unit: string
+  stock: number
+  reorderPoint: number
+}
+
+export interface OrderLine {
+  productId: string
+  quantity: number
+  unitPrice: number
+  amount: number
+}
+
+export interface WholesaleClient {
+  id: string
+  name: string
+  type: 'Constructora' | 'Industria' | 'Taller' | 'Revendedor'
+  repId: string
+}
+
+export interface WholesaleOrder {
+  id: string
+  date: string
+  clientId: string
+  repId: string
+  amount: number
+  status: 'pendiente' | 'surtido'
+  lines: OrderLine[]
+}
+
+export type RetailChannel = 'Google' | 'Redes sociales' | 'Directo' | 'Email' | 'Referido'
+
+export interface RetailOrder {
+  id: string
+  date: string
+  channel: RetailChannel
+  amount: number
+  status: 'pendiente' | 'enviado' | 'entregado'
+  lines: OrderLine[]
+}
+
+export interface WholesaleQuote {
+  id: string
+  date: string
+  clientId: string
+  repId: string
+  amount: number
+  status: 'enviada' | 'negociacion' | 'ganada' | 'perdida'
+  closedDate?: string
+}
+
+export interface TrafficDay {
+  date: string
+  visits: number
+  productViews: number
+  carts: number
+  checkouts: number
+  orders: number
+}
+
+export interface MonthlyGoal {
+  /** 'YYYY-MM' */
+  month: string
+  businessUnit: BusinessUnit
+  amount: number
+}
+
+export interface CommercialData {
+  source: 'demo' | 'erp'
+  /** Último día con datos ('YYYY-MM-DD'). Todos los periodos se calculan contra esta fecha. */
+  asOf: string
+  generatedAt: string
+  reps: SalesRep[]
+  products: CommercialProduct[]
+  clients: WholesaleClient[]
+  wholesaleOrders: WholesaleOrder[]
+  retailOrders: RetailOrder[]
+  quotes: WholesaleQuote[]
+  traffic: TrafficDay[]
+  goals: MonthlyGoal[]
+}
+
 export interface MitraData {
   leads: Lead[]
   companies: Company[]
@@ -176,6 +291,7 @@ export interface MitraData {
   activities: Activity[]
   automations: AutomationRule[]
   agents: AiAgent[]
+  commercial: CommercialData
 }
 
 export interface LeadFilters {

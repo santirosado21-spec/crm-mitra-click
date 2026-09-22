@@ -73,7 +73,7 @@ export function DashboardPage() {
         title="Pulso comercial"
         description="Lectura unificada de ventas, demanda y avance comercial. Las cifras son sintéticas y validan la experiencia antes de conectar fuentes reales."
         actions={
-          <div className="rounded-xl border border-[#deded8] bg-white px-3 py-2 text-xs font-semibold text-[#626765] shadow-sm">
+          <div className="rounded-xl border border-mc-line bg-white px-3 py-2 text-xs font-semibold text-mc-muted shadow-sm">
             Periodo de muestra · jun–ago 2026
           </div>
         }
@@ -111,10 +111,10 @@ export function DashboardPage() {
             {view.pipeline.map((item, index) => (
               <div key={item.stage} className="rounded-xl border border-[#e6e6e0] bg-[#f8f8f4] p-3">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-2 text-xs font-bold text-slate-700"><span className="h-2 w-2 rounded-full ring-1 ring-[#454a49] ring-offset-1" style={{ backgroundColor: chartColors[index] }} />{item.stage}</span>
-                  <span className="text-xs font-black text-slate-900">{formatCurrency(item.valor, true)}</span>
+                  <span className="flex items-center gap-2 text-xs font-bold text-mc-gray-700"><span className="h-2 w-2 rounded-full ring-1 ring-mc-charcoal ring-offset-1" style={{ backgroundColor: chartColors[index] }} />{item.stage}</span>
+                  <span className="text-xs font-black text-mc-gray-900">{formatCurrency(item.valor, true)}</span>
                 </div>
-                <div className="mt-2 flex items-center justify-between text-[10px] text-slate-400"><span>{item.oportunidades} oportunidades</span><span>{item.oportunidades ? 'Con actividad' : 'Sin registros'}</span></div>
+                <div className="mt-2 flex items-center justify-between text-[10px] text-mc-gray-400"><span>{item.oportunidades} oportunidades</span><span>{item.oportunidades ? 'Con actividad' : 'Sin registros'}</span></div>
               </div>
             ))}
           </div>
@@ -142,7 +142,7 @@ export function DashboardPage() {
             </ResponsiveContainer>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {view.categories.map((item, index) => <div key={item.category} className="flex items-center gap-2 text-[11px] text-slate-500"><span className="h-2 w-2 rounded-full ring-1 ring-[#454a49] ring-offset-1" style={{ backgroundColor: chartColors[index % chartColors.length] }} /><span className="truncate">{item.category}</span></div>)}
+            {view.categories.map((item, index) => <div key={item.category} className="flex items-center gap-2 text-[11px] text-mc-gray-500"><span className="h-2 w-2 rounded-full ring-1 ring-mc-charcoal ring-offset-1" style={{ backgroundColor: chartColors[index % chartColors.length] }} /><span className="truncate">{item.category}</span></div>)}
           </div>
         </Panel>
 
@@ -150,8 +150,8 @@ export function DashboardPage() {
           <div className="space-y-3">
             {view.attribution.slice().sort((a, b) => b.revenue - a.revenue).map((journey) => (
                 <div key={journey.campaignId} className="rounded-xl border border-[#e6e6e0] p-3">
-                <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-extrabold text-slate-800">{journey.channel}</p><p className="mt-0.5 text-[10px] text-slate-400">{journey.campaignName}</p></div><p className="text-xs font-black text-slate-900">{formatCurrency(journey.revenue, true)}</p></div>
-                <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] text-[#676b69]"><span className="rounded bg-[#efefe9] px-1.5 py-0.5">{journey.leadCount} leads</span><span>→</span><span className="rounded bg-[#fff5c7] px-1.5 py-0.5 text-[#665000]">{journey.opportunityCount} oportunidades</span><span>→</span><span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">{journey.saleCount} ventas</span></div>
+                <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-extrabold text-mc-gray-800">{journey.channel}</p><p className="mt-0.5 text-[10px] text-mc-gray-400">{journey.campaignName}</p></div><p className="text-xs font-black text-mc-gray-900">{formatCurrency(journey.revenue, true)}</p></div>
+                <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] text-mc-muted"><span className="rounded bg-mc-gray-100 px-1.5 py-0.5">{journey.leadCount} leads</span><span>→</span><span className="rounded bg-mc-yellow-wash px-1.5 py-0.5 text-[#665000]">{journey.opportunityCount} oportunidades</span><span>→</span><span className="rounded bg-mc-success-soft px-1.5 py-0.5 text-mc-success">{journey.saleCount} ventas</span></div>
               </div>
             ))}
           </div>
@@ -161,11 +161,11 @@ export function DashboardPage() {
       <Panel title="Campañas en observación" description="Rendimiento comercial preparado para datos de medios y analítica" padding={false}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] text-left text-xs">
-            <thead className="bg-[#f6f6f1] text-[10px] uppercase tracking-wider text-[#676b69]"><tr><th className="px-5 py-3">Campaña</th><th className="px-4 py-3">Canal</th><th className="px-4 py-3 text-right">Inversión</th><th className="px-4 py-3 text-right">Impresiones</th><th className="px-4 py-3 text-right">Clics</th><th className="px-4 py-3 text-right">Leads</th><th className="px-5 py-3 text-right">Ingresos atribuidos</th></tr></thead>
-            <tbody className="divide-y divide-slate-100">
+            <thead className="bg-mc-surface-2 text-[10px] uppercase tracking-wider text-mc-muted"><tr><th className="px-5 py-3">Campaña</th><th className="px-4 py-3">Canal</th><th className="px-4 py-3 text-right">Inversión</th><th className="px-4 py-3 text-right">Impresiones</th><th className="px-4 py-3 text-right">Clics</th><th className="px-4 py-3 text-right">Leads</th><th className="px-5 py-3 text-right">Ingresos atribuidos</th></tr></thead>
+            <tbody className="divide-y divide-mc-gray-100">
               {view.attribution.map((journey) => {
                 const campaign = data.campaigns.find((item) => item.id === journey.campaignId)!
-                return <tr key={journey.campaignId} className="hover:bg-slate-50/70"><td className="px-5 py-3 font-bold text-slate-800">{journey.campaignName}</td><td className="px-4 py-3"><StatusBadge status={journey.channel} /></td><td className="px-4 py-3 text-right text-slate-600">{formatCurrency(campaign.spend)}</td><td className="px-4 py-3 text-right text-slate-500">{formatNumber(campaign.impressions)}</td><td className="px-4 py-3 text-right text-slate-500">{formatNumber(campaign.clicks)}</td><td className="px-4 py-3 text-right font-bold text-slate-700">{journey.leadCount}</td><td className="px-5 py-3 text-right font-black text-slate-900">{formatCurrency(journey.revenue)}</td></tr>
+                return <tr key={journey.campaignId} className="hover:bg-mc-gray-50/70"><td className="px-5 py-3 font-bold text-mc-gray-800">{journey.campaignName}</td><td className="px-4 py-3"><StatusBadge status={journey.channel} /></td><td className="px-4 py-3 text-right text-mc-gray-600">{formatCurrency(campaign.spend)}</td><td className="px-4 py-3 text-right text-mc-gray-500">{formatNumber(campaign.impressions)}</td><td className="px-4 py-3 text-right text-mc-gray-500">{formatNumber(campaign.clicks)}</td><td className="px-4 py-3 text-right font-bold text-mc-gray-700">{journey.leadCount}</td><td className="px-5 py-3 text-right font-black text-mc-gray-900">{formatCurrency(journey.revenue)}</td></tr>
               })}
             </tbody>
           </table>

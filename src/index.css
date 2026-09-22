@@ -26,6 +26,28 @@
   --color-mc-line: #deded8;
   --color-mc-line-soft: #ecebe5;
 
+  /* Escala de gris cálido (sustituye a slate). 400+ cumple AA sobre blanco. */
+  --color-mc-gray-50: #f6f6f1;
+  --color-mc-gray-100: #efefe9;
+  --color-mc-gray-200: #deded8;
+  --color-mc-gray-300: #c9c9c2;
+  --color-mc-gray-400: #767a78;
+  --color-mc-gray-500: #676b69;
+  --color-mc-gray-600: #555a58;
+  --color-mc-gray-700: #454a49;
+  --color-mc-gray-800: #3a3f3e;
+  --color-mc-gray-900: #303536;
+  --color-mc-gray-950: #222626;
+
+  /* Series de gráficas: orden fijo, validado con dataviz (CVD y visión normal).
+     1 = Mitra B2B, 2 = Mitra Click B2C. 6+ series se agrupan en "Otros". */
+  --color-mc-series-1: #3a6ea5;
+  --color-mc-series-2: #eda100;
+  --color-mc-series-3: #4a3aa7;
+  --color-mc-series-4: #1baf7a;
+  --color-mc-series-5: #eb6834;
+  --color-mc-series-other: #a1a4a2;
+
   /* Semánticos (semáforo comercial) */
   --color-mc-success: #1f7a4d;
   --color-mc-success-soft: #e3f3ea;

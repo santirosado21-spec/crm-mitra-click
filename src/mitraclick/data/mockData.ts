@@ -1,6 +1,8 @@
 import type { MitraData } from '../domain'
 
-export const mockMitraData: MitraData = {
+// Datos CRM simulados (leads, empresas, oportunidades…). Los datos comerciales
+// (vendedores, pedidos, productos) los genera data/demo/generateCommercialData.ts.
+export const mockMitraData: Omit<MitraData, 'commercial'> = {
   companies: [
     {
       id: 'company-1', name: 'Comercializadora Horizonte', segment: 'B2B', industry: 'Retail especializado', city: 'Ciudad de México', owner: 'Mariana López', website: 'horizonte.ejemplo.test', status: 'Cliente', annualPotential: 1450000, lastActivityAt: '2026-08-27T15:30:00.000Z',
