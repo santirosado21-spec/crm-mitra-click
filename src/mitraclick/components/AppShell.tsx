@@ -72,7 +72,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
       { label: 'Atribución', path: '/atribucion', icon: GitFork, keywords: 'canal campaña conversión' },
       { label: 'Actividad', path: '/actividad', icon: Activity, keywords: 'timeline seguimiento llamadas notas' },
       { label: 'Automatizaciones', path: '/automatizaciones', icon: Workflow, keywords: 'trigger condición acción reglas' },
-      { label: 'Agentes IA', path: '/agentes', icon: Bot, keywords: 'asistente ejecutivo comercial reportes' },
+      { label: 'Agentes Grok Bot', path: '/agentes', icon: Bot, keywords: 'grok bot agentes ia perfiles reportes whatsapp' },
     ],
   },
 ]
@@ -188,11 +188,11 @@ function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void 
           <p className="px-2 pb-2 pt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-mc-gray-400">Navegar</p>
           {results.map((item) => {
             const Icon = item.icon
-            return <button key={item.path} type="button" onClick={() => { navigate(item.path); onClose() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#4f5352] hover:bg-mc-yellow-wash"><span className="grid h-8 w-8 place-items-center rounded-lg bg-mc-yellow-soft text-mc-ink"><Icon size={16} /></span><span className="flex-1">{item.label}</span><ChevronRight size={15} className="text-[#a1a4a2]" /></button>
+            return <button key={item.path} type="button" onClick={() => { navigate(item.path); onClose() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-mc-gray-700 hover:bg-mc-yellow-wash"><span className="grid h-8 w-8 place-items-center rounded-lg bg-mc-yellow-soft text-mc-ink"><Icon size={16} /></span><span className="flex-1">{item.label}</span><ChevronRight size={15} className="text-mc-gray-400" /></button>
           })}
           {!results.length && <p className="px-3 py-8 text-center text-sm text-mc-gray-400">No encontramos un módulo con esa búsqueda.</p>}
           <div className="my-2 border-t border-mc-gray-100" />
-          <button type="button" onClick={() => { void resetMocks(); onClose() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#4f5352] hover:bg-mc-yellow-wash"><span className="grid h-8 w-8 place-items-center rounded-lg bg-mc-gray-100 text-mc-charcoal"><RefreshCw size={16} /></span><span className="flex-1"><span className="block">Restablecer datos simulados</span><span className="block text-[11px] font-normal text-mc-muted">Descarta cambios locales de esta sesión</span></span></button>
+          <button type="button" onClick={() => { void resetMocks(); onClose() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-mc-gray-700 hover:bg-mc-yellow-wash"><span className="grid h-8 w-8 place-items-center rounded-lg bg-mc-gray-100 text-mc-charcoal"><RefreshCw size={16} /></span><span className="flex-1"><span className="block">Restablecer datos simulados</span><span className="block text-[11px] font-normal text-mc-muted">Descarta cambios locales de esta sesión</span></span></button>
         </div>
         <div className="flex items-center justify-between border-t border-mc-gray-100 bg-mc-gray-50/80 px-4 py-2 text-[10px] text-mc-gray-400"><span>Selecciona una opción para navegar</span><span>Datos locales · sin API</span></div>
       </div>
@@ -229,7 +229,7 @@ export function AppShell() {
               <p className="truncate text-sm font-extrabold text-mc-ink">{current.label}</p>
               <p className="hidden text-[11px] text-mc-muted sm:block">Inteligencia comercial de Mitra y Mitra Click</p>
             </div>
-            <button type="button" onClick={() => setSearchOpen(true)} className="flex h-11 items-center gap-2 rounded-xl border border-mc-line bg-white px-3 text-xs font-semibold text-mc-muted shadow-sm hover:border-[#e0b51d] hover:text-mc-ink"><Search size={15} /><span className="hidden sm:inline">Buscar</span><kbd className="hidden rounded border border-mc-line bg-mc-surface-2 px-1.5 py-0.5 text-[9px] text-mc-muted md:inline">⌘ K</kbd></button>
+            <button type="button" onClick={() => setSearchOpen(true)} className="flex h-11 items-center gap-2 rounded-xl border border-mc-line bg-white px-3 text-xs font-semibold text-mc-muted shadow-sm hover:border-mc-yellow-strong hover:text-mc-ink"><Search size={15} /><span className="hidden sm:inline">Buscar</span><kbd className="hidden rounded border border-mc-line bg-mc-surface-2 px-1.5 py-0.5 text-[9px] text-mc-muted md:inline">⌘ K</kbd></button>
             <DemoBanner />
             <button type="button" disabled title="Se habilitará al conectar configuración real" className="flex h-11 w-11 items-center justify-center rounded-xl border border-mc-gray-200 bg-white text-mc-gray-400 disabled:cursor-not-allowed" aria-label="Configuración pendiente"><Settings2 size={17} /></button>
           </header>

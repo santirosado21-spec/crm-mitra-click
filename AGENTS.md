@@ -121,7 +121,7 @@ CRM y sistema:
 - `/atribucion`: Recorrido y atribución demostrativa
 - `/actividad`: Timeline y seguimiento
 - `/automatizaciones`: Reglas en modo simulación
-- `/agentes`: Vista previa de agentes IA
+- `/agentes`: Perfiles de los agentes de Grok Bot, sus reportes y reglas
 
 Límites funcionales importantes:
 
@@ -129,7 +129,7 @@ Límites funcionales importantes:
 - **Cotizaciones** da seguimiento comercial; no es un cotizador logístico.
 - **Atribución** es demostrativa; correlación no equivale a causalidad.
 - **Automatizaciones** sólo simula reglas y no ejecuta acciones externas.
-- **Agentes IA** es una vista previa sin inferencia real.
+- **Agentes** describe los perfiles de Grok Bot; la inferencia ocurre en Grok Bot, no en esta app.
 - Chatbot, outbound B2B y promesas como “tracking al 100%” requieren definición y aprobación antes de implementarse o comunicarse.
 
 ## 6. Diseño y contenido

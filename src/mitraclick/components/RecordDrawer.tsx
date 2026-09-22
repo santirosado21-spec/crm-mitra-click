@@ -48,7 +48,7 @@ export function RecordDrawer({
       >
         <header className="flex items-start justify-between gap-4 border-b border-mc-gray-100 px-5 py-4 lg:px-6">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#e25f45]">Detalle de registro</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-mc-charcoal">Detalle de registro</p>
             <h2 className="mt-1 truncate text-xl font-extrabold text-mc-gray-950">{title}</h2>
             {subtitle && <p className="mt-0.5 truncate text-xs text-mc-gray-500">{subtitle}</p>}
           </div>

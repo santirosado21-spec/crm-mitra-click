@@ -1,37 +1,72 @@
-import { useMemo, useState } from 'react'
-import { BarChart3, Bot, CheckCircle2, ClipboardCheck, FileSearch, LockKeyhole, Send, ShieldCheck, Sparkles, Target, UserRoundSearch } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-import { useMitraClick } from '../MitraClickContext'
-import type { AiAgent } from '../domain'
-import { IntegrationBadge, PageHeader, Panel, StatusBadge } from '../components/Primitives'
+import { Link } from 'react-router-dom'
+import { Bot, CalendarClock, FileText, KeyRound, LockKeyhole, MessageCircle, ShieldCheck } from 'lucide-react'
+import { REPORT_DEFINITIONS, REPORT_TYPES, type AgentProfile } from '../reports/buildReport'
+import { AGENT_PROFILES } from '../reports/agentProfiles'
+import { IntegrationBadge, PageHeader, Panel } from '../components/Primitives'
 
-const agentIcons: Record<AiAgent['id'], LucideIcon> = { executive: BarChart3, sales: Target, followup: ClipboardCheck, reports: FileSearch }
+const PROFILE_ORDER: AgentProfile[] = ['ejecutivo', 'vendedores', 'productos']
+
+const RULES = [
+  'Solo lectura: no modifican datos, no aprueban y no borran.',
+  'Envían el texto que genera la plataforma, sin cifras propias.',
+  'Con datos simulados, envían solo al grupo de pruebas.',
+  'El envío por WhatsApp lo hace Grok Bot; la plataforma no manda mensajes.',
+]
 
 export function AgentsPage() {
-  const { data } = useMitraClick()
-  const [selectedId, setSelectedId] = useState<AiAgent['id']>('executive')
-  const [draft, setDraft] = useState('')
-  const [preview, setPreview] = useState(false)
-  const selected = useMemo(() => data?.agents.find((agent) => agent.id === selectedId), [data, selectedId])
-  if (!data || !selected) return null
-  const SelectedIcon = agentIcons[selected.id]
-
   return (
-    <div className="space-y-6">
-      <PageHeader eyebrow="Experiencia futura" title="Agentes IA" description="Interfaz visual para cuatro asistentes especializados. No hay modelo, prompt, RAG ni acción autónoma conectada en esta fase." actions={<IntegrationBadge label="IA no conectada" />} />
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">{data.agents.map((agent) => { const Icon = agentIcons[agent.id]; const active = agent.id === selectedId; return <button key={agent.id} type="button" onClick={() => { setSelectedId(agent.id); setDraft(''); setPreview(false) }} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-mc-charcoal bg-white shadow-lg ring-1 ring-mc-charcoal' : 'border-mc-gray-200 bg-white hover:border-mc-gray-300 hover:shadow-sm'}`}><div className="flex items-start justify-between gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl text-white" style={{ backgroundColor: agent.accent }}><Icon size={18} /></span>{active && <CheckCircle2 size={18} className="text-mc-success" />}</div><p className="mt-4 text-sm font-extrabold text-mc-gray-900">{agent.name}</p><p className="mt-1 text-[11px] font-bold text-mc-gray-400">{agent.role}</p></button>})}</div>
+    <div className="space-y-5">
+      <PageHeader
+        eyebrow="Sistema"
+        title="Agentes de Grok Bot"
+        description="Los agentes de IA operan desde Grok Bot con una cuenta de Google compartida y un perfil propio. Arman los reportes de esta plataforma y los envían por WhatsApp a dirección."
+        actions={<IntegrationBadge label="Inicio de sesión con Google pendiente" />}
+      />
 
-      <div className="grid gap-4 xl:grid-cols-[.7fr_1.3fr]">
-        <Panel title="Alcance del agente" description="Capacidades previstas, sujetas a aprobación"><div className="flex items-start gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white shadow-lg" style={{ backgroundColor: selected.accent }}><SelectedIcon size={22} /></span><div><p className="text-lg font-extrabold text-mc-gray-900">{selected.name}</p><p className="mt-1 text-xs leading-5 text-mc-gray-500">{selected.description}</p></div></div><div className="mt-5 space-y-2">{selected.capabilities.map((capability) => <div key={capability} className="flex items-center gap-3 rounded-xl border border-mc-gray-100 bg-mc-gray-50/70 p-3 text-xs font-bold text-mc-gray-700"><ShieldCheck size={15} className="text-mc-success" />{capability}</div>)}</div><div className="mt-5 rounded-xl border border-mc-warning/30 bg-mc-warning-soft p-3 text-xs leading-5 text-mc-warning"><span className="font-extrabold">Control humano:</span> cualquier recomendación o borrador deberá mostrar evidencia, confianza y una acción explícita de aprobación.</div></Panel>
+      <ul className="grid gap-4 lg:grid-cols-3" data-testid="agent-profiles">
+        {PROFILE_ORDER.map((profile) => {
+          const agent = AGENT_PROFILES[profile]
+          const reports = REPORT_TYPES.filter((type) => REPORT_DEFINITIONS[type].agent === profile)
+          return (
+            <li key={profile} className="flex flex-col rounded-2xl border border-mc-line bg-mc-surface p-5 shadow-mc-card" data-testid={`agent-${profile}`}>
+              <div className="flex items-center gap-3">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-mc-charcoal text-mc-yellow"><Bot size={18} aria-hidden="true" /></span>
+                <div className="min-w-0">
+                  <h2 className="text-base font-bold text-mc-ink">{agent.name}</h2>
+                  <p className="text-xs text-mc-muted">Perfil <code className="text-mc-ink">{profile}</code></p>
+                </div>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-mc-gray-700">{agent.job}</p>
+              <p className="mt-4 text-xs font-semibold text-mc-muted">Reportes a su cargo</p>
+              <ul className="mt-2 space-y-2">
+                {reports.map((type) => (
+                  <li key={type}>
+                    <Link to={`/reportes/${type}`} className="flex items-center justify-between gap-3 rounded-xl border border-mc-line-soft p-3 text-sm hover:border-mc-line hover:bg-mc-surface-2/60">
+                      <span className="flex min-w-0 items-center gap-2 font-semibold text-mc-ink"><MessageCircle size={15} className="shrink-0 text-mc-muted" aria-hidden="true" /><span className="truncate">{REPORT_DEFINITIONS[type].title}</span></span>
+                      <span className="flex shrink-0 items-center gap-1 text-[11px] text-mc-muted"><CalendarClock size={12} aria-hidden="true" />{REPORT_DEFINITIONS[type].cadence}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-4 flex items-center gap-2 border-t border-mc-line-soft pt-3 text-xs text-mc-muted"><FileText size={13} aria-hidden="true" />Instrucciones: <code className="text-mc-ink">{agent.guide}</code></p>
+            </li>
+          )
+        })}
+      </ul>
 
-        <Panel className="min-h-[600px]" padding={false}>
-          <div className="flex h-full min-h-[600px] flex-col">
-            <div className="flex items-center justify-between border-b border-mc-gray-100 px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-mc-gray-900 text-white"><Bot size={17} /></span><div><p className="text-sm font-extrabold text-mc-gray-900">Espacio de trabajo · {selected.name}</p><p className="text-[10px] text-mc-gray-400">Vista de interacción, sin inferencia real</p></div></div><StatusBadge status="Modo visual" /></div>
-            <div className="flex-1 p-5">
-              {!preview ? <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center py-10 text-center"><span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-mc-charcoal to-[#4d74a9] text-white shadow-lg"><Sparkles size={23} /></span><h2 className="mt-5 text-xl font-extrabold text-mc-gray-900">¿Qué quieres analizar?</h2><p className="mt-2 max-w-md text-xs leading-5 text-mc-gray-500">Selecciona una sugerencia para previsualizar cómo se presentaría una respuesta con fuentes y controles.</p><div className="mt-6 flex flex-wrap justify-center gap-2">{selected.examplePrompts.map((prompt) => <button key={prompt} type="button" onClick={() => setDraft(prompt)} className="rounded-full border border-mc-gray-200 bg-white px-3 py-2 text-[11px] font-bold text-mc-gray-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">{prompt}</button>)}</div></div> : <div className="space-y-4"><div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4"><div className="flex items-start gap-3"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white" style={{ backgroundColor: selected.accent }}><SelectedIcon size={15} /></span><div><p className="text-xs font-extrabold text-mc-gray-800">Vista previa de respuesta</p><p className="mt-2 text-sm leading-6 text-mc-gray-700">Este bloque mostraría una síntesis generada a partir de datos autorizados. En el esqueleto se usa contenido estático para validar jerarquía, evidencia y aprobación sin enviar información a un modelo.</p></div></div></div><div className="rounded-2xl border border-mc-gray-200 p-4"><p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-mc-gray-400">Hallazgos de muestra</p><ul className="mt-3 space-y-3 text-xs leading-5 text-mc-gray-600"><li className="flex gap-2"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-mc-success" />El pipeline abierto concentra valor en Negociación y Cotización.</li><li className="flex gap-2"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-mc-success" />Tres seguimientos simulados requieren atención.</li><li className="flex gap-2"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-mc-success" />Selección Esencial presenta la señal de demanda más alta.</li></ul></div><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-xl border border-mc-gray-200 p-3"><p className="text-[10px] font-bold uppercase text-mc-gray-400">Evidencia</p><div className="mt-2 flex flex-wrap gap-1.5"><span className="rounded bg-mc-gray-100 px-2 py-1 text-[10px] font-bold text-mc-gray-600">Pipeline mock</span><span className="rounded bg-mc-gray-100 px-2 py-1 text-[10px] font-bold text-mc-gray-600">Actividad mock</span><span className="rounded bg-mc-gray-100 px-2 py-1 text-[10px] font-bold text-mc-gray-600">Productos mock</span></div></div><div className="rounded-xl border border-mc-gray-200 p-3"><p className="text-[10px] font-bold uppercase text-mc-gray-400">Confianza</p><p className="mt-2 text-sm font-extrabold text-mc-gray-800">No calculada</p><p className="mt-1 text-[10px] text-mc-gray-400">Requiere IA e instrumento de evaluación</p></div></div><button type="button" disabled className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-mc-gray-100 px-4 py-3 text-xs font-bold text-mc-gray-400"><LockKeyhole size={15} />Aprobar acción · integración pendiente</button></div>}
-            </div>
-            <div className="border-t border-mc-gray-100 bg-mc-gray-50/60 p-4"><div className="rounded-2xl border border-mc-gray-200 bg-white shadow-sm"><textarea value={draft} onChange={(event) => { setDraft(event.target.value); setPreview(false) }} rows={3} placeholder={`Pregunta al ${selected.name.toLocaleLowerCase('es-MX')}…`} className="w-full resize-none rounded-t-2xl border-0 bg-transparent p-3 text-sm outline-none placeholder:text-mc-gray-400" /><div className="flex items-center justify-between border-t border-mc-gray-100 px-3 py-2"><div className="flex items-center gap-2 text-[10px] text-mc-gray-400"><UserRoundSearch size={13} />Fuentes autorizadas pendientes</div><button type="button" disabled={!draft.trim()} onClick={() => setPreview(true)} className="flex items-center gap-2 rounded-lg bg-mc-charcoal px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"><Send size={14} />Previsualizar</button></div></div><p className="mt-2 text-center text-[10px] text-mc-gray-400">Previsualizar usa contenido estático; no envía el texto a ninguna IA.</p></div>
-          </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title="Reglas de operación" description="Aplican a todos los agentes">
+          <ul className="space-y-2">
+            {RULES.map((rule) => <li key={rule} className="flex gap-2 text-sm text-mc-gray-700"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-mc-success" aria-hidden="true" />{rule}</li>)}
+          </ul>
+        </Panel>
+        <Panel title="Acceso" description="Lo que falta para que los agentes entren con su perfil">
+          <ul className="space-y-2 text-sm text-mc-gray-700">
+            <li className="flex gap-2"><KeyRound size={16} className="mt-0.5 shrink-0 text-mc-muted" aria-hidden="true" />Inicio de sesión con Google y lista de correos autorizados.</li>
+            <li className="flex gap-2"><Bot size={16} className="mt-0.5 shrink-0 text-mc-muted" aria-hidden="true" />Selección de perfil al entrar con la cuenta de agentes.</li>
+            <li className="flex gap-2"><LockKeyhole size={16} className="mt-0.5 shrink-0 text-mc-muted" aria-hidden="true" />Bitácora de lo que consulta y publica cada perfil.</li>
+          </ul>
+          <p className="mt-3 text-xs text-mc-muted">Mientras tanto, la demo no pide sesión y los agentes pueden usar los links de reportes directamente.</p>
         </Panel>
       </div>
     </div>
