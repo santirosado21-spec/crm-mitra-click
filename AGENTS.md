@@ -4,7 +4,18 @@ Este archivo define el contexto y las reglas de trabajo para cualquier agente de
 
 ## 1. Objetivo del producto
 
-**MitraClick Intelligence** es un centro de inteligencia comercial en español para representar el ciclo:
+**MitraClick Intelligence** es la plataforma de inteligencia comercial de dos negocios:
+
+- **Mitra**: comercializadora B2B de material industrial en México. Vende mediante **vendedores humanos** con cartera y cuota.
+- **Mitra Click**: e-commerce B2C de Mitra en Shopify. Se mide por canal y campaña, no por vendedor.
+
+Prioridad de producto, definida por Ángel Secades (Director Comercial):
+
+1. **Vendedores**: quién vende, quién no vende y quién tiene que vender más (venta vs cuota, semáforo, días sin vender).
+2. **Productos/material**: qué se vende bien, qué no, qué no se mueve y qué se agotó con demanda.
+3. **Reportes rápidos y digeribles**: Ángel los recibe **por WhatsApp**; el **dashboard web** tiene todo el detalle.
+
+Además representa el ciclo comercial:
 
 `Canal → Campaña → Lead → Empresa → Oportunidad → Cotización → Venta`
 
@@ -34,9 +45,12 @@ Antes de trabajar, revisar en este orden:
 6. `src/mitraclick/data/repository.ts`: puerto de lectura y adaptador activo.
 7. `src/mitraclick/selectors.ts` y sus pruebas: lógica derivada y reglas puras.
 
-El `README.md` y buena parte de `src/pages`, `src/hooks`, `src/types` y `supabase/` pertenecen al CRM logístico original de Supply Chain México. Son contexto heredado, pero **no describen por sí solos el alcance actual de MitraClick Intelligence**.
+El CRM logístico heredado de Supply Chain México se eliminó del repositorio el 22-sep-2026 (sigue en el historial de git). No reintroducirlo.
 
-No borrar, migrar ni reactivar módulos heredados salvo que la tarea lo pida explícitamente.
+Referencias externas útiles:
+
+- Dashboard V1 (`santirosado21-spec/mitra-dashboard`, mitra-dashboard-alpha.vercel.app): origen del catálogo real, del generador demo y del esquema de datos por vendedor.
+- Carta HOTCHES de Ángel Secades (feb-2026) y "Propuesta actualizada — Mitra y Mitra Click" (ago-2026): alcance comercial acordado.
 
 ## 3. Stack
 
@@ -187,6 +201,32 @@ Si un cambio sólo afecta documentación, no es necesario reconstruir toda la ap
 - Toda integración productiva necesita autorización, trazabilidad, reintentos y manejo de errores.
 - Cualquier acción sensible o comunicación externa generada por IA necesita aprobación humana explícita.
 - No ejecutar `npm run db:push`, migraciones remotas, deploys, pushes a Git ni operaciones destructivas sin autorización explícita.
+
+## 10.1 Agentes de Grok Bot
+
+Los agentes de IA de Mitra operan desde **Grok Bot (xAI)**, fuera de este repositorio. Usan la plataforma **por navegador**, con una cuenta de Google compartida y un perfil propio por agente dentro de la app. Arman los reportes y los envían por WhatsApp. **La plataforma no envía mensajes.**
+
+Para que puedan operar, toda pantalla debe cumplir:
+
+- Tener un `<h1>` único y descriptivo.
+- Guardar filtros y periodo en la URL (query params), para que un link reproduzca exactamente la misma vista.
+- Poner etiquetas visibles o `aria-label` en todo control, y `data-testid` estables en las piezas que un agente lee o copia (KPIs, rankings, texto para WhatsApp).
+- No depender de hover, drag-and-drop ni gestos para ninguna acción.
+- Usar tablas semánticas (`<table>`) en escritorio.
+- Mostrar el estado de los datos ("Datos simulados", fuente y fecha).
+
+Los agentes **no** modifican datos comerciales, no aprueban y no borran. Sus instrucciones de operación viven en `docs/agents/`.
+
+## 10.2 Skills del proyecto
+
+Las skills del proyecto están en `.claude/skills/`. Su procedencia y commit están en `.claude/skills/PROVENANCE.md`.
+
+- `frontend-design`, `ui-ux-pro-max` y `redesign-skill`: dirección visual y auditoría de UI.
+- `web-design-guidelines` (fijada) y `react-best-practices`/`composition-patterns`: revisión de accesibilidad, rendimiento y composición.
+- `webapp-testing` y el MCP de Playwright (`.mcp.json`): verificación visual en escritorio (1440px) y móvil (390px).
+- `mcp-builder`: reservado para el futuro servidor MCP de MitraClick.
+
+No descargar ni activar skills nuevas sin revisar su contenido y registrarlas en `PROVENANCE.md`.
 
 ## 11. Convenciones de implementación
 

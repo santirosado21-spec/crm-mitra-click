@@ -60,3 +60,6 @@ dist-ssr
 **/* 2.mjs
 **/* 2.cjs
 
+
+# Python caches (skills)
+__pycache__/
