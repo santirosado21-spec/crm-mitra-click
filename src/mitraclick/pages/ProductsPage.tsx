@@ -1,51 +1,166 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { Boxes, Layers3, Search, ShoppingBag, Sparkles, TrendingUp } from 'lucide-react'
-import type { Product } from '../domain'
-import { useMitraClick } from '../MitraClickContext'
-import { formatCurrency, formatNumber } from '../utils'
-import { KpiCard, PageHeader, Panel, ProductBar, StatusBadge } from '../components/Primitives'
-import { RecordDrawer } from '../components/RecordDrawer'
+import { Boxes, PackageX, Layers, TrendingDown } from 'lucide-react'
+import { useDashboardFilters } from '../commercial/useDashboardFilters'
+import {
+  getCategoryPerformance,
+  getProductHighlights,
+  getProductPerformance,
+  getSlowMovers,
+  getStockoutsWithDemand,
+  type ProductPerformance,
+} from '../commercial/selectors'
+import { formatDayLabel } from '../commercial/dates'
+import { BUSINESS_UNIT_LABEL } from '../domain'
+import { CHART, axisTick } from '../chartTheme'
+import { FilterBar, Segmented } from '../components/FilterBar'
+import { Delta, EmptyState, KpiCard, PageHeader, Panel, SourceStamp } from '../components/Primitives'
+import { formatCurrency, formatNumber, formatRatio } from '../utils'
 
-function ProductDetail({ product, onClose }: { product: Product; onClose: () => void }) {
-  const { data } = useMitraClick()
-  if (!data) return null
-  const opportunities = data.opportunities.filter((item) => item.productIds.includes(product.id))
+const SLOW_OPTIONS = [
+  { value: '30', label: '30 días' },
+  { value: '60', label: '60 días' },
+  { value: '90', label: '90 días' },
+] as const
+type SlowDays = (typeof SLOW_OPTIONS)[number]['value']
 
+function ProductTable({ rows, caption, testId }: { rows: ProductPerformance[]; caption: string; testId: string }) {
+  if (!rows.length) return <EmptyState title="Sin productos para mostrar" description="Prueba con otro periodo o unidad de negocio." />
   return (
-    <RecordDrawer open title={product.name} subtitle={`${product.sku} · ${product.brand}`} onClose={onClose}>
-      <div className="space-y-6">
-        <div className="rounded-2xl bg-gradient-to-br from-[#f7eee8] to-[#fff8f3] p-5"><div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#c94c35]">Inteligencia de producto</p><p className="mt-2 text-2xl font-black text-mc-gray-950">Índice {product.demandIndex}/100</p><p className={`mt-1 text-xs font-bold ${product.trend >= 0 ? 'text-mc-success' : 'text-mc-danger'}`}>{product.trend >= 0 ? '+' : ''}{product.trend}% de tendencia simulada</p></div><span className="grid h-12 w-12 place-items-center rounded-2xl bg-white text-[#d65339] shadow-sm"><Sparkles size={21} /></span></div><div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-gradient-to-r from-[#e25f45] to-[#f5a14e]" style={{ width: `${product.demandIndex}%` }} /></div></div>
-        <div className="grid gap-3 sm:grid-cols-2"><div className="rounded-xl border border-mc-gray-200 p-4"><p className="text-[10px] font-bold uppercase text-mc-gray-400">Ventas atribuidas</p><p className="mt-1 text-xl font-black text-mc-gray-900">{formatCurrency(product.salesValue)}</p><p className="mt-1 text-xs text-mc-gray-400">{product.unitsSold} unidades simuladas</p></div><div className="rounded-xl border border-mc-gray-200 p-4"><p className="text-[10px] font-bold uppercase text-mc-gray-400">Interés comercial</p><p className="mt-1 text-xl font-black text-mc-gray-900">{product.leadCount} leads</p><p className="mt-1 text-xs text-mc-gray-400">{product.opportunityCount} oportunidades</p></div><div className="rounded-xl border border-mc-gray-200 p-4"><p className="text-[10px] font-bold uppercase text-mc-gray-400">Categoría</p><p className="mt-1 text-sm font-extrabold text-mc-gray-800">{product.category}</p></div><div className="rounded-xl border border-mc-gray-200 p-4"><p className="text-[10px] font-bold uppercase text-mc-gray-400">Precio de referencia</p><p className="mt-1 text-sm font-extrabold text-mc-gray-800">{formatCurrency(product.price)}</p></div></div>
-        <section><h3 className="mb-3 text-xs font-extrabold uppercase tracking-[0.16em] text-mc-gray-400">Oportunidades relacionadas</h3><div className="space-y-2">{opportunities.map((item) => <div key={item.id} className="flex items-center justify-between gap-3 rounded-xl border border-mc-gray-200 p-3"><div><p className="text-xs font-extrabold text-mc-gray-800">{item.name}</p><p className="mt-1 text-[11px] text-mc-gray-400">{item.companyName} · {formatCurrency(item.value)}</p></div><StatusBadge status={item.stage} /></div>)}</div></section>
-        <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-900"><span className="font-extrabold">Alcance:</span> esta pantalla analiza señales comerciales. No permite crear, editar, publicar ni sincronizar productos con Shopify.</div>
-      </div>
-    </RecordDrawer>
+    <table className="w-full table-fixed text-left text-sm" data-testid={testId}>
+      <caption className="sr-only">{caption}</caption>
+      <thead className="border-b border-mc-line-soft bg-mc-surface-2 text-xs text-mc-muted">
+        <tr>
+          <th scope="col" className="px-5 py-2.5 font-semibold">Producto</th>
+          <th scope="col" className="w-24 px-3 py-2.5 text-right font-semibold">Venta</th>
+          <th scope="col" className="w-28 px-5 py-2.5 text-right font-semibold">Vs. anterior</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-mc-line-soft">
+        {rows.map((row) => (
+          <tr key={row.product.id} data-testid={`product-${row.product.id}`}>
+            <td className="px-5 py-2.5">
+              <span className="block truncate font-semibold text-mc-ink" title={row.product.name}>{row.product.name}</span>
+              <span className="block truncate text-[11px] text-mc-muted">
+                {formatNumber(row.units)} {row.product.unit}s{row.share > 0 && `, ${formatRatio(row.share, 1)} del total`}. {row.product.brand}, {BUSINESS_UNIT_LABEL[row.product.businessUnit]}
+              </span>
+            </td>
+            <td className="px-3 py-2.5 text-right font-bold text-mc-ink tabular">{formatCurrency(row.revenue, true)}</td>
+            <td className="px-5 py-2.5 text-right">{row.deltaPct === null ? <span className="text-xs text-mc-muted">Sin base</span> : <Delta value={row.deltaPct} />}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
 export function ProductsPage() {
-  const { data } = useMitraClick()
-  const [query, setQuery] = useState('')
-  const [category, setCategory] = useState('Todas')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const products = useMemo(() => data?.products.filter((product) => (category === 'Todas' || product.category === category) && `${product.name} ${product.category} ${product.brand} ${product.sku}`.toLocaleLowerCase('es-MX').includes(query.toLocaleLowerCase('es-MX'))) ?? [], [category, data, query])
-  if (!data) return null
-  const categories = ['Todas', ...Array.from(new Set(data.products.map((product) => product.category)))]
-  const selected = data.products.find((product) => product.id === selectedId)
-  const totalSales = data.products.reduce((sum, product) => sum + product.salesValue, 0)
-  const maxDemand = Math.max(...data.products.map((product) => product.demandIndex))
+  const { commercial, period, setPeriod, unit, setUnit, params, setParam } = useDashboardFilters()
+  const slowParam = params.get('sin-movimiento')
+  const slowDays: SlowDays = slowParam === '60' || slowParam === '90' ? slowParam : '30'
+
+  const view = useMemo(() => {
+    const rows = getProductPerformance(commercial, period, unit)
+    const categories = getCategoryPerformance(commercial, period, unit)
+    const inUnit = (businessUnit: string) => unit === 'todas' || unit === businessUnit
+    return {
+      rows,
+      highlights: getProductHighlights(rows, 8),
+      categories,
+      stockouts: getStockoutsWithDemand(commercial, 30).filter((row) => inUnit(row.product.businessUnit)),
+      slow: getSlowMovers(commercial, Number(slowDays)).filter((row) => inUnit(row.product.businessUnit)),
+      revenue: rows.reduce((sum, row) => sum + row.revenue, 0),
+      sold: rows.filter((row) => row.revenue > 0).length,
+    }
+  }, [commercial, period, unit, slowDays])
+
+  const topCategory = view.categories[0]
+  const chartCategories = view.categories.slice(0, 10).map((item) => ({ ...item, label: unit === 'todas' ? `${item.category} (${item.businessUnit === 'mitra' ? 'B2B' : 'Click'})` : item.category }))
 
   return (
-    <div className="space-y-6">
-      <PageHeader eyebrow="Inteligencia comercial" title="Productos" description="Detecta demanda, ventas, leads y oportunidades por producto, categoría y marca. El catálogo permanece fuera del alcance." actions={<span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-bold text-blue-700">Sólo análisis · sin Shopify</span>} />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><KpiCard label="Ventas por productos" value={formatCurrency(totalSales, true)} helper="Suma de señales simuladas" icon={ShoppingBag} accent="green" /><KpiCard label="Leads con interés" value={data.products.reduce((sum, item) => sum + item.leadCount, 0)} helper="Puede haber múltiples intereses" icon={Sparkles} accent="coral" /><KpiCard label="Categorías" value={categories.length - 1} helper="Agrupación analítica" icon={Layers3} accent="violet" /><KpiCard label="Demanda máxima" value={`${maxDemand}/100`} helper="Índice sintético" icon={TrendingUp} accent="amber" /></div>
-      <div className="grid gap-4 xl:grid-cols-[1.2fr_.8fr]"><Panel title="Ventas e interés por producto" description="Compara ingresos simulados contra volumen de leads"><div className="h-[320px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={data.products} margin={{ left: 0, right: 10, top: 10, bottom: 40 }}><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e9edf2" /><XAxis dataKey="name" angle={-28} textAnchor="end" interval={0} tick={{ fontSize: 9, fill: '#64748b' }} axisLine={false} tickLine={false} /><YAxis yAxisId="sales" tickFormatter={(value) => formatCurrency(Number(value), true)} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={58} /><YAxis yAxisId="leads" orientation="right" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={28} /><Tooltip formatter={(value, name) => [name === 'salesValue' ? formatCurrency(Number(value)) : formatNumber(Number(value)), name === 'salesValue' ? 'Ventas' : 'Leads']} contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }} /><Bar yAxisId="sales" dataKey="salesValue" fill="#23395d" radius={[5, 5, 0, 0]} /><Bar yAxisId="leads" dataKey="leadCount" fill="#e25f45" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div></Panel><Panel title="Índice de demanda" description="Señal sintética preparada para un modelo futuro"><div className="space-y-4">{data.products.slice().sort((a, b) => b.demandIndex - a.demandIndex).map((product) => <ProductBar key={product.id} label={product.name} value={product.demandIndex} max={100} detail={`${product.demandIndex}/100`} />)}</div></Panel></div>
-      <Panel padding={false}>
-        <div className="flex flex-col gap-3 border-b border-mc-gray-100 p-4 sm:flex-row"><div className="relative flex-1"><Search size={16} className="absolute left-3 top-1/2 -tranmc-gray-y-1/2 text-mc-gray-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar producto, categoría, marca o SKU…" className="h-10 w-full rounded-xl border border-mc-gray-200 bg-mc-gray-50/60 pl-9 pr-3 text-sm outline-none focus:border-blue-400" /></div><select value={category} onChange={(event) => setCategory(event.target.value)} className="h-10 rounded-xl border border-mc-gray-200 bg-white px-3 text-xs font-bold text-mc-gray-600">{categories.map((item) => <option key={item}>{item}</option>)}</select></div>
-        <div className="overflow-x-auto"><table className="w-full min-w-[1050px] text-left text-xs"><thead className="bg-mc-gray-50 text-[10px] uppercase tracking-wider text-mc-gray-400"><tr><th className="px-5 py-3">Producto</th><th className="px-4 py-3">Categoría / Marca</th><th className="px-4 py-3 text-right">Precio</th><th className="px-4 py-3 text-right">Ventas</th><th className="px-4 py-3 text-center">Unidades</th><th className="px-4 py-3 text-center">Leads</th><th className="px-4 py-3 text-center">Oportunidades</th><th className="px-5 py-3">Demanda</th></tr></thead><tbody className="divide-y divide-mc-gray-100">{products.map((product) => <tr key={product.id} onClick={() => setSelectedId(product.id)} className="group cursor-pointer hover:bg-blue-50/30"><td className="px-5 py-3"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-orange-50 text-[#d65339]"><Boxes size={17} /></span><div><p className="font-extrabold text-mc-gray-800 group-hover:text-blue-800">{product.name}</p><p className="mt-0.5 text-[10px] text-mc-gray-400">{product.sku}</p></div></div></td><td className="px-4 py-3"><p className="font-semibold text-mc-gray-700">{product.category}</p><p className="mt-0.5 text-[10px] text-mc-gray-400">{product.brand}</p></td><td className="px-4 py-3 text-right font-bold text-mc-gray-700">{formatCurrency(product.price)}</td><td className="px-4 py-3 text-right font-black text-mc-gray-900">{formatCurrency(product.salesValue)}</td><td className="px-4 py-3 text-center font-bold text-mc-gray-600">{product.unitsSold}</td><td className="px-4 py-3 text-center font-bold text-mc-gray-600">{product.leadCount}</td><td className="px-4 py-3 text-center font-bold text-mc-gray-600">{product.opportunityCount}</td><td className="px-5 py-3"><div className="flex items-center gap-2"><div className="h-2 w-20 overflow-hidden rounded-full bg-mc-gray-100"><div className="h-full rounded-full bg-[#e25f45]" style={{ width: `${product.demandIndex}%` }} /></div><span className="font-black text-mc-gray-700">{product.demandIndex}</span></div></td></tr>)}</tbody></table></div>
-      </Panel>
-      {selected && <ProductDetail product={selected} onClose={() => setSelectedId(null)} />}
+    <div className="space-y-5">
+      <PageHeader eyebrow="Material y producto" title="Productos" description="Qué material se vende bien, qué no se mueve y qué se está agotando con demanda." />
+      <FilterBar period={period} onPeriodChange={setPeriod} unit={unit} onUnitChange={setUnit} asOf={commercial.asOf} />
+
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <KpiCard label="Venta de productos" value={formatCurrency(view.revenue, true)} helper={period.label} icon={Boxes} testId="products-revenue" />
+        <KpiCard label="Productos con venta" value={`${view.sold} de ${view.rows.length}`} helper="En el catálogo filtrado" icon={Layers} />
+        <KpiCard label="Categoría líder" value={topCategory ? topCategory.category : 'Sin ventas'} helper={topCategory ? formatCurrency(topCategory.revenue, true) : undefined} icon={TrendingDown} />
+        <KpiCard label="Agotados con demanda" value={view.stockouts.length} helper="Vendieron en los últimos 30 días" icon={PackageX} testId="products-stockouts" />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Panel title="Lo que más se vende" description="Top por venta del periodo" padding={false} testId="products-top">
+          <ProductTable rows={view.highlights.top} caption="Productos más vendidos" testId="table-products-top" />
+        </Panel>
+        <Panel title="Lo que menos se vende" description="Catálogo con menor venta del periodo, incluidos los que no vendieron" padding={false} testId="products-bottom">
+          <ProductTable rows={view.highlights.bottom} caption="Productos menos vendidos" testId="table-products-bottom" />
+        </Panel>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+        <Panel title="Venta por categoría" description="Top 10 categorías del periodo">
+          <div style={{ height: Math.max(220, chartCategories.length * 34) }} role="img" aria-label="Venta por categoría">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartCategories} layout="vertical" margin={{ left: 8, right: 16, top: 0, bottom: 0 }}>
+                <CartesianGrid horizontal={false} stroke={CHART.grid} />
+                <XAxis type="number" tickFormatter={(value) => formatCurrency(Number(value), true)} axisLine={false} tickLine={false} tick={axisTick} />
+                <YAxis type="category" dataKey="label" width={210} axisLine={false} tickLine={false} tick={{ ...axisTick, fill: CHART.ink }} />
+                <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Venta']} contentStyle={{ borderRadius: 12, border: `1px solid ${CHART.grid}`, fontSize: 12 }} cursor={{ fill: 'rgba(69,74,73,.06)' }} />
+                <Bar dataKey="revenue" fill={CHART.neutral} radius={[0, 4, 4, 0]} maxBarSize={18} isAnimationActive={false} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+        <Panel title="Caen contra el periodo anterior" description={`Mayor caída porcentual, ${period.comparisonLabel}`} padding={false} testId="products-falling">
+          <ProductTable rows={view.highlights.falling} caption="Productos con mayor caída" testId="table-products-falling" />
+        </Panel>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Panel title="Agotados que se siguen pidiendo" description="Sin existencia y con venta en los últimos 30 días: prioridad de reabasto" padding={false} testId="products-stockouts-list">
+          {view.stockouts.length ? (
+            <ul className="divide-y divide-mc-line-soft">
+              {view.stockouts.map((row) => (
+                <li key={row.product.id} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
+                  <span className="min-w-0">
+                    <span className="block truncate font-semibold text-mc-ink">{row.product.name}</span>
+                    <span className="block text-[11px] text-mc-muted">{BUSINESS_UNIT_LABEL[row.product.businessUnit]}. Última venta: {formatDayLabel(row.lastSaleDate)}</span>
+                  </span>
+                  <span className="shrink-0 text-right">
+                    <span className="block font-bold text-mc-danger tabular">{formatCurrency(row.revenueInWindow, true)}</span>
+                    <span className="block text-[11px] text-mc-muted tabular">{formatNumber(row.unitsInWindow)} {row.product.unit}s en 30 días</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : <EmptyState title="Sin agotados con demanda" description="Ningún producto agotado tuvo venta en los últimos 30 días." />}
+        </Panel>
+        <Panel
+          title="Sin movimiento"
+          description="Productos con existencia que no se venden, ordenados por valor de inventario detenido"
+          action={<Segmented label="Días sin venta" value={slowDays} options={SLOW_OPTIONS.map((option) => ({ ...option }))} onChange={(value) => setParam('sin-movimiento', value, '30')} testId="filter-slow-days" />}
+          padding={false}
+          testId="products-slow"
+        >
+          {view.slow.length ? (
+            <ul className="divide-y divide-mc-line-soft">
+              {view.slow.map((row) => (
+                <li key={row.product.id} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
+                  <span className="min-w-0">
+                    <span className="block truncate font-semibold text-mc-ink">{row.product.name}</span>
+                    <span className="block text-[11px] text-mc-muted">
+                      {row.daysSinceLastSale === null ? 'Sin ventas en los últimos 90 días' : `${row.daysSinceLastSale} días sin venta`}, {formatNumber(row.product.stock)} {row.product.unit}s en existencia
+                    </span>
+                  </span>
+                  <span className="shrink-0 font-bold text-mc-warning tabular">{formatCurrency(row.stockValue, true)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : <EmptyState title="Todo se está moviendo" description={`Ningún producto con existencia lleva ${slowDays} días sin venta.`} />}
+        </Panel>
+      </div>
+      <SourceStamp source="Datos simulados de pedidos, órdenes e inventario" period={period.label} updatedAt={commercial.generatedAt} />
     </div>
   )
 }

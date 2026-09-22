@@ -2,7 +2,7 @@ export const formatCurrency = (value: number, compact = false) =>
   new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: 'MXN',
-    maximumFractionDigits: 0,
+    maximumFractionDigits: compact && Math.abs(value) >= 1_000_000 ? 1 : 0,
     notation: compact ? 'compact' : 'standard',
   }).format(value)
 
@@ -12,7 +12,11 @@ export const formatNumber = (value: number) =>
 export const formatPercent = (value: number) =>
   new Intl.NumberFormat('es-MX', { maximumFractionDigits: 1 }).format(value) + '%'
 
-export const formatDate = (value: string, withTime = false) =>
+/** 0.953 → "95%". Para avances, participaciones y conversiones expresadas como fracción. */
+export const formatRatio = (value: number, digits = 0) =>
+  new Intl.NumberFormat('es-MX', { style: 'percent', maximumFractionDigits: digits }).format(value)
+
+export const formatDate =(value: string, withTime = false) =>
   new Intl.DateTimeFormat('es-MX', {
     dateStyle: 'medium',
     ...(withTime ? { timeStyle: 'short' as const } : {}),

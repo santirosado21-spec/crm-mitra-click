@@ -14,6 +14,10 @@ import { ActivityPage } from './mitraclick/pages/ActivityPage'
 import { AutomationsPage } from './mitraclick/pages/AutomationsPage'
 import { AgentsPage } from './mitraclick/pages/AgentsPage'
 import { ReportsPage } from './mitraclick/pages/ReportsPage'
+import { SalesRepsPage } from './mitraclick/pages/SalesRepsPage'
+import { SalesRepDetailPage } from './mitraclick/pages/SalesRepDetailPage'
+import { MitraWholesalePage } from './mitraclick/pages/MitraWholesalePage'
+import { MitraClickPage } from './mitraclick/pages/MitraClickPage'
 
 function DataGate() {
   const { data, error, loading, resetMocks } = useMitraClick()
@@ -24,6 +28,10 @@ function DataGate() {
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
+        <Route path="vendedores" element={<SalesRepsPage />} />
+        <Route path="vendedores/:repId" element={<SalesRepDetailPage />} />
+        <Route path="mitra" element={<MitraWholesalePage />} />
+        <Route path="mitra-click" element={<MitraClickPage />} />
         <Route path="leads" element={<LeadsPage />} />
         <Route path="empresas" element={<CompaniesPage />} />
         <Route path="oportunidades" element={<OpportunitiesPage />} />

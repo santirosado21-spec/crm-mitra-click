@@ -7,6 +7,7 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import {
   Activity,
+  BadgeCheck,
   Bot,
   Building2,
   ChevronRight,
@@ -21,7 +22,9 @@ import {
   RefreshCw,
   Search,
   Settings2,
+  Store,
   Target,
+  Truck,
   Users,
   Workflow,
   X,
@@ -39,24 +42,32 @@ interface NavItem {
 
 const navGroups: { label: string; items: NavItem[] }[] = [
   {
-    label: 'Inteligencia',
+    label: 'Dirección',
     items: [
-      { label: 'Dashboard ejecutivo', path: '/', icon: LayoutDashboard, keywords: 'inicio métricas ventas' },
-      { label: 'Reportes', path: '/reportes', icon: FileBarChart, keywords: 'analytics análisis' },
+      { label: 'Resumen', path: '/', icon: LayoutDashboard, keywords: 'inicio métricas ventas meta hoy' },
+      { label: 'Vendedores', path: '/vendedores', icon: BadgeCheck, keywords: 'agentes de venta ranking cuota semáforo' },
+      { label: 'Productos', path: '/productos', icon: PackageSearch, keywords: 'material demanda categorías agotados sin movimiento' },
+      { label: 'Reportes', path: '/reportes', icon: FileBarChart, keywords: 'whatsapp resumen diario semanal' },
     ],
   },
   {
-    label: 'Comercial',
+    label: 'Negocios',
+    items: [
+      { label: 'Mitra mayorista', path: '/mitra', icon: Truck, keywords: 'b2b pedidos clientes cotizaciones categorías' },
+      { label: 'Mitra Click', path: '/mitra-click', icon: Store, keywords: 'b2c tienda en línea shopify embudo canales' },
+    ],
+  },
+  {
+    label: 'CRM',
     items: [
       { label: 'Leads', path: '/leads', icon: Users, keywords: 'prospectos contactos' },
       { label: 'Empresas', path: '/empresas', icon: Building2, keywords: 'cuentas b2b clientes' },
       { label: 'Oportunidades', path: '/oportunidades', icon: Target, keywords: 'pipeline etapas negocios' },
       { label: 'Cotizaciones', path: '/cotizaciones', icon: FileText, keywords: 'propuestas valores' },
-      { label: 'Productos', path: '/productos', icon: PackageSearch, keywords: 'demanda categorías marcas' },
     ],
   },
   {
-    label: 'Orquestación',
+    label: 'Sistema',
     items: [
       { label: 'Atribución', path: '/atribucion', icon: GitFork, keywords: 'canal campaña conversión' },
       { label: 'Actividad', path: '/actividad', icon: Activity, keywords: 'timeline seguimiento llamadas notas' },
@@ -97,7 +108,7 @@ function Sidebar({
   return (
     <>
       {mobileOpen && <button type="button" aria-label="Cerrar navegación" onClick={onMobileClose} className="fixed inset-0 z-40 bg-mc-ink/40 lg:hidden" />}
-      <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-mc-line bg-white text-mc-muted shadow-[8px_0_32px_rgba(48,53,54,.06)] transition-all duration-200 ${collapsed ? 'lg:w-[76px]' : 'lg:w-[244px]'} w-[270px] ${mobileOpen ? 'tranmc-gray-x-0' : '-tranmc-gray-x-full lg:tranmc-gray-x-0'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-mc-line bg-white text-mc-muted shadow-[8px_0_32px_rgba(48,53,54,.06)] transition-all duration-200 ${collapsed ? 'lg:w-[76px]' : 'lg:w-[244px]'} w-[270px] ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="flex h-18 items-center justify-between border-b border-mc-line-soft px-4">
           <Brand compact={collapsed} />
           <button type="button" className="flex h-11 w-11 items-center justify-center rounded-xl text-mc-muted hover:bg-mc-yellow-wash hover:text-mc-ink lg:hidden" onClick={onMobileClose} aria-label="Cerrar menú"><X size={18} /></button>
@@ -116,7 +127,7 @@ function Sidebar({
                       end={item.path === '/'}
                       onClick={onMobileClose}
                       title={collapsed ? item.label : undefined}
-                      className={({ isActive }) => `group flex h-11 items-center rounded-xl text-sm font-semibold transition ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} ${isActive ? 'bg-mc-yellow-soft text-mc-ink shadow-sm ring-1 ring-[#f2d75d]' : 'text-mc-muted hover:bg-mc-surface-2 hover:text-mc-ink'}`}
+                      className={({ isActive }) => `group flex h-11 items-center rounded-xl text-sm font-semibold transition ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} ${isActive ? 'bg-mc-yellow-soft text-mc-ink shadow-sm ring-1 ring-mc-yellow-strong/50' : 'text-mc-muted hover:bg-mc-surface-2 hover:text-mc-ink'}`}
                     >
                       <Icon size={17} className="shrink-0" />
                       {!collapsed && <span className="truncate">{item.label}</span>}
@@ -194,7 +205,7 @@ export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const location = useLocation()
-  const current = allNavItems.find((item) => item.path === location.pathname) ?? allNavItems[0]
+  const current = allNavItems.find((item) => item.path === location.pathname) ?? allNavItems.find((item) => item.path !== '/' && location.pathname.startsWith(item.path)) ?? allNavItems[0]
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -216,7 +227,7 @@ export function AppShell() {
             <button type="button" className="flex h-11 w-11 items-center justify-center rounded-xl border border-mc-gray-200 bg-white text-mc-gray-600 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Abrir navegación"><Menu size={18} /></button>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-extrabold text-mc-ink">{current.label}</p>
-              <p className="hidden text-[11px] text-mc-muted sm:block">MitraClick Intelligence · Centro de inteligencia comercial</p>
+              <p className="hidden text-[11px] text-mc-muted sm:block">Inteligencia comercial de Mitra y Mitra Click</p>
             </div>
             <button type="button" onClick={() => setSearchOpen(true)} className="flex h-11 items-center gap-2 rounded-xl border border-mc-line bg-white px-3 text-xs font-semibold text-mc-muted shadow-sm hover:border-[#e0b51d] hover:text-mc-ink"><Search size={15} /><span className="hidden sm:inline">Buscar</span><kbd className="hidden rounded border border-mc-line bg-mc-surface-2 px-1.5 py-0.5 text-[9px] text-mc-muted md:inline">⌘ K</kbd></button>
             <DemoBanner />

@@ -3,6 +3,10 @@ import type { CommercialData, CommercialProduct, OrderLine, RetailOrder, Wholesa
 import { resolvePeriod } from './period'
 import {
   getBusinessUnitSummary,
+  getChannelMix,
+  getClientActivity,
+  getFunnel,
+  getRepDailySeries,
   getCategoryPerformance,
   getDailySeries,
   getGoalProgress,
@@ -211,5 +215,38 @@ describe('negocio y metas', () => {
     expect(series).toHaveLength(7)
     expect(series.at(-1)).toEqual({ date: '2026-09-22', mitra: 0, mitraclick: 1_000 })
     expect(series.find((day) => day.date === '2026-09-21')).toEqual({ date: '2026-09-21', mitra: 10_000, mitraclick: 0 })
+  })
+})
+
+describe('vistas de detalle', () => {
+  it('filtra el desempeño de productos por vendedor', () => {
+    const rows = getProductPerformance(fixture(), resolvePeriod('mes', '2026-09-22'), 'mitra', { repId: 'rep-a' })
+    expect(rows.filter((row) => row.revenue > 0).map((row) => [row.product.id, row.revenue])).toEqual([['W1', 18_000], ['W2', 4_000]])
+  })
+
+  it('resume la actividad de cada cliente con días desde su última compra', () => {
+    const rows = getClientActivity(fixture(), resolvePeriod('mes', '2026-09-22'))
+    expect(rows[0]).toMatchObject({ clientId: 'CL1', sales: 23_000, orders: 2, lastPurchaseDate: '2026-09-10', daysSincePurchase: 12 })
+    expect(rows[1]).toMatchObject({ clientId: 'CL2', sales: 10_000, daysSincePurchase: 1, repId: 'rep-a' })
+  })
+
+  it('reparte las ventas de Mitra Click por canal', () => {
+    expect(getChannelMix(fixture(), resolvePeriod('mes', '2026-09-22'))).toEqual([{ channel: 'Google', sales: 3_000, orders: 2, share: 1 }])
+  })
+
+  it('suma el embudo e-commerce del periodo', () => {
+    const data = fixture()
+    data.traffic = [
+      { date: '2026-09-21', visits: 100, productViews: 60, carts: 8, checkouts: 4, orders: 2 },
+      { date: '2026-09-22', visits: 100, productViews: 50, carts: 6, checkouts: 3, orders: 2 },
+      { date: '2026-08-01', visits: 999, productViews: 0, carts: 0, checkouts: 0, orders: 0 },
+    ]
+    expect(getFunnel(data, resolvePeriod('semana', '2026-09-22'))).toEqual({ visits: 200, productViews: 110, carts: 14, checkouts: 7, orders: 4, conversionRate: 0.02 })
+  })
+
+  it('arma la serie diaria de un vendedor', () => {
+    const series = getRepDailySeries(fixture(), 'rep-a', resolvePeriod('semana', '2026-09-22'))
+    expect(series).toHaveLength(7)
+    expect(series.find((point) => point.date === '2026-09-21')?.sales).toBe(10_000)
   })
 })

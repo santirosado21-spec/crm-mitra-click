@@ -60,7 +60,7 @@ export function Panel({
   return (
     <section className={`overflow-hidden rounded-2xl border border-mc-line bg-mc-surface shadow-mc-card ${className}`} data-testid={testId}>
       {(title || description || action) && (
-        <div className="flex items-start justify-between gap-4 border-b border-mc-line-soft px-5 py-4">
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 border-b border-mc-line-soft px-5 py-4">
           <div className="min-w-0">
             {title && <h2 className="text-sm font-bold text-mc-ink">{title}</h2>}
             {description && <p className="mt-0.5 text-xs leading-5 text-mc-muted">{description}</p>}
@@ -123,16 +123,16 @@ export function KpiCard({
 }) {
   return (
     <article
-      className={`flex flex-col rounded-2xl border p-4 shadow-mc-card ${emphasis ? 'border-mc-charcoal bg-mc-charcoal text-white' : 'border-mc-line bg-mc-surface'}`}
+      className={`flex min-w-0 flex-col rounded-2xl border p-3 shadow-mc-card sm:p-4 ${emphasis ? 'border-mc-charcoal bg-mc-charcoal text-white' : 'border-mc-line bg-mc-surface'}`}
       data-testid={testId}
     >
       <div className="flex items-start justify-between gap-3">
-        <p className={`text-xs font-semibold ${emphasis ? 'text-white/75' : 'text-mc-muted'}`}>{label}</p>
+        <p className={`min-w-0 text-xs font-semibold ${emphasis ? 'text-white/75' : 'text-mc-muted'}`}>{label}</p>
         <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${emphasis ? 'bg-mc-yellow text-mc-ink' : 'bg-mc-surface-2 text-mc-charcoal'}`}>
           <Icon size={16} aria-hidden="true" />
         </span>
       </div>
-      <p className={`mt-2 text-[26px] font-extrabold leading-tight tabular ${emphasis ? 'text-white' : 'text-mc-ink'}`} data-testid={testId ? `${testId}-value` : undefined}>{value}</p>
+      <p className={`mt-2 break-words text-xl font-extrabold leading-tight tabular sm:text-[26px] ${emphasis ? 'text-white' : 'text-mc-ink'}`} data-testid={testId ? `${testId}-value` : undefined}>{value}</p>
       <div className="mt-1 flex flex-wrap items-center gap-2">
         {delta !== undefined && <Delta value={delta} />}
         {helper && <span className={`text-[11px] ${emphasis ? 'text-white/75' : 'text-mc-muted'}`}>{helper}</span>}

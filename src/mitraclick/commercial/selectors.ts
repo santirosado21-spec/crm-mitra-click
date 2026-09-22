@@ -8,6 +8,7 @@ import type {
   PerformanceStatus,
   RetailChannel,
   SalesRep,
+  WholesaleClient,
 } from '../domain'
 import { addDays, daysBetween, daysInMonth, inRange, monthOf } from './dates'
 import type { ResolvedPeriod } from './period'
@@ -151,8 +152,13 @@ export interface ProductPerformance {
 
 const matchesUnit = (unit: UnitFilter, businessUnit: BusinessUnit) => unit === 'todas' || unit === businessUnit
 
-export function getProductPerformance(data: CommercialData, period: ResolvedPeriod, unit: UnitFilter = 'todas'): ProductPerformance[] {
-  const facts = getSalesFacts(data).filter((fact) => matchesUnit(unit, fact.businessUnit))
+export function getProductPerformance(
+  data: CommercialData,
+  period: ResolvedPeriod,
+  unit: UnitFilter = 'todas',
+  options: { repId?: string } = {},
+): ProductPerformance[] {
+  const facts = getSalesFacts(data).filter((fact) => matchesUnit(unit, fact.businessUnit) && (!options.repId || fact.repId === options.repId))
   const current = new Map<string, { revenue: number; units: number; orders: Set<string> }>()
   const previous = new Map<string, number>()
 
@@ -376,4 +382,100 @@ export function getDailySeries(data: CommercialData, period: ResolvedPeriod): Da
     if (point) point.mitraclick += order.amount
   }
   return [...points.values()]
+}
+
+export function getRepDailySeries(data: CommercialData, repId: string, period: ResolvedPeriod): { date: string; sales: number }[] {
+  const points = new Map<string, { date: string; sales: number }>()
+  for (let offset = 0; offset < period.days; offset += 1) {
+    const date = addDays(period.start, offset)
+    points.set(date, { date, sales: 0 })
+  }
+  for (const order of data.wholesaleOrders) {
+    if (order.repId !== repId) continue
+    const point = points.get(order.date)
+    if (point) point.sales += order.amount
+  }
+  return [...points.values()]
+}
+
+// ── Clientes mayoristas ─────────────────────────────────────────────────────
+
+export interface ClientActivity {
+  clientId: string
+  client: WholesaleClient
+  name: string
+  /** Vendedor asignado a la cuenta. */
+  repId: string
+  sales: number
+  orders: number
+  lastPurchaseDate: string | null
+  daysSincePurchase: number | null
+}
+
+export function getClientActivity(data: CommercialData, period: ResolvedPeriod): ClientActivity[] {
+  return data.clients
+    .map((client) => {
+      const orders = data.wholesaleOrders.filter((order) => order.clientId === client.id && order.date <= period.end)
+      const current = orders.filter((order) => order.date >= period.start)
+      const lastPurchaseDate = orders.reduce<string | null>((latest, order) => (!latest || order.date > latest ? order.date : latest), null)
+      return {
+        clientId: client.id,
+        client,
+        name: client.name,
+        repId: client.repId,
+        sales: current.reduce((sum, order) => sum + order.amount, 0),
+        orders: current.length,
+        lastPurchaseDate,
+        daysSincePurchase: lastPurchaseDate ? daysBetween(lastPurchaseDate, period.end) : null,
+      }
+    })
+    .sort((a, b) => b.sales - a.sales || a.name.localeCompare(b.name, 'es-MX'))
+}
+
+// ── Mitra Click ─────────────────────────────────────────────────────────────
+
+export interface ChannelShare {
+  channel: RetailChannel
+  sales: number
+  orders: number
+  share: number
+}
+
+export function getChannelMix(data: CommercialData, period: ResolvedPeriod): ChannelShare[] {
+  const byChannel = new Map<RetailChannel, ChannelShare>()
+  let total = 0
+  for (const order of data.retailOrders) {
+    if (!inRange(order.date, period.start, period.end)) continue
+    const entry = byChannel.get(order.channel) ?? { channel: order.channel, sales: 0, orders: 0, share: 0 }
+    entry.sales += order.amount
+    entry.orders += 1
+    total += order.amount
+    byChannel.set(order.channel, entry)
+  }
+  return [...byChannel.values()]
+    .map((entry) => ({ ...entry, share: total ? round2(entry.sales / total) : 0 }))
+    .sort((a, b) => b.sales - a.sales)
+}
+
+export interface FunnelSummary {
+  visits: number
+  productViews: number
+  carts: number
+  checkouts: number
+  orders: number
+  /** Pedidos / visitas (0–1). */
+  conversionRate: number
+}
+
+export function getFunnel(data: CommercialData, period: ResolvedPeriod): FunnelSummary {
+  const totals = { visits: 0, productViews: 0, carts: 0, checkouts: 0, orders: 0 }
+  for (const day of data.traffic) {
+    if (!inRange(day.date, period.start, period.end)) continue
+    totals.visits += day.visits
+    totals.productViews += day.productViews
+    totals.carts += day.carts
+    totals.checkouts += day.checkouts
+    totals.orders += day.orders
+  }
+  return { ...totals, conversionRate: totals.visits ? Math.round((totals.orders / totals.visits) * 10_000) / 10_000 : 0 }
 }
