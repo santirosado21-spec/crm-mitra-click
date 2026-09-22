@@ -35,7 +35,8 @@ dist-ssr
 .supabase
 
 # Tooling
-.claude
+.claude/*
+!.claude/skills/
 .agent
 .zed
 .hermes/
@@ -59,5 +60,3 @@ dist-ssr
 **/* 2.mjs
 **/* 2.cjs
 
-# Embedded subrepo (legacy, not used)
-scm-dashboard/

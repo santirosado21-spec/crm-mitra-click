@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ArrowDown, BellRing, CheckCircle2, CircleDot, Clock3, FlaskConical, Play, Power, Workflow, Zap } from 'lucide-react'
-import { Button } from '../../components/ui/Button'
+import { Button } from '../components/Controls'
 import type { AutomationRule } from '../domain'
 import { useMitraClick } from '../MitraClickContext'
 import { formatDate } from '../utils'

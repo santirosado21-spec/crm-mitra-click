@@ -3,10 +3,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     environment: 'node',
-    include: [
-      'src/**/*.{test,spec}.{ts,tsx}',
-      'supabase/functions/_shared/**/*.{test,spec}.ts',
-    ],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist'],
     coverage: {
       provider: 'v8',

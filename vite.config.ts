@@ -8,17 +8,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Separa las librerías pesadas en chunks propios — antes todo iba en
-        // un solo bundle de ~3.5 MB. Beneficio principal: estos chunks de
-        // vendor se cachean entre deploys (cambiar código del app no los
-        // invalida) y se descargan en paralelo.
+        // Librerías de vendor en chunks propios: se cachean entre deploys.
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           charts: ['recharts'],
-          pdf: ['jspdf', 'pdf-lib', 'pdfjs-dist'],
-          sheets: ['xlsx'],
-          maps: ['leaflet'],
-          i18n: ['i18next', 'react-i18next'],
         },
       },
     },

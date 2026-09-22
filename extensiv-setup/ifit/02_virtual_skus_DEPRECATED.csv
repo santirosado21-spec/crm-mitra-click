@@ -1,5 +1,0 @@
-SKU,Description,Customer,LabelingUnitLength,LabelingUnitWidth,LabelingUnitHeight,LabelingUnitWeight,_qty_apr,_volume_ft3_unit,_notes
-FORKLIFT,FORKLIFT,I Fit Inc.,118.08,47.28,106.32,,1,343.50,"Dims REALES del invoice abril (9.84 x 3.94 x 8.86 ft)"
-ORDER-PROCESING,ORDER PROCESSING AREA,I Fit Inc.,58.32,58.32,66.96,,1,131.80,"Dims REALES del invoice abril (4.86 x 4.86 x 5.58 ft)"
-FORKLIFT-CLAMPS,CLAMPS FORKLIFT,I Fit Inc.,49.20,49.20,49.20,,1,68.92,"Dims REALES del invoice abril (4.10 x 4.10 x 4.10 ft)"
-PALLETS,WOODEN PALLETS,I Fit Inc.,78.72,36.96,7.08,70,220,11.94,"Dims REALES del invoice abril (6.56 x 3.08 x 0.59 ft). Qty cambia mensual - 220 en abril"

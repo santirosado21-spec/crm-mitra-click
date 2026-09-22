@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Activity as ActivityIcon, CalendarCheck, FileText, History, MessageSquareText, PhoneCall, Plus, Search, Target, UserPlus } from 'lucide-react'
-import { Button } from '../../components/ui/Button'
+import { Button } from '../components/Controls'
 import { useMitraClick } from '../MitraClickContext'
 import type { ActivityType } from '../domain'
 import { formatDate } from '../utils'

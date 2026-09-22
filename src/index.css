@@ -1,239 +1,104 @@
 @import "tailwindcss";
 
-/* ── Tokens de diseño ─────────────────────────────────────────────────────── */
+/* ── Tokens de marca MitraClick ───────────────────────────────────────────────
+   Única fuente de color de la app. Usar siempre las utilidades generadas
+   (bg-mc-charcoal, text-mc-ink, border-mc-line, …) en lugar de hex sueltos.
+   Regla de contraste: el amarillo es fondo o acento, nunca texto sobre blanco;
+   para texto "amarillo" usar mc-yellow-ink. */
+@theme {
+  --font-sans: 'Poppins', system-ui, -apple-system, sans-serif;
+
+  /* Marca */
+  --color-mc-charcoal: #454a49;
+  --color-mc-ink: #303536;
+  --color-mc-muted: #676b69;
+  --color-mc-subtle: #8a8d8b;
+  --color-mc-yellow: #ffc62a;
+  --color-mc-yellow-strong: #f2b705;
+  --color-mc-yellow-soft: #fff2ad;
+  --color-mc-yellow-wash: #fff8db;
+  --color-mc-yellow-ink: #8a6500;
+
+  /* Superficies y líneas */
+  --color-mc-bg: #f7f7f3;
+  --color-mc-surface: #ffffff;
+  --color-mc-surface-2: #f6f6f1;
+  --color-mc-line: #deded8;
+  --color-mc-line-soft: #ecebe5;
+
+  /* Semánticos (semáforo comercial) */
+  --color-mc-success: #1f7a4d;
+  --color-mc-success-soft: #e3f3ea;
+  --color-mc-warning: #a35f00;
+  --color-mc-warning-soft: #fdf0d8;
+  --color-mc-danger: #b42318;
+  --color-mc-danger-soft: #fde8e6;
+  --color-mc-info: #2f5d7c;
+  --color-mc-info-soft: #e6eff5;
+
+  --shadow-mc-card: 0 1px 2px rgba(48, 53, 54, 0.04), 0 8px 24px rgba(48, 53, 54, 0.05);
+  --shadow-mc-pop: 0 12px 40px rgba(48, 53, 54, 0.14);
+
+  --animate-drawer-in: drawerIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-fade-up: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 :root {
-  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-  font-feature-settings: 'cv02', 'cv03', 'cv04';
+  font-family: var(--font-sans);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* Colores corporativos */
-  --brand-navy:    #454a49;
-  --brand-red:     #dc3545;
-  --brand-green:   #28a745;
-  --brand-amber:   #ffc62a;
-
-  /* Light theme */
-  --page-bg:       #f7f7f3;
-  --card-bg:       #ffffff;
-  --card-border:   #e2e2dc;
-  --card-shadow:   0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-  --sidebar-bg:    #ffffff;
-  --header-bg:     #ffffff;
-  --text-primary:  #303536;
-  --text-muted:    #676b69;
+  color: var(--color-mc-ink);
 }
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 html, body, #root { min-height: 100%; }
-body { margin: 0; min-width: 320px; min-height: 100dvh; background: var(--page-bg); }
+body { margin: 0; min-width: 320px; min-height: 100dvh; background: var(--color-mc-bg); }
 a { color: inherit; text-decoration: none; }
-button { font-family: inherit; cursor: pointer; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
 
-/* ── Texto blanco automático en fondos azul/navy (mobile + web) ──────────── */
-/* Garantiza visibilidad: cualquier elemento con bg navy hereda texto blanco
-   por default. Tailwind text-* utilities ganan por mayor especificidad
-   gracias a :where(). No afecta a variantes con opacidad (bg-[#1e3a5f]/10)
-   ni a backgrounds claros. */
-:where([class*="bg-[#1e3a5f]"]):not([class*="/10"]):not([class*="/20"]):not([class*="/5"]),
-:where([class*="bg-[#16304d]"]),
-:where([class*="bg-[#1f3864]"]):not([class*="/10"]):not([class*="/20"]):not([class*="/5"]),
-:where([class*="bg-[#0f172a]"]),
-:where([class*="bg-[#16304d]"]),
-:where([class*="bg-blue-600"]),
-:where([class*="bg-blue-700"]),
-:where([class*="bg-blue-800"]),
-:where([class*="bg-blue-900"]) {
-  color: #ffffff;
-}
-/* Mismo principio para inline styles con bg navy.
-   IMPORTANTE: cubrimos los 3 patrones más comunes:
-     - hex literal:       style={{ background: '#1e3a5f' }}
-     - CSS variable:      style={{ background: 'var(--brand-navy)' }}
-     - background-color:  style={{ backgroundColor: '#1e3a5f' }} */
-:where([style*="background:#1e3a5f"]),
-:where([style*="background: #1e3a5f"]),
-:where([style*="background-color:#1e3a5f"]),
-:where([style*="background-color: #1e3a5f"]),
-:where([style*="background:#1f3864"]),
-:where([style*="background: #1f3864"]),
-:where([style*="brand-navy"]),
-:where([style*="brand_navy"]),
-:where([style*="background:var(--brand"]),
-:where([style*="background: var(--brand"]),
-:where([style*="background-color:var(--brand"]),
-:where([style*="background-color: var(--brand"]) {
-  color: #ffffff;
-}
+/* Poppins replica el carácter geométrico del wordmark MitraClick. */
+h1, h2, h3 { letter-spacing: -0.02em; }
 
-/* Garantiza que descendientes (icons SVG, spans sin clase de color, etc.)
-   hereden el blanco. Tailwind text-* o text-gray-* explícito en un hijo
-   gana por especificidad mayor — esta regla es solo para los hijos sin
-   color propio. */
-:where([class*="bg-[#1e3a5f]"]):not([class*="/10"]):not([class*="/20"]):not([class*="/5"]) :where(svg, span:not([class*="text-"])),
-:where([style*="brand-navy"]) :where(svg, span:not([class*="text-"])),
-:where([style*="background:#1e3a5f"]) :where(svg, span:not([class*="text-"])),
-:where([style*="background: #1e3a5f"]) :where(svg, span:not([class*="text-"])) {
-  color: inherit;
-}
+/* Cifras alineadas en tablas, rankings y KPIs. */
+.tabular { font-variant-numeric: tabular-nums; }
 
-/* Capa de seguridad final: si algún elemento con bg navy aún muestra texto
-   oscuro (Tailwind text-gray-* heredado de un wrapper externo, etc.), le
-   forzamos blanco con !important. Solo aplica al elemento directo, no a
-   hijos con text-* explícito (esos ya tienen color propio).
-   Especificidad alta vía atributo selector sin :where(). */
-[class*="bg-[#1e3a5f]"]:not([class*="/10"]):not([class*="/20"]):not([class*="/5"]),
-[style*="brand-navy"],
-[style*="background:#1e3a5f"],
-[style*="background: #1e3a5f"],
-[style*="background-color:#1e3a5f"],
-[style*="background-color: #1e3a5f"] {
-  color: #ffffff !important;
-}
-
-/* Excepción: si el elemento trae text-gray-* o text-rose-* etc. explícito
-   en su class, respetamos esa elección — el !important de arriba aplica solo
-   cuando NO hay text-* en la propia className. */
-[class*="bg-[#1e3a5f]"][class*="text-gray-"]:not([class*="/10"]),
-[class*="bg-[#1e3a5f]"][class*="text-rose-"]:not([class*="/10"]),
-[class*="bg-[#1e3a5f]"][class*="text-emerald-"]:not([class*="/10"]),
-[class*="bg-[#1e3a5f]"][class*="text-amber-"]:not([class*="/10"]) {
-  color: revert !important;
-}
-
-/* iOS: usar viewport dinámico (sin contar URL bar) y scroll suave en flex */
-@supports (height: 100dvh) {
-  .h-screen { height: 100dvh; }
-}
-.flex > main, .flex > .flex-1 { min-height: 0; }
-.overflow-auto, .overflow-y-auto {
+/* iOS: scroll suave en contenedores con overflow. */
+.overflow-auto, .overflow-y-auto, .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 
-/* Poppins replica el carácter geométrico y pesado del wordmark MitraClick. */
-h1, h2, h3, .font-display { font-family: 'Poppins', sans-serif; letter-spacing: -0.02em; font-weight: 800; }
-
 /* ── Scrollbar ────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d4d4ce; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #a1a4a2; }
 
-/* ── Animaciones ──────────────────────────────────────────────────────────── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.97); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-.animate-fade-up  { animation: fadeUp  0.4s cubic-bezier(0.16,1,0.3,1) both; }
-.animate-fade-in  { animation: fadeIn  0.3s ease both; }
-.animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16,1,0.3,1) both; }
-
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.10s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.20s; }
-.stagger-5 { animation-delay: 0.25s; }
-.stagger-6 { animation-delay: 0.30s; }
-
-/* ── Login: marco animado azul + naranja ────────────────────────────────── */
-@keyframes login-frame-flow {
-  0%   { background-position:   0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position:   0% 50%; }
-}
-@keyframes login-frame-pulse {
-  0%, 100% { transform: scale(1);   opacity: 0.9; }
-  50%      { transform: scale(1.5); opacity: 0.4; }
-}
-
-.login-frame {
-  background: linear-gradient(
-    115deg,
-    #1e3a5f 0%,
-    #1e3a5f 25%,
-    #c8373c 40%,
-    #e25560 50%,
-    #c8373c 60%,
-    #1e3a5f 75%,
-    #1e3a5f 100%
-  );
-  background-size: 300% 300%;
-  animation: login-frame-flow 9s ease-in-out infinite;
-}
-
-.login-frame-dot {
-  position: absolute;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #e25560, #c8373c 60%, transparent 70%);
-  box-shadow: 0 0 16px 4px rgba(200,55,60,0.55);
-  animation: login-frame-pulse 2.6s ease-in-out infinite;
-}
-
-/* ── Card estándar (light mode) ──────────────────────────────────────────── */
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--card-shadow);
-  border-radius: 12px;
-}
-.card-hover {
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-.card-hover:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
-  transform: translateY(-1px);
-}
-
-/* ── KPI número ───────────────────────────────────────────────────────────── */
-.kpi-number {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1;
-}
-
-/* ── Focus visible ────────────────────────────────────────────────────────── */
+/* ── Foco visible (teclado y agentes) ─────────────────────────────────────── */
 :focus-visible {
-  outline: 3px solid #8a6500;
+  outline: 3px solid var(--color-mc-yellow-ink);
   outline-offset: 2px;
 }
 
-/* ── Print ────────────────────────────────────────────────────────────────── */
-@media print {
-  input, textarea, select {
-    -webkit-appearance: none;
-    appearance: none;
-    border-color: transparent !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-}
-
-/* ── MitraClick Intelligence ─────────────────────────────────────────────── */
+/* ── Animaciones ──────────────────────────────────────────────────────────── */
 @keyframes drawerIn {
   from { opacity: 0; transform: translateX(36px); }
   to { opacity: 1; transform: translateX(0); }
 }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-button, input, select, textarea { font: inherit; }
-button:disabled { cursor: not-allowed; }
+/* ── Impresión / captura de reportes ─────────────────────────────────────── */
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none !important; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

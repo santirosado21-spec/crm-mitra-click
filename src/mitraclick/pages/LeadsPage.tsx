@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Building2, CalendarClock, Filter, Mail, Phone, Search, SlidersHorizontal, UserRound } from 'lucide-react'
-import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
+import { Button, Input } from '../components/Controls'
+
 import { useMitraClick } from '../MitraClickContext'
 import { OPPORTUNITY_STAGES, type Lead } from '../domain'
 import { filterLeads } from '../selectors'
