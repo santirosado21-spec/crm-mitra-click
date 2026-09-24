@@ -139,51 +139,6 @@ export function MitraClickProvider({
     [],
   )
 
-  const toggleAutomation = useCallback((automationId: string) => {
-    setData((current) =>
-      current
-        ? {
-            ...current,
-            automations: current.automations.map((automation) =>
-              automation.id === automationId
-                ? { ...automation, enabled: !automation.enabled }
-                : automation,
-            ),
-          }
-        : current,
-    )
-  }, [])
-
-  const simulateAutomation = useCallback((automationId: string) => {
-    setData((current) => {
-      if (!current) return current
-      const automation = current.automations.find((item) => item.id === automationId)
-      if (!automation) return current
-      const timestamp = nowIso()
-
-      return {
-        ...current,
-        automations: current.automations.map((item) =>
-          item.id === automationId
-            ? { ...item, lastRunAt: timestamp, runCount: item.runCount + 1 }
-            : item,
-        ),
-        activities: [
-          {
-            id: localId('activity-automation'),
-            type: 'seguimiento',
-            title: `Simulación: ${automation.name}`,
-            description: `Se evaluó localmente “${automation.trigger} → ${automation.condition} → ${automation.action}”. No se ejecutó ninguna integración externa.`,
-            actor: 'Motor de simulación',
-            occurredAt: timestamp,
-            status: 'Completado',
-          },
-          ...current.activities,
-        ],
-      }
-    })
-  }, [])
-
   const value = useMemo<MitraClickContextValue>(
     () => ({
       data,
@@ -191,8 +146,6 @@ export function MitraClickProvider({
       loading,
       updateLead,
       moveOpportunityStage,
-      toggleAutomation,
-      simulateAutomation,
       addActivity,
       resetMocks,
     }),
@@ -203,8 +156,6 @@ export function MitraClickProvider({
       loading,
       moveOpportunityStage,
       resetMocks,
-      simulateAutomation,
-      toggleAutomation,
       updateLead,
     ],
   )

@@ -11,14 +11,11 @@ import { QuotesPage } from './mitraclick/pages/QuotesPage'
 import { ProductsPage } from './mitraclick/pages/ProductsPage'
 import { AttributionPage } from './mitraclick/pages/AttributionPage'
 import { ActivityPage } from './mitraclick/pages/ActivityPage'
-import { AutomationsPage } from './mitraclick/pages/AutomationsPage'
 import { AgentsPage } from './mitraclick/pages/AgentsPage'
-import { ReportsPage } from './mitraclick/pages/ReportsPage'
 import { SalesRepsPage } from './mitraclick/pages/SalesRepsPage'
 import { SalesRepDetailPage } from './mitraclick/pages/SalesRepDetailPage'
 import { MitraWholesalePage } from './mitraclick/pages/MitraWholesalePage'
 import { MitraClickPage } from './mitraclick/pages/MitraClickPage'
-import { ReportCapturePage, ReportViewPage } from './mitraclick/pages/ReportViewPage'
 
 function DataGate() {
   const { data, error, loading, resetMocks } = useMitraClick()
@@ -40,12 +37,8 @@ function DataGate() {
         <Route path="productos" element={<ProductsPage />} />
         <Route path="atribucion" element={<AttributionPage />} />
         <Route path="actividad" element={<ActivityPage />} />
-        <Route path="automatizaciones" element={<AutomationsPage />} />
         <Route path="agentes" element={<AgentsPage />} />
-        <Route path="reportes" element={<ReportsPage />} />
-        <Route path="reportes/:tipo" element={<ReportViewPage />} />
       </Route>
-      <Route path="reportes/:tipo/captura" element={<ReportCapturePage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

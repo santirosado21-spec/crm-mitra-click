@@ -10,7 +10,7 @@ export interface MitraRepository {
 /**
  * Único adaptador activo durante la fase sin integraciones. Los datos comerciales
  * se generan de forma determinista hasta `asOf` (por defecto, hoy) para que los
- * reportes diarios siempre tengan un "hoy". Un conector real deberá implementar
+ * dashboards siempre tengan un "hoy". Un conector real deberá implementar
  * el mismo contrato y normalizar sus respuestas antes de llegar a la UI.
  */
 export class MockMitraRepository implements MitraRepository {

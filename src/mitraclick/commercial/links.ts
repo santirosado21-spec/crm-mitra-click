@@ -1,5 +1,5 @@
-// Construcción de rutas internas con filtros en la URL. Los reportes de WhatsApp
-// y los agentes de Grok Bot dependen de que estos links sean estables.
+// Construcción de rutas internas con filtros en la URL. Los agentes de Grok Bot
+// y los links compartidos dependen de que estas rutas sean estables.
 
 import type { PeriodKey } from '../domain'
 import type { UnitFilter } from './selectors'

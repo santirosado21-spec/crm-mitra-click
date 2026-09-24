@@ -116,7 +116,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Impresión / captura de reportes ─────────────────────────────────────── */
+/* ── Impresión ───────────────────────────────────────────────────────────── */
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print { display: none !important; }

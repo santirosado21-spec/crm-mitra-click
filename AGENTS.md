@@ -15,6 +15,8 @@ Prioridad de producto, definida por Ángel Secades (Director Comercial):
 2. **Productos/material**: qué se vende bien, qué no, qué no se mueve y qué se agotó con demanda.
 3. **Reportes rápidos y digeribles**: Ángel los recibe **por WhatsApp**; el **dashboard web** tiene todo el detalle.
 
+**Reportes y automatizaciones no se construyen en esta app.** Los arma, programa y envía Grok Bot (ver 10.1). La plataforma se limita a dashboards con datos confiables, links estables y selectores legibles por agentes.
+
 Además representa el ciclo comercial:
 
 `Canal → Campaña → Lead → Empresa → Oportunidad → Cotización → Venta`
@@ -26,7 +28,7 @@ No presentar la demo como un sistema productivo. Actualmente:
 - Los datos de MitraClick son sintéticos y viven en memoria.
 - Los cambios hechos en la interfaz se pierden al recargar o restablecer la sesión.
 - No hay atribución causal real ni actualización en tiempo real.
-- No se ejecutan automatizaciones externas.
+- No hay módulo de reportes ni de automatizaciones: ese trabajo vive en Grok Bot.
 - No se envían emails, mensajes de WhatsApp ni mensajes de LinkedIn.
 - No se consulta ningún modelo de IA.
 - No hay autenticación ni permisos productivos para MitraClick.
@@ -108,7 +110,6 @@ Dirección y negocios (datos comerciales de `src/mitraclick/commercial/`):
 - `/productos`: material más y menos vendido, agotados con demanda, sin movimiento
 - `/mitra`: Mitra mayorista (categorías, clientes, cotizaciones por vendedor)
 - `/mitra-click`: Mitra Click (canales, embudo, más vendidos)
-- `/reportes`, `/reportes/:tipo` y `/reportes/:tipo/captura`: reportes para WhatsApp
 
 Todas aceptan `?periodo=hoy|semana|mes|30d|90d`; Productos también `?unidad=mitra|mitraclick` y `?sin-movimiento=30|60|90`.
 
@@ -120,15 +121,13 @@ CRM y sistema:
 - `/cotizaciones`: Seguimiento de cotizaciones
 - `/atribucion`: Recorrido y atribución demostrativa
 - `/actividad`: Timeline y seguimiento
-- `/automatizaciones`: Reglas en modo simulación
-- `/agentes`: Perfiles de los agentes de Grok Bot, sus reportes y reglas
+- `/agentes`: Perfiles de los agentes de Grok Bot, pantallas que consultan, selectores y reglas
 
 Límites funcionales importantes:
 
 - **Productos** es una superficie de lectura e inteligencia, no un administrador de catálogo.
 - **Cotizaciones** da seguimiento comercial; no es un cotizador logístico.
 - **Atribución** es demostrativa; correlación no equivale a causalidad.
-- **Automatizaciones** sólo simula reglas y no ejecuta acciones externas.
 - **Agentes** describe los perfiles de Grok Bot; la inferencia ocurre en Grok Bot, no en esta app.
 - Chatbot, outbound B2B y promesas como “tracking al 100%” requieren definición y aprobación antes de implementarse o comunicarse.
 
@@ -214,18 +213,18 @@ Si un cambio sólo afecta documentación, no es necesario reconstruir toda la ap
 
 ## 10.1 Agentes de Grok Bot
 
-Los agentes de IA de Mitra operan desde **Grok Bot (xAI)**, fuera de este repositorio. Usan la plataforma **por navegador**, con una cuenta de Google compartida y un perfil propio por agente dentro de la app. Arman los reportes y los envían por WhatsApp. **La plataforma no envía mensajes.**
+Los agentes de IA de Mitra operan desde **Grok Bot (xAI)**, fuera de este repositorio. Usan la plataforma **por navegador**, con una cuenta de Google compartida y un perfil propio por agente dentro de la app. Arman los reportes, los programan y los envían por WhatsApp desde Grok Bot. **La plataforma no genera reportes, no ejecuta automatizaciones y no envía mensajes**; no volver a agregar esos módulos sin aprobación.
 
 Para que puedan operar, toda pantalla debe cumplir:
 
 - Tener un `<h1>` único y descriptivo.
 - Guardar filtros y periodo en la URL (query params), para que un link reproduzca exactamente la misma vista.
-- Poner etiquetas visibles o `aria-label` en todo control, y `data-testid` estables en las piezas que un agente lee o copia (KPIs, rankings, texto para WhatsApp).
+- Poner etiquetas visibles o `aria-label` en todo control, y `data-testid` estables en las piezas que un agente lee (KPIs, rankings, tablas de productos). La lista vigente está en `docs/agents/README.md`.
 - No depender de hover, drag-and-drop ni gestos para ninguna acción.
 - Usar tablas semánticas (`<table>`) en escritorio.
 - Mostrar el estado de los datos ("Datos simulados", fuente y fecha).
 
-Los agentes **no** modifican datos comerciales, no aprueban y no borran. Sus instrucciones de operación viven en `docs/agents/`.
+Los agentes **no** modifican datos comerciales, no aprueban y no borran. La guía de dónde leer cada dato vive en `docs/agents/`.
 
 ## 10.2 Skills del proyecto
 

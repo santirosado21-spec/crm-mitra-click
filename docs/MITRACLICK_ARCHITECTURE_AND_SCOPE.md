@@ -74,15 +74,11 @@ Responsabilidades:
 - Nunca se expondrán credenciales en el navegador.
 - Requieren plantillas, consentimiento, reglas de opt-out, trazabilidad y aprobación de remitentes.
 
-### Automatizaciones reales
+### Reportes, automatizaciones y agentes IA (Grok Bot)
 
-- Sustituirán la simulación local por un motor de eventos, colas/programación, reintentos, auditoría y alertas.
-- La interfaz Disparador → Condición → Acción ya representa el flujo, pero no ejecuta acciones externas.
-
-### Agentes IA
-
-- Sustituirán la vista previa estática por un servicio de inferencia del lado servidor.
-- Requieren fuentes autorizadas, permisos, registro de entradas/salidas, evaluación, límites y aprobación humana para acciones sensibles.
+- Decisión del 24-sep-2026: reportes, envíos por WhatsApp y automatizaciones **no** se construyen en esta plataforma. Los resuelven los agentes de Grok Bot (xAI).
+- Los agentes leen los dashboards por navegador con una cuenta de Google compartida y un perfil propio; la guía está en `docs/agents/`.
+- Esta plataforma aporta datos confiables, links con filtros estables y selectores legibles; no infiere, no programa y no envía mensajes.
 
 ## 3. Checklist contra “Propuesta Mitra y Mitra Click”
 
@@ -92,9 +88,8 @@ Responsabilidades:
 - CRM visual de leads, empresas/contactos, oportunidades, cotizaciones y actividad.
 - Pipeline por etapas y movimiento local con registro de actividad.
 - Superficie de atribución por campaña/canal, claramente marcada como demostrativa.
-- Automatizaciones en modo simulación.
-- Reportes comerciales configurables.
-- Espacio de trabajo de agentes IA en modo vista previa.
+- Dashboards de vendedores, productos, Mitra mayorista y Mitra Click preparados para que Grok Bot arme los reportes.
+- Perfiles de agentes de Grok Bot documentados (`/agentes`).
 
 ### 🟡 Requiere integración o definición de Mitra
 
@@ -103,8 +98,7 @@ Responsabilidades:
 - Analytics/GA4 y gobierno de tracking.
 - Google Ads, Meta Ads y reconciliación de campañas.
 - Atribución real, identidad, deduplicación y ventanas aprobadas.
-- Automatizaciones productivas, email y WhatsApp.
-- Inferencia real de agentes IA, permisos y auditoría.
+- Inicio de sesión con Google para la cuenta de agentes, perfiles y bitácora.
 - Actualización en tiempo real o con frecuencia acordada.
 - Autenticación, roles y permisos de usuarios reales.
 
@@ -122,7 +116,7 @@ Responsabilidades:
 - Leads, clientes/empresas, oportunidades, actividad y cotizaciones.
 - Productos e inventario como superficies de inteligencia.
 - Campañas, inversión, leads, ventas e ingresos en la vista de atribución demo.
-- Reportes y automatizaciones representadas visualmente.
+- Reportes y automatizaciones asignados a Grok Bot, que consume los dashboards de esta plataforma.
 
 ### 🟡 Requiere integración o coordinación
 
@@ -144,7 +138,7 @@ Responsabilidades:
 - Todos los datos son sintéticos y viven en memoria durante la sesión.
 - No existe persistencia productiva, autenticación real ni control de permisos.
 - No se envían mensajes, correos ni WhatsApp.
-- No se ejecutan automatizaciones externas.
+- No hay módulos de reportes ni automatizaciones: ese trabajo vive en Grok Bot.
 - No se consulta ningún modelo de IA.
 - No se administran catálogo, anuncios ni configuración de Shopify.
 - Productos es inteligencia de lectura; Cotizaciones es seguimiento comercial, no un cotizador logístico.

@@ -6,7 +6,7 @@ para dejar de usar datos simulados. Cada tabla corresponde a un tipo de
 servidor: el formato de origen puede ser API, vista SQL o exportación programada.
 
 **Frecuencia mínima sugerida:** una vez al día antes de las 7:00 (para los
-reportes matutinos de WhatsApp). Si el ERP lo permite, cada hora.
+reportes matutinos que Grok Bot envía por WhatsApp). Si el ERP lo permite, cada hora.
 
 **Datos personales:** no se necesitan correos, teléfonos, RFC ni direcciones de
 clientes; basta el nombre comercial.

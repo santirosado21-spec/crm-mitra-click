@@ -117,16 +117,4 @@ export const mockMitraData: Omit<MitraData, 'commercial'> = {
     { id: 'activity-11', type: 'nota', title: 'Razón de pérdida registrada', description: 'Presupuesto pospuesto al siguiente trimestre.', actor: 'Mariana López', occurredAt: '2026-08-18T09:00:00.000Z', leadId: 'lead-7', companyId: 'company-7', opportunityId: 'opp-7', status: 'Completado' },
     { id: 'activity-12', type: 'lead', title: 'Lead B2C registrado', description: 'Consulta por Pieza Cobalto desde redes sociales.', actor: 'Sistema demo', occurredAt: '2026-08-27T11:25:00.000Z', leadId: 'lead-8', companyId: 'company-8', status: 'Completado' },
   ],
-  automations: [
-    { id: 'automation-1', name: 'Asignar nuevos leads', trigger: 'Se crea un lead nuevo', condition: 'El responsable está vacío', action: 'Asignar por turno comercial', enabled: true, lastRunAt: '2026-08-27T11:25:00.000Z', runCount: 34 },
-    { id: 'automation-2', name: 'Alerta de seguimiento', trigger: 'Un lead no tiene actividad', condition: 'Han pasado más de 48 horas', action: 'Crear alerta para el responsable', enabled: true, lastRunAt: '2026-08-27T09:00:00.000Z', runCount: 12 },
-    { id: 'automation-3', name: 'Seguimiento de cotización', trigger: 'Una cotización sigue pendiente', condition: 'No cambia en 3 días', action: 'Crear tarea de seguimiento', enabled: true, lastRunAt: '2026-08-26T09:00:00.000Z', runCount: 18 },
-    { id: 'automation-4', name: 'Crear oportunidad B2B', trigger: 'Se califica un lead', condition: 'El segmento es B2B', action: 'Crear oportunidad en etapa Calificado', enabled: false, runCount: 0 },
-  ],
-  agents: [
-    { id: 'executive', name: 'Agente Ejecutivo', role: 'Síntesis para dirección', description: 'Experiencia preparada para resumir desempeño, riesgos y prioridades con evidencia trazable.', capabilities: ['Resumen ejecutivo', 'Variaciones clave', 'Riesgos del pipeline', 'Prioridades sugeridas'], examplePrompts: ['Resume el desempeño de este mes', '¿Qué riesgos requieren atención?', 'Compara ventas contra pipeline'], accent: '#4f46e5' },
-    { id: 'sales', name: 'Agente Comercial', role: 'Apoyo a ventas', description: 'Experiencia preparada para priorizar leads y preparar contexto antes de una conversación comercial.', capabilities: ['Priorización de leads', 'Contexto de cuenta', 'Siguiente mejor acción', 'Preparación de reunión'], examplePrompts: ['¿Qué leads debo atender hoy?', 'Prepara la cuenta Horizonte', 'Sugiere la próxima acción'], accent: '#0284c7' },
-    { id: 'followup', name: 'Agente de Seguimiento', role: 'Continuidad operativa', description: 'Experiencia preparada para detectar compromisos pendientes y proponer seguimientos sujetos a aprobación.', capabilities: ['Pendientes vencidos', 'Cotizaciones sin respuesta', 'Recordatorios', 'Borradores para aprobar'], examplePrompts: ['Muéstrame seguimientos vencidos', '¿Qué cotizaciones necesitan atención?', 'Prepara un borrador de seguimiento'], accent: '#d97706' },
-    { id: 'reports', name: 'Agente de Reportes', role: 'Análisis bajo demanda', description: 'Experiencia preparada para construir explicaciones sobre métricas y vistas guardadas.', capabilities: ['Reportes ejecutivos', 'Análisis por producto', 'Atribución', 'Comparativos por periodo'], examplePrompts: ['Crea un reporte de pipeline', 'Explica la atribución por canal', 'Compara categorías'], accent: '#059669' },
-  ],
 }

@@ -1,53 +1,48 @@
 # Agentes de Grok Bot en MitraClick Intelligence
 
-Los agentes de IA de Mitra operan desde **Grok Bot (xAI)**. Cada uno usa la
-plataforma por navegador, arma su reporte y lo envía por WhatsApp a dirección.
-**La plataforma no envía mensajes**: el envío lo hace el agente desde Grok Bot.
+Los agentes de IA de Mitra operan desde **Grok Bot (xAI)**. Los reportes, los
+envíos por WhatsApp y las automatizaciones se definen y ejecutan **en Grok Bot**.
+Esta plataforma solo les da los datos: dashboards con links estables y
+selectores que pueden leer.
 
-| Agente | Instrucciones | Reportes |
+| Agente | Guía | Pantallas principales |
 |---|---|---|
-| Agente Ejecutivo | [ejecutivo.md](ejecutivo.md) | Ventas del día (diario 19:00), Alertas del día (diario 8:00) |
-| Agente de Vendedores | [vendedores.md](vendedores.md) | Vendedores de la semana (lunes 8:00) |
-| Agente de Productos | [productos.md](productos.md) | Material de la semana (lunes 8:30) |
+| Agente Ejecutivo | [ejecutivo.md](ejecutivo.md) | `/`, `/mitra`, `/mitra-click` |
+| Agente de Vendedores | [vendedores.md](vendedores.md) | `/vendedores`, `/vendedores/<id>` |
+| Agente de Productos | [productos.md](productos.md) | `/productos` |
 
 ## Acceso
 
-- **URL de la plataforma:** pendiente del deploy de producción. Hoy corre en demo.
-- **Cuenta:** la cuenta de Google compartida de agentes. Pendiente: el login con
-  Google llega en la Fase 5; mientras tanto la demo no pide sesión.
-- **Perfil:** al entrar con la cuenta de agentes, elegir el perfil propio
-  (Ejecutivo, Vendedores o Productos). La bitácora registra el perfil y la cuenta.
+- **URL:** https://mitraclick-intelligence-review.vercel.app (demo con datos simulados).
+- **Cuenta:** la cuenta de Google compartida de agentes. El inicio de sesión con
+  Google todavía no está implementado; hoy la demo no pide sesión.
+- **Perfil:** cuando exista el login, cada agente elegirá su perfil al entrar.
 
-## Links estables
+## Links con filtros
 
-Cada reporte tiene tres links que no cambian. Siempre muestran los datos más
-recientes:
+Todas las pantallas de dirección aceptan el periodo en la URL, así el mismo link
+siempre reproduce la misma vista con los datos más recientes:
 
-| Qué | Link |
+- `?periodo=hoy`, `semana` (7 días), `mes` (mes en curso), `30d` o `90d`.
+- Productos además acepta `?unidad=mitra` o `?unidad=mitraclick`, y `?sin-movimiento=30|60|90`.
+
+## Selectores estables (`data-testid`)
+
+| Dato | Selector |
 |---|---|
-| Vista del reporte con texto para WhatsApp | `/reportes/<tipo>` |
-| Solo la tarjeta, para captura de pantalla (ancho de teléfono) | `/reportes/<tipo>/captura` |
-| Cambiar periodo | agregar `?periodo=hoy`, `?periodo=semana` o `?periodo=mes` |
-
-Tipos: `ventas-diario`, `vendedores-semanal`, `productos-semanal`, `alertas-dia`.
-
-## Elementos que el agente debe leer o usar
-
-| Elemento | Selector estable |
-|---|---|
-| Texto para WhatsApp | `[data-testid="whatsapp-text"]` (textarea de solo lectura) |
-| Botón copiar | `[data-testid="copy-whatsapp"]` |
-| Tarjeta del reporte | `[data-testid="report-card"]` |
-| Titular del reporte | `[data-testid="report-headline"]` |
-| Aviso de datos simulados | `[data-testid="data-mode"]` |
+| Barra de filtros y periodo activo | `filter-bar`, `filter-period`, `filter-unit`, `period-label` |
+| Avance del mes contra meta | `goal-progress`, `goal-mitra`, `goal-mitraclick`, `month-total` |
+| Venta de hoy | `today-sales` |
+| KPIs del Resumen | `kpi-mitra`, `kpi-mitraclick`, `kpi-orders`, `kpi-ticket` (valor en `<id>-value`) |
+| Ranking de vendedores | `rep-leaderboard`; filas `rep-row-<id>` con `data-status` = `cumple`, `riesgo` o `sin-ventas` |
+| Vendedores que requieren atención | `reps-attention` |
+| Productos | `table-products-top`, `table-products-bottom`, `table-products-falling`, `products-stockouts-list`, `products-slow` |
+| Estado de los datos | `data-mode` ("Datos simulados"), `source-stamp` (fuente, periodo y fecha) |
 
 ## Reglas para todos los agentes
 
 1. **Solo lectura.** No modificar datos, no mover oportunidades, no restablecer datos.
-2. **No inventar cifras.** Enviar el texto tal como lo genera la plataforma. Si un
-   número parece incorrecto, reportarlo a Santiago en lugar de corregirlo.
-3. **Datos simulados.** Mientras el texto diga "(datos simulados)", el envío es
-   de prueba: mandarlo solo al grupo de pruebas, no a Ángel.
-4. **Un envío por reporte y por horario.** Si falla, reintentar una vez y avisar.
-5. **Nunca** compartir credenciales, capturas de otras pantallas ni datos de
-   clientes fuera del reporte.
+2. **No inventar cifras.** Usar los valores que muestra la plataforma. Si un número
+   parece incorrecto, reportarlo a Santiago en lugar de corregirlo.
+3. **Datos simulados.** Mientras aparezca "Datos simulados", las cifras no son reales.
+4. **Nunca** compartir credenciales ni datos de clientes fuera de lo que se reporta.

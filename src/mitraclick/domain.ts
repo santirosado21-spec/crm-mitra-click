@@ -144,27 +144,6 @@ export interface Activity {
   status?: 'Pendiente' | 'Completado'
 }
 
-export interface AutomationRule {
-  id: string
-  name: string
-  trigger: string
-  condition: string
-  action: string
-  enabled: boolean
-  lastRunAt?: string
-  runCount: number
-}
-
-export interface AiAgent {
-  id: 'executive' | 'sales' | 'followup' | 'reports'
-  name: string
-  role: string
-  description: string
-  capabilities: string[]
-  examplePrompts: string[]
-  accent: string
-}
-
 // ── Inteligencia comercial: vendedores, productos y ventas ──────────────────
 // Fechas de negocio en formato 'YYYY-MM-DD' (día calendario de México).
 
@@ -289,8 +268,6 @@ export interface MitraData {
   campaigns: Campaign[]
   sales: Sale[]
   activities: Activity[]
-  automations: AutomationRule[]
-  agents: AiAgent[]
   commercial: CommercialData
 }
 

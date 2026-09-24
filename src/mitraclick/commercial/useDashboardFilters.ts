@@ -11,7 +11,7 @@ export const isUnitFilter = (value: string | null): value is BusinessUnit =>
 /**
  * Filtros de dashboard guardados en la URL (`?periodo=mes&unidad=mitra`).
  * Así un link reproduce exactamente la misma vista: sirve para compartir,
- * para los reportes de WhatsApp y para que los agentes de Grok Bot naveguen directo.
+ * y para que los agentes de Grok Bot naveguen directo.
  */
 export function useDashboardFilters({ defaultPeriod = 'mes' }: { defaultPeriod?: PeriodKey } = {}) {
   const [params, setParams] = useSearchParams()

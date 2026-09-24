@@ -11,7 +11,6 @@ import {
   Bot,
   Building2,
   ChevronRight,
-  FileBarChart,
   FileText,
   GitFork,
   LayoutDashboard,
@@ -26,7 +25,6 @@ import {
   Target,
   Truck,
   Users,
-  Workflow,
   X,
 } from 'lucide-react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -47,7 +45,6 @@ const navGroups: { label: string; items: NavItem[] }[] = [
       { label: 'Resumen', path: '/', icon: LayoutDashboard, keywords: 'inicio métricas ventas meta hoy' },
       { label: 'Vendedores', path: '/vendedores', icon: BadgeCheck, keywords: 'agentes de venta ranking cuota semáforo' },
       { label: 'Productos', path: '/productos', icon: PackageSearch, keywords: 'material demanda categorías agotados sin movimiento' },
-      { label: 'Reportes', path: '/reportes', icon: FileBarChart, keywords: 'whatsapp resumen diario semanal' },
     ],
   },
   {
@@ -71,8 +68,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     items: [
       { label: 'Atribución', path: '/atribucion', icon: GitFork, keywords: 'canal campaña conversión' },
       { label: 'Actividad', path: '/actividad', icon: Activity, keywords: 'timeline seguimiento llamadas notas' },
-      { label: 'Automatizaciones', path: '/automatizaciones', icon: Workflow, keywords: 'trigger condición acción reglas' },
-      { label: 'Agentes Grok Bot', path: '/agentes', icon: Bot, keywords: 'grok bot agentes ia perfiles reportes whatsapp' },
+      { label: 'Agentes Grok Bot', path: '/agentes', icon: Bot, keywords: 'grok bot agentes ia perfiles' },
     ],
   },
 ]
