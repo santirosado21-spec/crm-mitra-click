@@ -70,8 +70,10 @@ Estas fuentes las opera el proveedor actual: se solicitarán accesos de lectura.
 
 ## Destino en Supabase
 
-Cada campo se carga con `source = 'erp'` (o `shopify`, `ga4`). La mecánica de carga
-está en `docs/DATABASE.md`.
+Cada campo se carga con `source = 'erp'` (o `shopify`, `ga4`). Se puede entregar por
+API/webhook a la función `ingest` o como CSV. Hay una plantilla por entidad en
+`docs/plantillas/` con estos mismos nombres de columna. La mecánica de carga está
+en `docs/DATABASE.md`.
 
 | Campo del ERP | Tabla.columna |
 |---|---|

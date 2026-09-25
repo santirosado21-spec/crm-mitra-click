@@ -11,6 +11,9 @@ import {
   Bot,
   Building2,
   ChevronRight,
+  Database,
+  LogIn,
+  LogOut,
   FileText,
   GitFork,
   LayoutDashboard,
@@ -20,7 +23,6 @@ import {
   PanelLeftOpen,
   RefreshCw,
   Search,
-  Settings2,
   Store,
   Target,
   Truck,
@@ -29,6 +31,7 @@ import {
 } from 'lucide-react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useMitraClick } from '../MitraClickContext'
+import { useSession } from '../auth/SessionContext'
 import { DemoBanner, UserAvatar } from './Primitives'
 
 interface NavItem {
@@ -69,11 +72,14 @@ const navGroups: { label: string; items: NavItem[] }[] = [
       { label: 'Atribución', path: '/atribucion', icon: GitFork, keywords: 'canal campaña conversión' },
       { label: 'Actividad', path: '/actividad', icon: Activity, keywords: 'timeline seguimiento llamadas notas' },
       { label: 'Agentes Grok Bot', path: '/agentes', icon: Bot, keywords: 'grok bot agentes ia perfiles' },
+      { label: 'Estado de datos', path: '/datos', icon: Database, keywords: 'fuentes supabase erp shopify sincronización carga' },
     ],
   },
 ]
 
 const allNavItems = navGroups.flatMap((group) => group.items)
+/** Rutas fuera del menú que también necesitan título en el encabezado. */
+const extraRoutes: NavItem[] = [{ label: 'Iniciar sesión', path: '/entrar', icon: LogIn, keywords: 'entrar login google correo' }]
 
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
@@ -135,16 +141,45 @@ function Sidebar({
           ))}
         </nav>
         <div className="border-t border-mc-line-soft p-3">
-          <div className={`flex items-center rounded-xl bg-mc-surface-2 ${collapsed ? 'justify-center p-2' : 'gap-3 p-3'}`}>
-            <UserAvatar name="Usuario Demo" size="sm" />
-            {!collapsed && <div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-mc-ink">Usuario Demo</p><p className="mt-0.5 truncate text-[10px] text-mc-muted">Entorno sin integraciones</p></div>}
-          </div>
+          <UserBox collapsed={collapsed} onNavigate={onMobileClose} />
           <button type="button" onClick={onToggle} className="mt-2 hidden h-10 w-full items-center justify-center gap-2 rounded-xl text-xs font-semibold text-mc-muted hover:bg-mc-yellow-wash hover:text-mc-ink lg:flex">
             {collapsed ? <PanelLeftOpen size={16} /> : <><PanelLeftClose size={16} /> <span>Contraer menú</span></>}
           </button>
         </div>
       </aside>
     </>
+  )
+}
+
+function UserBox({ collapsed, onNavigate }: { collapsed: boolean; onNavigate: () => void }) {
+  const { enabled, session, signOut } = useSession()
+  const email = session?.user.email
+  const name = email ? email.split('@')[0] : 'Usuario Demo'
+
+  if (enabled && !session) {
+    return (
+      <NavLink to="/entrar" onClick={onNavigate} className={`flex items-center rounded-xl bg-mc-charcoal text-white hover:bg-mc-ink ${collapsed ? 'justify-center p-2' : 'gap-3 p-3'}`} data-testid="sign-in-link">
+        <LogIn size={16} aria-hidden="true" />
+        {!collapsed && <span className="text-xs font-bold">Iniciar sesión</span>}
+      </NavLink>
+    )
+  }
+
+  return (
+    <div className={`flex items-center rounded-xl bg-mc-surface-2 ${collapsed ? 'justify-center p-2' : 'gap-3 p-3'}`}>
+      <UserAvatar name={name} size="sm" />
+      {!collapsed && (
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs font-bold text-mc-ink">{email ?? 'Usuario Demo'}</p>
+          <p className="mt-0.5 truncate text-[10px] text-mc-muted">{session ? 'Sesión iniciada' : 'Modo demostración'}</p>
+        </div>
+      )}
+      {session && !collapsed && (
+        <button type="button" onClick={() => { void signOut() }} className="grid h-8 w-8 place-items-center rounded-lg text-mc-muted hover:bg-white hover:text-mc-ink" aria-label="Cerrar sesión" title="Cerrar sesión">
+          <LogOut size={15} aria-hidden="true" />
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -201,7 +236,10 @@ export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const location = useLocation()
-  const current = allNavItems.find((item) => item.path === location.pathname) ?? allNavItems.find((item) => item.path !== '/' && location.pathname.startsWith(item.path)) ?? allNavItems[0]
+  const { data } = useMitraClick()
+  const { enabled, session } = useSession()
+  const notice = data?.commercial.notice
+  const current = [...allNavItems, ...extraRoutes].find((item) => item.path === location.pathname) ?? allNavItems.find((item) => item.path !== '/' && location.pathname.startsWith(item.path)) ?? allNavItems[0]
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -226,9 +264,14 @@ export function AppShell() {
               <p className="hidden text-[11px] text-mc-muted sm:block">Inteligencia comercial de Mitra y Mitra Click</p>
             </div>
             <button type="button" onClick={() => setSearchOpen(true)} className="flex h-11 items-center gap-2 rounded-xl border border-mc-line bg-white px-3 text-xs font-semibold text-mc-muted shadow-sm hover:border-mc-yellow-strong hover:text-mc-ink"><Search size={15} /><span className="hidden sm:inline">Buscar</span><kbd className="hidden rounded border border-mc-line bg-mc-surface-2 px-1.5 py-0.5 text-[9px] text-mc-muted md:inline">⌘ K</kbd></button>
-            <DemoBanner />
-            <button type="button" disabled title="Se habilitará al conectar configuración real" className="flex h-11 w-11 items-center justify-center rounded-xl border border-mc-gray-200 bg-white text-mc-gray-400 disabled:cursor-not-allowed" aria-label="Configuración pendiente"><Settings2 size={17} /></button>
+            <NavLink to="/datos" aria-label="Ver estado de datos" className="rounded-full focus-visible:outline-offset-4"><DemoBanner source={data?.commercial.source} notice={notice} /></NavLink>
           </header>
+          {notice && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-mc-warning/20 bg-mc-warning-soft px-4 py-2 text-xs text-mc-warning lg:px-6" role="status" data-testid="data-notice">
+              <span className="font-semibold">{notice}</span>
+              {enabled && !session ? <NavLink to="/entrar" className="font-bold underline">Iniciar sesión</NavLink> : <NavLink to="/datos" className="font-bold underline">Ver estado de datos</NavLink>}
+            </div>
+          )}
         </div>
         <main className="mx-auto w-full max-w-[1700px] p-4 lg:p-6"><Outlet /></main>
       </div>

@@ -246,8 +246,24 @@ export interface MonthlyGoal {
   amount: number
 }
 
+export interface SyncRunSummary {
+  id: number
+  source: string
+  entity: string
+  status: 'en_curso' | 'exitoso' | 'parcial' | 'fallido'
+  startedAt: string
+  finishedAt: string | null
+  rowsReceived: number
+  rowsUpserted: number
+  error: string | null
+}
+
 export interface CommercialData {
   source: 'demo' | 'erp'
+  /** Por qué se muestran estos datos (p. ej. respaldo a demo porque Supabase no respondió). */
+  notice?: string
+  /** Últimas corridas de carga (solo con Supabase). */
+  syncRuns?: SyncRunSummary[]
   /** Último día con datos ('YYYY-MM-DD'). Todos los periodos se calculan contra esta fecha. */
   asOf: string
   generatedAt: string

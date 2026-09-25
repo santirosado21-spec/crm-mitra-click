@@ -12,7 +12,11 @@
     "type-check": "tsc -b --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:cov": "vitest run --coverage"
+    "test:cov": "vitest run --coverage",
+    "data:ingest": "node scripts/run.mjs ingest-file",
+    "data:seed-demo": "node scripts/run.mjs seed-demo",
+    "data:purge-demo": "node scripts/run.mjs purge-source --fuente demo",
+    "data:purge": "node scripts/run.mjs purge-source"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",
@@ -33,6 +37,7 @@
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/coverage-v8": "^4.1.6",
     "@vitest/ui": "^4.1.6",
+    "esbuild": "^0.27.3",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",

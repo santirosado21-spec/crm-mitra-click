@@ -73,17 +73,21 @@
   color: var(--color-mc-ink);
 }
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-html, body, #root { min-height: 100%; }
-body { margin: 0; min-width: 320px; min-height: 100dvh; background: var(--color-mc-bg); }
-a { color: inherit; text-decoration: none; }
-button, input, select, textarea { font: inherit; }
-button { cursor: pointer; }
-button:disabled { cursor: not-allowed; }
+/* Estilos base dentro de @layer base: así las utilidades de Tailwind (text-*, bg-*…)
+   siempre ganan. Fuera de una capa, `a { color: inherit }` anulaba el color de los links. */
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body, #root { min-height: 100%; }
+  body { margin: 0; min-width: 320px; min-height: 100dvh; background: var(--color-mc-bg); }
+  a { color: inherit; text-decoration: none; }
+  button, input, select, textarea { font: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
 
-/* Poppins replica el carácter geométrico del wordmark MitraClick. */
-h1, h2, h3 { letter-spacing: -0.02em; }
+  /* Poppins replica el carácter geométrico del wordmark MitraClick. */
+  h1, h2, h3 { letter-spacing: -0.02em; }
+}
 
 /* Cifras alineadas en tablas, rankings y KPIs. */
 .tabular { font-variant-numeric: tabular-nums; }

@@ -16,6 +16,9 @@ import { SalesRepsPage } from './mitraclick/pages/SalesRepsPage'
 import { SalesRepDetailPage } from './mitraclick/pages/SalesRepDetailPage'
 import { MitraWholesalePage } from './mitraclick/pages/MitraWholesalePage'
 import { MitraClickPage } from './mitraclick/pages/MitraClickPage'
+import { DataStatusPage } from './mitraclick/pages/DataStatusPage'
+import { LoginPage } from './mitraclick/pages/LoginPage'
+import { SessionProvider } from './mitraclick/auth/SessionProvider'
 
 function DataGate() {
   const { data, error, loading, resetMocks } = useMitraClick()
@@ -38,6 +41,8 @@ function DataGate() {
         <Route path="atribucion" element={<AttributionPage />} />
         <Route path="actividad" element={<ActivityPage />} />
         <Route path="agentes" element={<AgentsPage />} />
+        <Route path="datos" element={<DataStatusPage />} />
+        <Route path="entrar" element={<LoginPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -48,7 +53,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <MitraClickProvider>
-        <DataGate />
+        <SessionProvider>
+          <DataGate />
+        </SessionProvider>
       </MitraClickProvider>
     </BrowserRouter>
   )

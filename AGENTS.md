@@ -78,10 +78,12 @@ Pantallas React
   → MitraClickProvider
   → MitraRepository
   → MockMitraRepository (demo, por defecto) → mockData.ts + data/demo/
-  → SupabaseMitraRepository (VITE_DATA_SOURCE=supabase) → data/supabase/
+  → FallbackMitraRepository(SupabaseMitraRepository → data/supabase/, respaldo: MockMitraRepository)  [VITE_DATA_SOURCE=supabase]
 ```
 
-Supabase lo alimentan integraciones del lado servidor (ERP, Shopify, GA4) con `service_role`. La app solo lee, con la publishable key y la sesión del usuario.
+Carga de datos (fuera de la app): API/webhook → Edge Function `ingest` → `public.ingest_batch`. También CSV/JSON → `npm run data:ingest` → la misma función. Contrato de entidades y campos en `docs/DATABASE.md`; plantillas en `docs/plantillas/`.
+
+Supabase lo alimentan integraciones del lado servidor (ERP, Shopify, GA4) con `service_role` a través de `ingest`. La app solo lee, con la publishable key y la sesión del usuario. Si no hay sesión, permiso o pedidos, la app cae a los datos simulados con un aviso: **no quitar los datos simulados**.
 
 Responsabilidades:
 
@@ -126,6 +128,8 @@ CRM y sistema:
 - `/atribucion`: Recorrido y atribución demostrativa
 - `/actividad`: Timeline y seguimiento
 - `/agentes`: Perfiles de los agentes de Grok Bot, pantallas que consultan, selectores y reglas
+- `/datos`: Estado de datos (fuente activa, sesión y última carga por fuente y entidad)
+- `/entrar`: Inicio de sesión (Google o enlace por correo), activo solo con `VITE_DATA_SOURCE=supabase`
 
 Límites funcionales importantes:
 

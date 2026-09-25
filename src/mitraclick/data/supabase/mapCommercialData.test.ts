@@ -44,6 +44,7 @@ const rows = (): CommercialRows => ({
     { id: 'qt-2', source: 'erp', external_id: 'COT-2', quote_date: '2026-09-15', client_id: null, rep_id: null, amount: 5000, status: 'enviada', closed_date: null, ...stamp },
   ],
   traffic: [{ id: 't1', source: 'ga4', day: '2026-09-22', visits: 100, product_views: 60, carts: 8, checkouts: 4, orders: 2, ...stamp }],
+  syncRuns: [{ id: 7, source: 'erp', entity: 'pedidos', status: 'parcial', started_at: '2026-09-24T12:00:00Z', finished_at: '2026-09-24T12:00:05Z', rows_received: 10, rows_upserted: 9, error: '1 filas con error', triggered_by: 'n8n' }],
 })
 
 const options = { asOf: '2026-09-24', generatedAt: '2026-09-24T13:00:00.000Z' }
@@ -87,6 +88,12 @@ describe('mapCommercialData', () => {
     ])
     expect(data.traffic).toEqual([{ date: '2026-09-22', visits: 100, productViews: 60, carts: 8, checkouts: 4, orders: 2 }])
     expect(data.goals).toEqual([{ month: '2026-09', businessUnit: 'mitra', amount: 4000000 }])
+  })
+
+  it('expone la bitácora de sincronización', () => {
+    expect(mapCommercialData(rows(), options).syncRuns).toEqual([
+      { id: 7, source: 'erp', entity: 'pedidos', status: 'parcial', startedAt: '2026-09-24T12:00:00Z', finishedAt: '2026-09-24T12:00:05Z', rowsReceived: 10, rowsUpserted: 9, error: '1 filas con error' },
+    ])
   })
 
   it('convierte montos que llegan como texto a número', () => {

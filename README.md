@@ -21,6 +21,14 @@ npm ci
 npm run dev
 ```
 
+Cargar datos (con `MITRA_INGEST_KEY` en `.env.local`):
+
+```bash
+npm run data:ingest -- --fuente erp --entidad pedidos --archivo pedidos.csv
+npm run data:seed-demo    # datos simulados a Supabase como fuente demo
+npm run data:purge-demo   # borrarlos
+```
+
 Controles de calidad antes de entregar:
 
 ```bash
@@ -36,5 +44,6 @@ npm run build
 - `docs/MITRACLICK_ARCHITECTURE_AND_SCOPE.md`: arquitectura, alcance e integraciones futuras.
 - `docs/DATABASE.md`: base de datos Supabase, seguridad y cómo integrar las APIs.
 - `docs/ERP_DATA_CONTRACT.md`: campos que necesitamos del ERP y su tabla destino.
+- `docs/plantillas/`: una plantilla CSV por entidad para cargar exportaciones de Excel.
 - `docs/agents/`: guía para los agentes de Grok Bot (dónde leer cada dato).
 - `.claude/skills/`: skills del proyecto y su procedencia.

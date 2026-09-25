@@ -1,7 +1,7 @@
 // Convierte las filas de Supabase en `CommercialData`, el contrato que consumen
 // los selectores y las pantallas. Función pura: no toca la red.
 
-import type { CommercialData, RetailOrder, WholesaleOrder } from '../../domain'
+import type { CommercialData, RetailOrder, SyncRunSummary, WholesaleOrder } from '../../domain'
 import type { Tables } from './database.types'
 
 type WholesaleOrderRow = Tables<'wholesale_orders'> & { wholesale_order_lines: Tables<'wholesale_order_lines'>[] }
@@ -18,6 +18,7 @@ export interface CommercialRows {
   retailOrders: RetailOrderRow[]
   quotes: Tables<'wholesale_quotes'>[]
   traffic: Tables<'ecommerce_traffic_daily'>[]
+  syncRuns?: Tables<'sync_runs'>[]
 }
 
 /** PostgREST puede devolver `numeric` como texto; siempre normalizamos a número. */
@@ -118,5 +119,16 @@ export function mapCommercialData(rows: CommercialRows, { asOf, generatedAt }: {
       orders: day.orders,
     })),
     goals: rows.goals.map((goal) => ({ month: goal.month.slice(0, 7), businessUnit: goal.business_unit, amount: toNumber(goal.amount) })),
+    syncRuns: (rows.syncRuns ?? []).map((run) => ({
+      id: run.id,
+      source: run.source,
+      entity: run.entity,
+      status: run.status as SyncRunSummary['status'],
+      startedAt: run.started_at,
+      finishedAt: run.finished_at,
+      rowsReceived: run.rows_received,
+      rowsUpserted: run.rows_upserted,
+      error: run.error,
+    })),
   }
 }

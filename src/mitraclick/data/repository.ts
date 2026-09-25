@@ -3,6 +3,7 @@ import { localTodayKey } from '../commercial/dates'
 import { generateCommercialData } from './demo/generateCommercialData'
 import { mockMitraData } from './mockData'
 import { SupabaseMitraRepository } from './supabase/repository'
+import { FallbackMitraRepository } from './fallbackRepository'
 
 export interface MitraRepository {
   load(): Promise<MitraData>
@@ -28,8 +29,11 @@ export class MockMitraRepository implements MitraRepository {
 }
 
 /**
- * Fuente de datos de la app. `VITE_DATA_SOURCE=supabase` lee de Supabase (requiere
- * sesión de un usuario autorizado); cualquier otro valor usa datos simulados.
+ * Fuente de datos de la app. `VITE_DATA_SOURCE=supabase` lee de Supabase y, si no hay
+ * sesión, permisos o pedidos, cae a los datos simulados con un aviso. Cualquier otro
+ * valor usa solo datos simulados.
  */
 export const mitraRepository: MitraRepository =
-  import.meta.env.VITE_DATA_SOURCE === 'supabase' ? new SupabaseMitraRepository() : new MockMitraRepository()
+  import.meta.env.VITE_DATA_SOURCE === 'supabase'
+    ? new FallbackMitraRepository(new SupabaseMitraRepository(), new MockMitraRepository())
+    : new MockMitraRepository()
