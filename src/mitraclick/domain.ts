@@ -193,7 +193,8 @@ export interface OrderLine {
 export interface WholesaleClient {
   id: string
   name: string
-  type: 'Constructora' | 'Industria' | 'Taller' | 'Revendedor'
+  /** Tipo de cliente del ERP (p. ej. Constructora, Industria, Taller, Revendedor). */
+  type: string
   repId: string
 }
 
@@ -207,7 +208,8 @@ export interface WholesaleOrder {
   lines: OrderLine[]
 }
 
-export type RetailChannel = 'Google' | 'Redes sociales' | 'Directo' | 'Email' | 'Referido'
+/** Canal de origen normalizado (Google, Redes sociales, Directo, Email, Referido…); Shopify puede traer otros. */
+export type RetailChannel = string
 
 export interface RetailOrder {
   id: string

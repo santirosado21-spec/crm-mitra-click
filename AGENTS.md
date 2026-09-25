@@ -31,7 +31,8 @@ No presentar la demo como un sistema productivo. Actualmente:
 - No hay módulo de reportes ni de automatizaciones: ese trabajo vive en Grok Bot.
 - No se envían emails, mensajes de WhatsApp ni mensajes de LinkedIn.
 - No se consulta ningún modelo de IA.
-- No hay autenticación ni permisos productivos para MitraClick.
+- La base de datos Supabase (`mitraclick-intelligence`) ya existe con esquema, RLS y bitácoras, pero está **vacía** y la app no la lee por defecto (`VITE_DATA_SOURCE`). Ver `docs/DATABASE.md`.
+- No hay login productivo todavía: sin sesión, la RLS no deja leer datos reales.
 
 Usar etiquetas claras como **“Datos simulados”**, **“Simulación”** o **“Integración pendiente”** cuando corresponda.
 
@@ -64,7 +65,7 @@ Referencias externas útiles:
 - Recharts
 - Lucide React
 - Vitest
-- Supabase en el código heredado y como posible infraestructura futura
+- Supabase (Postgres 17): proyecto `mitraclick-intelligence`, migraciones en `supabase/migrations/`
 - Vercel para hosting
 
 Usar las dependencias existentes antes de agregar otras. No introducir shadcn, Radix, Framer Motion, una librería de estado global o una librería de drag-and-drop sólo por conveniencia visual.
@@ -76,15 +77,18 @@ Pantallas React
   → MitraClickContext
   → MitraClickProvider
   → MitraRepository
-  → MockMitraRepository
-  → mockData.ts
+  → MockMitraRepository (demo, por defecto) → mockData.ts + data/demo/
+  → SupabaseMitraRepository (VITE_DATA_SOURCE=supabase) → data/supabase/
 ```
+
+Supabase lo alimentan integraciones del lado servidor (ERP, Shopify, GA4) con `service_role`. La app solo lee, con la publishable key y la sesión del usuario.
 
 Responsabilidades:
 
 - `src/mitraclick/domain.ts`: entidades y contratos normalizados.
-- `src/mitraclick/data/mockData.ts`: única fuente de datos sintéticos.
-- `src/mitraclick/data/repository.ts`: puerto `MitraRepository` e implementación demo.
+- `src/mitraclick/data/mockData.ts` y `data/demo/`: datos sintéticos (CRM y comerciales).
+- `src/mitraclick/data/repository.ts`: puerto `MitraRepository`, adaptador demo y selección de fuente.
+- `src/mitraclick/data/supabase/`: cliente, tipos generados, `mapCommercialData` (puro, con pruebas) y `SupabaseMitraRepository`.
 - `src/mitraclick/MitraClickContext.ts`: API estable que consume la UI.
 - `src/mitraclick/MitraClickProvider.tsx`: carga, estado de sesión y comandos locales.
 - `src/mitraclick/selectors.ts`: métricas, filtros, agrupaciones y atribución como funciones puras.
@@ -247,6 +251,7 @@ No descargar ni activar skills nuevas sin revisar su contenido y registrarlas en
 - No mezclar refactors amplios con una corrección pequeña.
 - No modificar `dist/`, `node_modules/`, `.vercel/` ni archivos generados.
 - No editar migraciones de Supabase ya aplicadas; crear una nueva migración cuando una tarea autorizada lo requiera.
+- Toda tabla nueva en `public` lleva RLS, políticas explícitas y `grant`/`revoke` explícitos (sin acceso para `anon`). Después de migrar: advisors de seguridad y rendimiento, regenerar `database.types.ts` y actualizar `mapCommercialData` con sus pruebas. Detalle en `docs/DATABASE.md`.
 
 ## 12. Definition of Done
 

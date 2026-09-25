@@ -6,7 +6,8 @@ productos y dashboards ejecutivos. Los reportes, envíos por WhatsApp y
 automatizaciones los hacen los agentes de Grok Bot leyendo estos dashboards.
 
 > Estado: demostración con **datos simulados**. Todavía no hay conexión con el
-> ERP de Mitra, Shopify ni Analytics.
+> ERP de Mitra, Shopify ni Analytics. La base de datos Supabase ya está creada
+> (vacía) y lista para recibir esas integraciones: ver `docs/DATABASE.md`.
 
 ## Stack
 
@@ -33,5 +34,7 @@ npm run build
 
 - `AGENTS.md`: reglas para cualquier agente de IA que modifique el repositorio.
 - `docs/MITRACLICK_ARCHITECTURE_AND_SCOPE.md`: arquitectura, alcance e integraciones futuras.
+- `docs/DATABASE.md`: base de datos Supabase, seguridad y cómo integrar las APIs.
+- `docs/ERP_DATA_CONTRACT.md`: campos que necesitamos del ERP y su tabla destino.
 - `docs/agents/`: guía para los agentes de Grok Bot (dónde leer cada dato).
 - `.claude/skills/`: skills del proyecto y su procedencia.

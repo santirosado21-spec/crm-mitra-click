@@ -68,6 +68,26 @@ Líneas: `folio`, `sku`, `cantidad`, `precio_unitario`, `importe`.
 Órdenes, líneas y canal de origen desde Shopify; visitas y embudo desde GA4.
 Estas fuentes las opera el proveedor actual: se solicitarán accesos de lectura.
 
+## Destino en Supabase
+
+Cada campo se carga con `source = 'erp'` (o `shopify`, `ga4`). La mecánica de carga
+está en `docs/DATABASE.md`.
+
+| Campo del ERP | Tabla.columna |
+|---|---|
+| Vendedor `id`, `nombre`, `zona`, `activo` | `sales_reps.external_id`, `name`, `zone`, `active` |
+| Vendedor `cuota_mensual` | `rep_monthly_quotas.amount` (una fila por vendedor y mes, `month` = día 1) |
+| Producto `id`/`sku`, `nombre`, `marca`, `categoria`, `unidad`, `precio_lista`, `punto_reorden` | `products.external_id`/`sku`, `name`, `brand`, `category`, `unit`, `list_price`, `reorder_point` (`business_unit = 'mitra'`) |
+| Producto `existencia` | `inventory_levels.quantity` (una fila por producto y `warehouse`) |
+| Pedido `folio`, `fecha`, `cliente_id`, `vendedor_id`, `importe`, `estatus` | `wholesale_orders.external_id`, `order_date`, `client_id`\*, `rep_id`\*, `amount`, `status` |
+| Línea `folio`, `sku`, `cantidad`, `precio_unitario`, `importe` | `wholesale_order_lines.order_id`\*, `product_id`\*, `quantity`, `unit_price`, `amount` (+ `line_number`) |
+| Cotización `folio`, `fecha`, `cliente_id`, `vendedor_id`, `importe`, `estatus`, `fecha_cierre` | `wholesale_quotes.external_id`, `quote_date`, `client_id`\*, `rep_id`\*, `amount`, `status`, `closed_date` |
+| Cliente `id`, `nombre_comercial`, `tipo`, `vendedor_id` | `clients.external_id`, `name`, `client_type`, `rep_id`\* |
+| Meta `mes`, `unidad`, `importe` | `business_goals.month` (día 1), `business_unit`, `amount` |
+
+\* Columnas que guardan el `id` interno (uuid): la integración lo resuelve buscando el
+`external_id` que manda el ERP.
+
 ## Preguntas abiertas para Mitra
 
 1. ¿Qué ERP o sistema interno usan y quién puede dar acceso de lectura?
