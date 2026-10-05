@@ -11,7 +11,6 @@ export default defineConfig({
         // Librerías de vendor en chunks propios: se cachean entre deploys.
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          charts: ['recharts'],
         },
       },
     },

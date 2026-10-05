@@ -1,62 +1,31 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { MitraClickProvider } from './mitraclick/MitraClickProvider'
-import { useMitraClick } from './mitraclick/MitraClickContext'
-import { AppShell } from './mitraclick/components/AppShell'
-import { ErrorScreen, LoadingScreen } from './mitraclick/components/Primitives'
-import { DashboardPage } from './mitraclick/pages/DashboardPage'
-import { LeadsPage } from './mitraclick/pages/LeadsPage'
-import { CompaniesPage } from './mitraclick/pages/CompaniesPage'
-import { OpportunitiesPage } from './mitraclick/pages/OpportunitiesPage'
-import { QuotesPage } from './mitraclick/pages/QuotesPage'
-import { ProductsPage } from './mitraclick/pages/ProductsPage'
-import { AttributionPage } from './mitraclick/pages/AttributionPage'
-import { ActivityPage } from './mitraclick/pages/ActivityPage'
-import { AgentsPage } from './mitraclick/pages/AgentsPage'
-import { SalesRepsPage } from './mitraclick/pages/SalesRepsPage'
-import { SalesRepDetailPage } from './mitraclick/pages/SalesRepDetailPage'
-import { MitraWholesalePage } from './mitraclick/pages/MitraWholesalePage'
-import { MitraClickPage } from './mitraclick/pages/MitraClickPage'
-import { DataStatusPage } from './mitraclick/pages/DataStatusPage'
-import { LoginPage } from './mitraclick/pages/LoginPage'
+import { AuthGate } from './mitraclick/auth/AuthGate'
 import { SessionProvider } from './mitraclick/auth/SessionProvider'
-
-function DataGate() {
-  const { data, error, loading, resetMocks } = useMitraClick()
-  if (error) return <ErrorScreen onRetry={() => { void resetMocks() }} />
-  if (loading || !data) return <LoadingScreen />
-
-  return (
-    <Routes>
-      <Route element={<AppShell />}>
-        <Route index element={<DashboardPage />} />
-        <Route path="vendedores" element={<SalesRepsPage />} />
-        <Route path="vendedores/:repId" element={<SalesRepDetailPage />} />
-        <Route path="mitra" element={<MitraWholesalePage />} />
-        <Route path="mitra-click" element={<MitraClickPage />} />
-        <Route path="leads" element={<LeadsPage />} />
-        <Route path="empresas" element={<CompaniesPage />} />
-        <Route path="oportunidades" element={<OpportunitiesPage />} />
-        <Route path="cotizaciones" element={<QuotesPage />} />
-        <Route path="productos" element={<ProductsPage />} />
-        <Route path="atribucion" element={<AttributionPage />} />
-        <Route path="actividad" element={<ActivityPage />} />
-        <Route path="agentes" element={<AgentsPage />} />
-        <Route path="datos" element={<DataStatusPage />} />
-        <Route path="entrar" element={<LoginPage />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
-}
+import { AppShell } from './mitraclick/components/AppShell'
+import { ALL_MODULES } from './mitraclick/navigation'
+import { AuditPage } from './mitraclick/pages/AuditPage'
+import { ComingSoonPage } from './mitraclick/pages/ComingSoonPage'
+import { HomePage } from './mitraclick/pages/HomePage'
+import { UsersPage } from './mitraclick/pages/UsersPage'
 
 export default function App() {
   return (
     <BrowserRouter>
-      <MitraClickProvider>
-        <SessionProvider>
-          <DataGate />
-        </SessionProvider>
-      </MitraClickProvider>
+      <SessionProvider>
+        <AuthGate>
+          <Routes>
+            <Route element={<AppShell />}>
+              <Route index element={<HomePage />} />
+              <Route path="usuarios" element={<UsersPage />} />
+              <Route path="bitacora" element={<AuditPage />} />
+              {ALL_MODULES.filter((module) => !module.ready).map((module) => (
+                <Route key={module.path} path={module.path.slice(1)} element={<ComingSoonPage module={module} />} />
+              ))}
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthGate>
+      </SessionProvider>
     </BrowserRouter>
   )
 }

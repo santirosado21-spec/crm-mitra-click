@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { AlertTriangle, CheckCircle2, CircleSlash, Database, Info, RotateCcw, TrendingDown, TrendingUp } from 'lucide-react'
-import { formatCurrency, formatDate, initials, statusTone } from '../utils'
-import type { PerformanceStatus } from '../domain'
+import { formatCurrency, formatDate, initials, statusTone } from '../lib/format'
+
+/** Semáforo de desempeño: cumple, va en riesgo o no ha vendido. */
+export type PerformanceStatus = 'cumple' | 'riesgo' | 'sin-ventas'
 
 /** Indica de dónde vienen los datos que se ven: simulados o reales (Supabase). */
 export function DemoBanner({ source = 'demo', notice }: { source?: 'demo' | 'erp'; notice?: string }) {
@@ -241,7 +243,7 @@ export function LoadingScreen() {
     <div className="grid min-h-dvh place-items-center bg-mc-bg" role="status">
       <div className="text-center">
         <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-mc-line border-t-mc-yellow" aria-hidden="true" />
-        <p className="mt-3 text-sm font-semibold text-mc-muted">Cargando información comercial…</p>
+        <p className="mt-3 text-sm font-semibold text-mc-muted">Cargando…</p>
       </div>
     </div>
   )

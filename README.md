@@ -1,32 +1,26 @@
-# MitraClick Intelligence
+# Mitra Click — Sistema operativo
 
-Plataforma de inteligencia comercial para **Mitra** (B2B, material industrial) y
-**Mitra Click** (e-commerce B2C). Muestra desempeño por vendedor, desempeño de
-productos y dashboards ejecutivos. Los reportes, envíos por WhatsApp y
-automatizaciones los hacen los agentes de Grok Bot leyendo estos dashboards.
+Sistema propio de **Mitra Click** para operar el negocio de punta a punta:
+clientes, proveedores, catálogo, cotizaciones, pedidos (Shopify y venta directa),
+compras, bodega con etiquetas NFC/QR, logística, remisiones, facturas y pagos, con
+bitácora de cambios, pendientes, KPIs, agentes y reportes.
 
-> Estado: demostración con **datos simulados**. Todavía no hay conexión con el
-> ERP de Mitra, Shopify ni Analytics. La base de datos Supabase ya está creada
-> (vacía) y lista para recibir esas integraciones: ver `docs/DATABASE.md`.
+> Estado: **Fase A (fundación) en curso.** Funcionan el inicio de sesión, la
+> navegación, Usuarios y permisos y la Bitácora. Los demás módulos aparecen como
+> "en construcción". El modelo operativo de la base está escrito pero aún no se
+> aplica en Supabase; no hay conexión con Shopify ni datos cargados.
 
 ## Stack
 
-React 19 · TypeScript · Vite 7 · React Router 7 · Tailwind CSS 4 · Recharts ·
-Vitest · Vercel.
+React 19 · TypeScript · Vite 7 · React Router 7 · Tailwind CSS 4 · Vitest ·
+Supabase (Postgres, RLS por rol) · Vercel.
 
 ## Desarrollo
 
 ```bash
 npm ci
+cp .env.example .env.local   # URL y publishable key de Supabase (valores públicos)
 npm run dev
-```
-
-Cargar datos (con `MITRA_INGEST_KEY` en `.env.local`):
-
-```bash
-npm run data:ingest -- --fuente erp --entidad pedidos --archivo pedidos.csv
-npm run data:seed-demo    # datos simulados a Supabase como fuente demo
-npm run data:purge-demo   # borrarlos
 ```
 
 Controles de calidad antes de entregar:
@@ -41,9 +35,6 @@ npm run build
 ## Documentación
 
 - `AGENTS.md`: reglas para cualquier agente de IA que modifique el repositorio.
-- `docs/MITRACLICK_ARCHITECTURE_AND_SCOPE.md`: arquitectura, alcance e integraciones futuras.
-- `docs/DATABASE.md`: base de datos Supabase, seguridad y cómo integrar las APIs.
-- `docs/ERP_DATA_CONTRACT.md`: campos que necesitamos del ERP y su tabla destino.
-- `docs/plantillas/`: una plantilla CSV por entidad para cargar exportaciones de Excel.
-- `docs/agents/`: guía para los agentes de Grok Bot (dónde leer cada dato).
+- `docs/MITRACLICK_ARCHITECTURE_AND_SCOPE.md`: alcance, fases y límites.
+- `docs/DATABASE.md`: modelo de datos, roles, seguridad y cómo aplicar el esquema.
 - `.claude/skills/`: skills del proyecto y su procedencia.

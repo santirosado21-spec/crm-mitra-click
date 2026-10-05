@@ -1,11 +1,84 @@
-import type { ReactNode } from 'react'
-import { useMitraClick } from '../MitraClickContext'
-import { SessionContext } from './SessionContext'
-import { useSupabaseSession } from './useSupabaseSession'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { Session } from '@supabase/supabase-js'
+import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase'
+import { SessionContext, type Profile, type SessionStatus, type SessionValue } from './SessionContext'
+import { hasAnyRole, type AppRole } from './roles'
 
-/** Una sola suscripción a Supabase Auth; al entrar o salir se recargan los datos. */
+/** Mantiene la sesión de Supabase Auth y el perfil (roles) del usuario dado de alta en app_users. */
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const { resetMocks } = useMitraClick()
-  const value = useSupabaseSession({ onChange: resetMocks })
+  const configured = isSupabaseConfigured()
+  const [session, setSession] = useState<Session | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [status, setStatus] = useState<SessionStatus>(configured ? 'cargando' : 'sin-configurar')
+
+  useEffect(() => {
+    if (!configured) return
+    const supabase = getSupabaseClient()
+    let active = true
+
+    const resolve = async (next: Session | null) => {
+      if (!active) return
+      setSession(next)
+      if (!next) {
+        setProfile(null)
+        setStatus('sin-sesion')
+        return
+      }
+      const { data, error } = await supabase.rpc('my_profile')
+      if (!active) return
+      const row = !error && data?.length ? data[0] : null
+      if (!row) {
+        setProfile(null)
+        setStatus('no-autorizado')
+        return
+      }
+      setProfile({ id: row.id, email: row.email, displayName: row.display_name, roles: row.roles as AppRole[] })
+      setStatus('listo')
+    }
+
+    void supabase.auth.getSession().then(({ data }) => resolve(data.session))
+    // El callback de Supabase no debe esperar otras llamadas al cliente: se difiere.
+    const { data } = supabase.auth.onAuthStateChange((_event, next) => {
+      setTimeout(() => { void resolve(next) }, 0)
+    })
+    return () => {
+      active = false
+      data.subscription.unsubscribe()
+    }
+  }, [configured])
+
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await getSupabaseClient().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
+    if (error) throw error
+  }, [])
+
+  const signInWithEmail = useCallback(async (email: string) => {
+    const { error } = await getSupabaseClient().auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } })
+    if (error) throw error
+  }, [])
+
+  const signInWithPassword = useCallback(async (email: string, password: string) => {
+    const { error } = await getSupabaseClient().auth.signInWithPassword({ email, password })
+    if (error) throw error
+  }, [])
+
+  const signOut = useCallback(async () => {
+    await getSupabaseClient().auth.signOut()
+  }, [])
+
+  const value = useMemo<SessionValue>(
+    () => ({
+      status,
+      session,
+      profile,
+      can: (roles) => hasAnyRole(profile?.roles ?? [], roles),
+      signInWithGoogle,
+      signInWithEmail,
+      signInWithPassword,
+      signOut,
+    }),
+    [status, session, profile, signInWithGoogle, signInWithEmail, signInWithPassword, signOut],
+  )
+
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
 }

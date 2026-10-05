@@ -1,0 +1,96 @@
+// Acceso genérico a tablas para los módulos de lista + formulario.
+// La seguridad no vive aquí: la aplica la base con RLS por rol.
+
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { getSupabaseClient } from './supabase'
+
+/** Cliente sin tipos por tabla: este módulo trabaja con nombres de tabla dinámicos. */
+const db = () => getSupabaseClient() as unknown as SupabaseClient
+
+interface DbError {
+  code?: string
+  message?: string
+  details?: string | null
+}
+
+/** Convierte un error de Postgres/PostgREST en un mensaje que el usuario pueda entender. */
+export function describeError(error: unknown): string {
+  if (error instanceof TypeError || (error instanceof Error && /failed to fetch|networkerror|load failed/i.test(error.message))) {
+    return 'Sin conexión con la base de datos. Revisa tu internet e intenta de nuevo.'
+  }
+  const { code, message = '', details } = (error ?? {}) as DbError
+  switch (code) {
+    case '23505': {
+      const value = /=\((.+)\) already exists/.exec(details ?? '')?.[1]
+      return value ? `Ya existe un registro con ese valor (${value}).` : 'Ya existe un registro con esos datos.'
+    }
+    case '23503':
+      return 'No se puede completar: el registro está relacionado con otros que dependen de él.'
+    case '23502':
+      return 'Falta un dato obligatorio.'
+    case '23514':
+      return 'Algún dato no cumple las reglas del sistema. Revisa los valores capturados.'
+    case '42501':
+      return 'Tu rol no tiene permiso para esta acción.'
+    case 'P0001':
+      return message
+    default:
+      return `No se pudo completar la operación: ${message || 'error desconocido'}`
+  }
+}
+
+/** Filtro `or` de PostgREST para buscar un término en varias columnas de texto. */
+export function buildSearchFilter(columns: string[], term: string): string | null {
+  const clean = term.replace(/[,()"%*\\]/g, ' ').replace(/\s+/g, ' ').trim()
+  if (!clean || !columns.length) return null
+  return columns.map((column) => `${column}.ilike.%${clean}%`).join(',')
+}
+
+export interface ListParams {
+  table: string
+  select: string
+  searchColumns?: string[]
+  search?: string
+  /** Igualdades exactas; los valores vacíos se ignoran. */
+  filters?: Record<string, string | boolean | null | undefined>
+  orderBy: { column: string; ascending?: boolean }
+  page: number
+  pageSize: number
+}
+
+export interface ListResult<Row> {
+  rows: Row[]
+  total: number
+}
+
+export async function listRows<Row = Record<string, unknown>>(params: ListParams): Promise<ListResult<Row>> {
+  let query = db().from(params.table).select(params.select, { count: 'exact' })
+  const search = buildSearchFilter(params.searchColumns ?? [], params.search ?? '')
+  if (search) query = query.or(search)
+  for (const [column, value] of Object.entries(params.filters ?? {})) {
+    if (value !== undefined && value !== null && value !== '') query = query.eq(column, value)
+  }
+  const from = params.page * params.pageSize
+  const { data, error, count } = await query
+    .order(params.orderBy.column, { ascending: params.orderBy.ascending ?? true })
+    .range(from, from + params.pageSize - 1)
+  if (error) throw new Error(describeError(error))
+  return { rows: (data ?? []) as Row[], total: count ?? 0 }
+}
+
+/** Crea (sin id) o actualiza (con id) y devuelve la fila guardada. */
+export async function saveRow(table: string, id: string | null, values: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const request = id ? db().from(table).update(values).eq('id', id) : db().from(table).insert(values)
+  const { data, error } = await request.select().single()
+  if (error) throw new Error(describeError(error))
+  return data as Record<string, unknown>
+}
+
+/** Opciones para un campo relacionado (id + etiqueta), hasta 1,000. */
+export async function listOptions(table: string, labelColumn: string, extraColumns: string[] = [], onlyActive = true): Promise<Record<string, unknown>[]> {
+  let query = db().from(table).select(['id', labelColumn, ...extraColumns].join(',')).order(labelColumn).limit(1000)
+  if (onlyActive) query = query.eq('active', true)
+  const { data, error } = await query
+  if (error) throw new Error(describeError(error))
+  return (data ?? []) as unknown as Record<string, unknown>[]
+}

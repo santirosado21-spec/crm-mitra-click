@@ -1,5 +1,5 @@
 {
-  "name": "mitraclick-intelligence",
+  "name": "mitraclick-sistema",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -12,11 +12,7 @@
     "type-check": "tsc -b --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:cov": "vitest run --coverage",
-    "data:ingest": "node scripts/run.mjs ingest-file",
-    "data:seed-demo": "node scripts/run.mjs seed-demo",
-    "data:purge-demo": "node scripts/run.mjs purge-source --fuente demo",
-    "data:purge": "node scripts/run.mjs purge-source"
+    "test:cov": "vitest run --coverage"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",
