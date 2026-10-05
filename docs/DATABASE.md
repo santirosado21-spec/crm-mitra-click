@@ -11,10 +11,11 @@ us-east-2, plan gratuito). Es la única fuente de verdad del sistema.
 | `pending_op1_reset_readonly_model.sql` | Escrita, **sin aplicar** |
 | `pending_op2_access_roles_audit.sql` | Escrita, **sin aplicar** |
 | `pending_op3_operational_model.sql` | Escrita, **sin aplicar** |
+| `pending_op4_catalog_inventory_functions.sql` | Escrita, **sin aplicar** |
 | `src/mitraclick/lib/database.types.ts` | Provisional, escrito a mano; se regenera al aplicar |
 | Edge Function `ingest` (desplegada) | Obsoleta: apunta al modelo anterior. Retirarla al aplicar el reinicio |
 
-Mientras las tres migraciones `pending_op*` no se apliquen, la app solo muestra el
+Mientras las cuatro migraciones `pending_op*` no se apliquen, la app solo muestra el
 inicio de sesión: la función `my_profile()` y las tablas nuevas todavía no existen.
 
 ## Cómo aplicar el modelo operativo
@@ -23,7 +24,7 @@ Requiere autorización explícita: la primera migración **borra** el modelo ant
 (tablas `wholesale_*`, `retail_*`, `clients`, `products`, `sales_reps`, `app_users`,
 `audit_log` y las funciones de carga). Están vacías, pero es una operación destructiva.
 
-1. Aplicar en orden `op1` → `op2` → `op3` (MCP `apply_migration` o SQL Editor).
+1. Aplicar en orden `op1` → `op2` → `op3` → `op4` (MCP `apply_migration` o SQL Editor).
 2. Renombrar cada archivo `pending_*` con la versión que asigne Supabase
    (`list_migrations`), para que el repo y la base coincidan.
 3. Revisar advisors de seguridad y rendimiento.
@@ -55,6 +56,21 @@ Reglas que hace cumplir la base:
   lo mantiene un trigger. Los ajustes solo los registra dirección o admin.
 - **Conteos** guardan lo contado y la diferencia; nunca cambian la existencia.
 - **Etiquetas** (`tags`) con código aleatorio; no contienen datos.
+
+## Funciones (migración 4)
+
+Corren con los permisos de quien las llama (`SECURITY INVOKER`); la RLS sigue aplicando.
+
+| Función | Para qué |
+|---|---|
+| `update_product(id, valores, motivo)` | Guarda un producto; exige motivo al cambiar familia, categoría, precio o costo |
+| `import_products(filas)` | Importación idempotente por SKU. Solo asigna familia si ya existe; no crea familias |
+| `import_customers(filas)` | Importación idempotente por ID de Shopify o correo |
+| `record_transfer(producto, origen, destino, cantidad, motivo)` | Traspaso: dos movimientos o ninguno |
+| `resolve_stock_count(conteo, 'ajustar'\|'descartar', motivo)` | Solo dirección y admin. Ajustar genera el movimiento por la diferencia |
+
+Además, un trigger en `stock_counts` fija la existencia del sistema, el estado y quién
+contó: quien cuenta solo envía la cantidad contada.
 
 ## Seguridad
 

@@ -31,6 +31,8 @@ export interface FieldDef {
   wide?: boolean
   /** No se puede cambiar después de crear el registro. */
   lockedOnEdit?: boolean
+  /** Solo aparece al editar (p. ej. el motivo de un cambio). */
+  onlyOnEdit?: boolean
   transform?: 'lower' | 'upper'
 }
 

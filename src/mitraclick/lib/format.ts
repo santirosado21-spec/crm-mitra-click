@@ -32,10 +32,10 @@ export const initials = (name: string) =>
     .join('')
     .toUpperCase()
 
+/** Tono de una etiqueta de estado. Lo que no está en la lista se muestra neutro. */
 export const statusTone = (status: string) => {
-  if (['Ganado', 'Aceptada', 'Cliente', 'Completado', 'Activa'].includes(status)) return 'success'
-  if (['Perdido', 'Rechazada', 'Vencida', 'Inactivo'].includes(status)) return 'danger'
-  if (['Negociación', 'Vista', 'Pendiente'].includes(status)) return 'warning'
-  if (['Cotización', 'Enviada', 'Calificado'].includes(status)) return 'info'
+  if (['Activo', 'Activa', 'Suficiente', 'Sin diferencia', 'Ajustado', 'Resuelta'].includes(status)) return 'success'
+  if (['Negativo', 'Abierta'].includes(status)) return 'danger'
+  if (['Pendiente', 'Bajo', 'Sin familia'].includes(status)) return 'warning'
   return 'neutral'
 }

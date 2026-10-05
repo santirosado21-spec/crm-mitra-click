@@ -86,6 +86,25 @@ export async function saveRow(table: string, id: string | null, values: Record<s
   return data as Record<string, unknown>
 }
 
+/** Llama una función de la base (operaciones atómicas: traspasos, conteos, importaciones). */
+export async function callFunction<Result = unknown>(name: string, args: Record<string, unknown>): Promise<Result> {
+  const { data, error } = await db().rpc(name, args)
+  if (error) throw new Error(describeError(error))
+  return data as Result
+}
+
+/** Consulta libre de solo lectura para pantallas que no caben en `listRows` (joins, sin paginar). */
+export async function selectRows<Row = Record<string, unknown>>(table: string, select: string, options: { filters?: Record<string, string | boolean | null | undefined>; orderBy?: { column: string; ascending?: boolean }; limit?: number } = {}): Promise<Row[]> {
+  let query = db().from(table).select(select)
+  for (const [column, value] of Object.entries(options.filters ?? {})) {
+    if (value !== undefined && value !== null && value !== '') query = query.eq(column, value)
+  }
+  if (options.orderBy) query = query.order(options.orderBy.column, { ascending: options.orderBy.ascending ?? true })
+  const { data, error } = await query.limit(options.limit ?? 500)
+  if (error) throw new Error(describeError(error))
+  return (data ?? []) as unknown as Row[]
+}
+
 /** Opciones para un campo relacionado (id + etiqueta), hasta 1,000. */
 export async function listOptions(table: string, labelColumn: string, extraColumns: string[] = [], onlyActive = true): Promise<Record<string, unknown>[]> {
   let query = db().from(table).select(['id', labelColumn, ...extraColumns].join(',')).order(labelColumn).limit(1000)

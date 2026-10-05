@@ -10,13 +10,14 @@ Este repositorio es el **sistema operativo propio de Mitra Click**: clientes, pr
 - **Documento base:** "Plan de Trabajo Mitra Click AI Implementation" (Ángel Secades, Santiago Rosado, Lorenzo Stoopen), 17 puntos. El plan de construcción aprobado se resume en `docs/MITRACLICK_ARCHITECTURE_AND_SCOPE.md`.
 - **Agentes, reportes y alertas viven dentro de esta app** (decisión de oct-2026, que revierte la anterior de dejarlos en Grok Bot).
 
-### Estado actual (Fase A en curso)
+### Estado actual (fases A, B y C escritas; base sin aplicar)
 
 No presentar el sistema como productivo. Hoy:
 
-- Funcionan: inicio de sesión obligatorio, navegación por áreas, **Usuarios y permisos** y **Bitácora**.
-- El resto de los módulos aparece en el menú como "en construcción", con la fase en que se entrega.
-- El modelo operativo de la base está escrito en `supabase/migrations/pending_op*.sql` y **todavía no se aplica** en Supabase. Hasta entonces la app no puede leer ni guardar.
+- **Escrito en la app:** sesión obligatoria, Usuarios y Bitácora (A); clientes, vendedores, proveedores, familias y categorías, productos con historial e importador CSV de Shopify (B); inventario, movimientos, conteos, ubicaciones, etiquetas y la ficha de etiqueta `/b/:codigo` (C).
+- **Sin verificar contra la base:** el esquema está en `supabase/migrations/pending_op1..4` y **todavía no se aplica** en Supabase. Hasta entonces la app solo llega al inicio de sesión; las pantallas interiores no se han probado con datos.
+- El código QR de la hoja de etiquetas está pendiente: falta instalar la dependencia `qrcode`. La hoja imprime el link en texto.
+- El resto de los módulos aparece como "en construcción", con su fase.
 - No hay conexión con Shopify (faltan credenciales), ni agentes, ni reportes, ni envío de mensajes.
 - No hay datos reales ni de prueba cargados.
 
@@ -80,12 +81,12 @@ Responsabilidades:
 
 ## 5. Módulos y rutas
 
-Definidos en `src/mitraclick/navigation.ts`. Listos: `/` (Inicio), `/usuarios`, `/bitacora`.
+Definidos en `src/mitraclick/navigation.ts`. Fuera del menú: `/b/:codigo` (ficha de etiqueta), `/etiquetas` (hoja imprimible), `/productos/importar` y `/clientes/importar`.
 
 | Área | Rutas | Fase |
 |---|---|---|
 | Dirección | `/dashboard`, `/pendientes`, `/reportes`, `/agentes` | G, F, H |
-| Ventas | `/clientes`, `/cotizaciones`, `/pedidos` | B, D |
+| Ventas | `/clientes`, `/vendedores`, `/cotizaciones`, `/pedidos` | B, D |
 | Compras | `/proveedores`, `/compras` | B, D |
 | Bodega | `/inventario`, `/movimientos`, `/conteos`, `/ubicaciones` | C |
 | Logística | `/envios`, `/remisiones` | D |
@@ -94,7 +95,7 @@ Definidos en `src/mitraclick/navigation.ts`. Listos: `/` (Inicio), `/usuarios`, 
 | Marketing | `/leads`, `/links` | I |
 | Sistema | `/usuarios`, `/bitacora`, `/shopify` | A, E |
 
-Al terminar un módulo: marcar `ready: true` en `navigation.ts` y registrar su ruta en `App.tsx`.
+Al terminar un módulo: marcar `ready: true` en `navigation.ts` y agregarlo a `READY` en `App.tsx`.
 
 Roles (`app_role`): dirección, admin, ventas, compras, almacén, logística, finanzas, marketing. Una persona puede tener varios.
 

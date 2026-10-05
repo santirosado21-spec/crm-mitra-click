@@ -40,6 +40,30 @@ export interface ResourceConfig {
   hasActive?: boolean
   rowTitle: (row: Row) => string
   pageSize?: number
+  /** Filtros de igualdad que se guardan en la URL. */
+  filters?: FilterDef[]
+  /** Reemplaza el guardado directo en la tabla (p. ej. una función de la base). */
+  save?: (context: SaveContext) => Promise<unknown>
+  /** Aviso antes de guardar. Si devuelve texto, la persona debe confirmar para continuar. */
+  warn?: (context: SaveContext) => Promise<string | null>
+  /** Acciones adicionales por fila (historial, etiqueta…). Deben tener texto o aria-label. */
+  rowActions?: (row: Row, reload: () => void) => ReactNode
+}
+
+export interface FilterDef {
+  /** Nombre del parámetro en la URL. */
+  param: string
+  column: string
+  label: string
+  options?: { value: string; label: string }[]
+  relation?: { table: string; labelColumn: string }
+}
+
+export interface SaveContext {
+  /** null al crear. */
+  row: Row | null
+  /** Valores listos para la base (ya convertidos y sin campos bloqueados). */
+  payload: Record<string, unknown>
 }
 
 const PAGE_SIZE = 25
@@ -96,8 +120,11 @@ function ResourceForm({ config, row, onClose, onSaved }: { config: ResourceConfi
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
+  const [warning, setWarning] = useState<string | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
   const relations = useRelationOptions(config.fields, true)
   const editing = row !== null
+  const fields = useMemo(() => config.fields.filter((field) => editing || !field.onlyOnEdit), [config.fields, editing])
 
   const optionsFor = (field: FieldDef) => {
     if (field.options) return field.options
@@ -110,6 +137,9 @@ function ResourceForm({ config, row, onClose, onSaved }: { config: ResourceConfi
   }
 
   const change = (field: FieldDef, value: FormValue) => {
+    // Cualquier cambio invalida la confirmación del aviso anterior.
+    setWarning(null)
+    setConfirmed(false)
     setValues((previous) => {
       const next = { ...previous, [field.name]: value }
       // Si cambia el campo del que depende otro (familia → categoría), se limpia el dependiente.
@@ -122,14 +152,24 @@ function ResourceForm({ config, row, onClose, onSaved }: { config: ResourceConfi
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
-    const found = validateValues(config.fields, values)
+    const found = validateValues(fields, values)
     setErrors(found)
     if (Object.keys(found).length) return
     setSaving(true)
     setFailure(null)
     try {
-      const payload = toRow(config.fields.filter((field) => !(editing && field.lockedOnEdit)), values)
-      await saveRow(config.table, editing ? String(row.id) : null, payload)
+      const payload = toRow(fields.filter((field) => !(editing && field.lockedOnEdit)), values)
+      const context: SaveContext = { row, payload }
+      if (config.warn && !confirmed) {
+        const message = await config.warn(context)
+        if (message) {
+          setWarning(message)
+          setConfirmed(true)
+          return
+        }
+      }
+      if (config.save) await config.save(context)
+      else await saveRow(config.table, editing ? String(row.id) : null, payload)
       onSaved()
     } catch (error) {
       setFailure(error instanceof Error ? error.message : String(error))
@@ -147,16 +187,17 @@ function ResourceForm({ config, row, onClose, onSaved }: { config: ResourceConfi
       footer={
         <div className="flex items-center justify-end gap-2">
           <Button variant="outline" onClick={onClose} disabled={saving}>Cancelar</Button>
-          <Button type="submit" form="resource-form" disabled={saving} data-testid="save-record">{saving ? 'Guardando…' : editing ? 'Guardar cambios' : `Crear ${config.noun}`}</Button>
+          <Button type="submit" form="resource-form" disabled={saving} data-testid="save-record">{saving ? 'Guardando…' : warning ? 'Guardar de todos modos' : editing ? 'Guardar cambios' : `Crear ${config.noun}`}</Button>
         </div>
       }
     >
       <form id="resource-form" onSubmit={(event) => { void submit(event) }} noValidate className="grid gap-4 sm:grid-cols-2">
-        {config.fields.map((field) => (
+        {fields.map((field) => (
           <div key={field.name} className={field.wide || field.type === 'textarea' || field.type === 'multiselect' ? 'sm:col-span-2' : ''}>
             <FieldControl field={field} value={values[field.name]} error={errors[field.name]} disabled={saving || (editing && Boolean(field.lockedOnEdit))} options={optionsFor(field)} onChange={(value) => change(field, value)} />
           </div>
         ))}
+        {warning && <p className="rounded-xl border border-mc-warning/25 bg-mc-warning-soft px-3 py-2 text-sm text-mc-ink sm:col-span-2" role="alert" data-testid="save-warning">{warning}</p>}
         {failure && <p className="rounded-xl border border-mc-danger/25 bg-mc-danger-soft px-3 py-2 text-sm text-mc-danger sm:col-span-2" role="alert">{failure}</p>}
       </form>
     </RecordDrawer>
@@ -164,7 +205,7 @@ function ResourceForm({ config, row, onClose, onSaved }: { config: ResourceConfi
 }
 
 /** Lista con búsqueda, paginación y formulario lateral para una tabla. */
-export function ResourcePage({ config }: { config: ResourceConfig }) {
+export function ResourcePage({ config, headerActions, toolbar }: { config: ResourceConfig; headerActions?: ReactNode; toolbar?: ReactNode }) {
   const { can } = useSession()
   const [params, setParams] = useSearchParams()
   const search = params.get('q') ?? ''
@@ -173,7 +214,19 @@ export function ResourcePage({ config }: { config: ResourceConfig }) {
   const pageSize = config.pageSize ?? PAGE_SIZE
   const [draft, setDraft] = useState(search)
   const [editing, setEditing] = useState<Row | 'new' | null>(null)
-  const canWrite = can(config.writeRoles)
+  const canWrite = can(config.writeRoles) && config.fields.length > 0
+  const filterDefs = config.filters ?? []
+  const filterValues = Object.fromEntries(filterDefs.map((filter) => [filter.column, params.get(filter.param) ?? '']))
+  const filterKey = filterDefs.map((filter) => params.get(filter.param) ?? '').join('|')
+  const filterOptions = useQuery(`filters:${config.table}`, async () => {
+    const entries = await Promise.all(
+      filterDefs.filter((filter) => filter.relation).map(async (filter) => {
+        const rows = await listOptions(filter.relation!.table, filter.relation!.labelColumn, [], false)
+        return [filter.param, rows.map((row) => ({ value: String(row.id), label: String(row[filter.relation!.labelColumn]) }))] as const
+      }),
+    )
+    return Object.fromEntries(entries) as Record<string, { value: string; label: string }[]>
+  })
 
   const setParam = (changes: Record<string, string | null>) => {
     setParams((previous) => {
@@ -194,13 +247,13 @@ export function ResourcePage({ config }: { config: ResourceConfig }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft])
 
-  const query = useQuery(`${config.table}|${search}|${showInactive}|${page}`, () =>
+  const query = useQuery(`${config.table}|${search}|${showInactive}|${page}|${filterKey}`, () =>
     listRows<Row>({
       table: config.table,
       select: config.select,
       searchColumns: config.searchColumns,
       search,
-      filters: config.hasActive && !showInactive ? { active: true } : undefined,
+      filters: { ...filterValues, ...(config.hasActive && !showInactive ? { active: true } : {}) },
       orderBy: config.orderBy,
       page,
       pageSize,
@@ -210,6 +263,7 @@ export function ResourcePage({ config }: { config: ResourceConfig }) {
   const rows = query.data?.rows ?? []
   const total = query.data?.total ?? 0
   const pages = Math.max(1, Math.ceil(total / pageSize))
+  const hasActions = canWrite || Boolean(config.rowActions)
   const [primary, ...rest] = config.columns
   const cell = (column: ColumnDef, row: Row) => (column.render ? column.render(row) : text(row[column.key]))
 
@@ -219,8 +273,9 @@ export function ResourcePage({ config }: { config: ResourceConfig }) {
         eyebrow={config.eyebrow}
         title={config.title}
         description={config.description}
-        actions={canWrite ? <Button onClick={() => setEditing('new')} data-testid="new-record"><Plus size={16} aria-hidden="true" />Nuevo {config.noun}</Button> : undefined}
+        actions={(canWrite || headerActions) ? <>{headerActions}{canWrite && <Button onClick={() => setEditing('new')} data-testid="new-record"><Plus size={16} aria-hidden="true" />Nuevo {config.noun}</Button>}</> : undefined}
       />
+      {toolbar}
 
       <Panel padding={false} testId={`resource-${config.table}`}>
         <div className="flex flex-col gap-3 border-b border-mc-line-soft p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -228,7 +283,13 @@ export function ResourcePage({ config }: { config: ResourceConfig }) {
             <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mc-gray-400" aria-hidden="true" />
             <TextInput type="search" aria-label={`Buscar ${config.title.toLowerCase()}`} placeholder={config.searchPlaceholder ?? 'Buscar…'} value={draft} onChange={(event) => setDraft(event.target.value)} className="pl-9" data-testid="search-input" />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {filterDefs.map((filter) => (
+              <Select key={filter.param} aria-label={filter.label} className="!w-auto min-w-36" value={params.get(filter.param) ?? ''} onChange={(event) => setParam({ [filter.param]: event.target.value || null, pagina: null })}>
+                <option value="">{filter.label}: todos</option>
+                {(filter.options ?? filterOptions.data?.[filter.param] ?? []).map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </Select>
+            ))}
             {config.hasActive && <Checkbox label="Mostrar inactivos" checked={showInactive} onChange={(event) => setParam({ inactivos: event.target.checked ? '1' : null, pagina: null })} />}
             <p className="text-xs text-mc-muted tabular" data-testid="result-count" aria-live="polite">{query.loading ? 'Cargando…' : `${total} ${total === 1 ? 'registro' : 'registros'}`}</p>
           </div>
@@ -249,7 +310,7 @@ export function ResourcePage({ config }: { config: ResourceConfig }) {
                 <thead className="border-b border-mc-line-soft bg-mc-surface-2 text-xs text-mc-muted">
                   <tr>
                     {config.columns.map((column) => <th key={column.key} scope="col" className={`px-4 py-2.5 font-semibold ${column.align === 'right' ? 'text-right' : ''}`}>{column.label}</th>)}
-                    {canWrite && <th scope="col" className="w-12 px-4 py-2.5"><span className="sr-only">Acciones</span></th>}
+                    {hasActions && <th scope="col" className="px-4 py-2.5"><span className="sr-only">Acciones</span></th>}
                   </tr>
                 </thead>
                 <tbody className={`divide-y divide-mc-line-soft ${query.loading ? 'opacity-60' : ''}`}>
@@ -258,9 +319,12 @@ export function ResourcePage({ config }: { config: ResourceConfig }) {
                       {config.columns.map((column, index) => (
                         <td key={column.key} className={`px-4 py-2.5 ${index === 0 ? 'font-semibold text-mc-ink' : 'text-mc-gray-700'} ${column.align === 'right' ? 'text-right tabular' : ''}`}>{cell(column, row)}</td>
                       ))}
-                      {canWrite && (
-                        <td className="px-4 py-2.5 text-right">
-                          <button type="button" onClick={() => setEditing(row)} className="grid h-9 w-9 place-items-center rounded-lg text-mc-muted hover:bg-mc-yellow-wash hover:text-mc-ink" aria-label={`Editar ${config.rowTitle(row)}`}><Pencil size={15} aria-hidden="true" /></button>
+                      {hasActions && (
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center justify-end gap-1">
+                            {config.rowActions?.(row, query.reload)}
+                            {canWrite && <button type="button" onClick={() => setEditing(row)} className="grid h-9 w-9 place-items-center rounded-lg text-mc-muted hover:bg-mc-yellow-wash hover:text-mc-ink" aria-label={`Editar ${config.rowTitle(row)}`}><Pencil size={15} aria-hidden="true" /></button>}
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -277,7 +341,12 @@ export function ResourcePage({ config }: { config: ResourceConfig }) {
                       {rest.map((column) => <div key={column.key} className="flex gap-1.5"><dt className="shrink-0">{column.label}:</dt><dd className="min-w-0 truncate text-mc-gray-700">{cell(column, row)}</dd></div>)}
                     </dl>
                   </div>
-                  {canWrite && <button type="button" onClick={() => setEditing(row)} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-mc-line text-mc-muted" aria-label={`Editar ${config.rowTitle(row)}`}><Pencil size={16} aria-hidden="true" /></button>}
+                  {hasActions && (
+                    <div className="flex shrink-0 items-center gap-1">
+                      {config.rowActions?.(row, query.reload)}
+                      {canWrite && <button type="button" onClick={() => setEditing(row)} className="grid h-11 w-11 place-items-center rounded-xl border border-mc-line text-mc-muted" aria-label={`Editar ${config.rowTitle(row)}`}><Pencil size={16} aria-hidden="true" /></button>}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

@@ -5,10 +5,10 @@ clientes, proveedores, catálogo, cotizaciones, pedidos (Shopify y venta directa
 compras, bodega con etiquetas NFC/QR, logística, remisiones, facturas y pagos, con
 bitácora de cambios, pendientes, KPIs, agentes y reportes.
 
-> Estado: **Fase A (fundación) en curso.** Funcionan el inicio de sesión, la
-> navegación, Usuarios y permisos y la Bitácora. Los demás módulos aparecen como
-> "en construcción". El modelo operativo de la base está escrito pero aún no se
-> aplica en Supabase; no hay conexión con Shopify ni datos cargados.
+> Estado: **fases A, B y C escritas** (acceso, catálogo, clientes, proveedores,
+> inventario y bodega con etiquetas). El modelo de la base está en
+> `supabase/migrations/pending_op*.sql` y **aún no se aplica en Supabase**, así que
+> las pantallas interiores no se han verificado con datos. Sin conexión con Shopify.
 
 ## Stack
 

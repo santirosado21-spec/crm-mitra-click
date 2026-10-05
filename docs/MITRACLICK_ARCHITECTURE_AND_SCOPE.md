@@ -60,9 +60,9 @@ Principios:
 
 | Fase | Contenido | Estado |
 |---|---|---|
-| A | Fundación: modelo operativo, roles y RLS, auditoría, sesión obligatoria, menú, patrón lista + formulario | En curso: app lista; esquema escrito, pendiente de aplicar |
-| B | Catálogo, clientes y proveedores; importador CSV (exportaciones de Shopify) | Pendiente |
-| C | Inventario y bodega: movimientos, existencias, conteos, etiquetas NFC/QR (`/b/:codigo`) | Pendiente |
+| A | Fundación: modelo operativo, roles y RLS, auditoría, sesión obligatoria, menú, patrón lista + formulario | App lista; esquema escrito, pendiente de aplicar |
+| B | Catálogo, clientes y proveedores; importador CSV (exportaciones de Shopify) | Escrita; sin verificar contra la base |
+| C | Inventario y bodega: movimientos, existencias, conteos, etiquetas NFC/QR (`/b/:codigo`) | Escrita; sin verificar contra la base. Falta el dibujo del QR (dependencia `qrcode`) |
 | D | Ciclo comercial y trazabilidad de punta a punta | Pendiente |
 | E | Conector de Shopify (webhooks con HMAC, sincronización; inventario hacia Shopify apagado) | Pendiente |
 | F | Calidad de datos, pendientes y alertas | Pendiente |

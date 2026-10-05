@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 import {
   Bot, Boxes, ClipboardCheck, ClipboardList, FileBarChart, FileSignature, FileText, FolderTree, History,
   Home, LayoutDashboard, Link2, MapPin, PackageSearch, Receipt, Repeat, ShoppingBag, ShoppingCart, Truck,
-  UserPlus, Users, UsersRound, Wallet, Warehouse,
+  UserCheck, UserPlus, Users, UsersRound, Wallet, Warehouse,
 } from 'lucide-react'
 
 /** Fase del plan de construcción en la que se entrega cada módulo. */
@@ -33,7 +33,8 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
   {
     label: 'Ventas',
     modules: [
-      { path: '/clientes', label: 'Clientes', icon: Users, phase: 'B', ready: false, summary: 'Clientes con su vendedor asignado, datos fiscales y de contacto.' },
+      { path: '/clientes', label: 'Clientes', icon: Users, phase: 'B', ready: true, summary: 'Clientes con su vendedor asignado, datos fiscales y de contacto.' },
+      { path: '/vendedores', label: 'Vendedores', icon: UserCheck, phase: 'B', ready: true, summary: 'Personas a las que se asignan clientes, cotizaciones y pedidos.' },
       { path: '/cotizaciones', label: 'Cotizaciones', icon: FileSignature, phase: 'D', ready: false, summary: 'Cotizaciones con seguimiento y conversión a pedido sin volver a capturar.' },
       { path: '/pedidos', label: 'Pedidos', icon: ShoppingCart, phase: 'D', ready: false, summary: 'Pedidos de Shopify y de venta directa, con su línea de tiempo de punta a punta.' },
     ],
@@ -41,17 +42,17 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
   {
     label: 'Compras',
     modules: [
-      { path: '/proveedores', label: 'Proveedores', icon: UsersRound, phase: 'B', ready: false, summary: 'Proveedores con condiciones y tiempos de entrega.' },
+      { path: '/proveedores', label: 'Proveedores', icon: UsersRound, phase: 'B', ready: true, summary: 'Proveedores con condiciones y tiempos de entrega.' },
       { path: '/compras', label: 'Compras', icon: ShoppingBag, phase: 'D', ready: false, summary: 'Órdenes de compra ligadas al pedido que las originó y su recepción en bodega.' },
     ],
   },
   {
     label: 'Bodega',
     modules: [
-      { path: '/inventario', label: 'Inventario', icon: Boxes, phase: 'C', ready: false, summary: 'Existencia por producto y ubicación, derivada del libro de movimientos.' },
-      { path: '/movimientos', label: 'Movimientos', icon: Repeat, phase: 'C', ready: false, summary: 'Entradas, salidas, traspasos y ajustes con usuario, fecha, motivo y documento.' },
-      { path: '/conteos', label: 'Conteos', icon: ClipboardList, phase: 'C', ready: false, summary: 'Conteos físicos: generan una diferencia para revisión, nunca sobrescriben.' },
-      { path: '/ubicaciones', label: 'Ubicaciones y etiquetas', icon: MapPin, phase: 'C', ready: false, summary: 'Almacenes, ubicaciones y etiquetas NFC/QR para abrir el registro desde el teléfono.' },
+      { path: '/inventario', label: 'Inventario', icon: Boxes, phase: 'C', ready: true, summary: 'Existencia por producto y ubicación, derivada del libro de movimientos.' },
+      { path: '/movimientos', label: 'Movimientos', icon: Repeat, phase: 'C', ready: true, summary: 'Entradas, salidas, traspasos y ajustes con usuario, fecha, motivo y documento.' },
+      { path: '/conteos', label: 'Conteos', icon: ClipboardList, phase: 'C', ready: true, summary: 'Conteos físicos: generan una diferencia para revisión, nunca sobrescriben.' },
+      { path: '/ubicaciones', label: 'Ubicaciones y etiquetas', icon: MapPin, phase: 'C', ready: true, summary: 'Almacenes, ubicaciones y etiquetas NFC/QR para abrir el registro desde el teléfono.' },
     ],
   },
   {
@@ -71,8 +72,8 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
   {
     label: 'Catálogo',
     modules: [
-      { path: '/productos', label: 'Productos', icon: PackageSearch, phase: 'B', ready: false, summary: 'Catálogo con reglas de alta, detección de duplicados e historial de cambios.' },
-      { path: '/familias', label: 'Familias y categorías', icon: FolderTree, phase: 'B', ready: false, summary: 'Estructura de clasificación vigente del catálogo.' },
+      { path: '/productos', label: 'Productos', icon: PackageSearch, phase: 'B', ready: true, summary: 'Catálogo con reglas de alta, detección de duplicados e historial de cambios.' },
+      { path: '/familias', label: 'Familias y categorías', icon: FolderTree, phase: 'B', ready: true, summary: 'Estructura de clasificación vigente del catálogo.' },
     ],
   },
   {
