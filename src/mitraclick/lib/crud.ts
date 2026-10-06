@@ -93,6 +93,18 @@ export async function callFunction<Result = unknown>(name: string, args: Record<
   return data as Result
 }
 
+/** Llama una Edge Function con la sesión del usuario. Devuelve el cuerpo aunque responda con error de negocio. */
+export async function invokeFunction<Result = unknown>(name: string, body: Record<string, unknown>): Promise<Result> {
+  const { data, error } = await getSupabaseClient().functions.invoke(name, { body })
+  if (error) {
+    // Las funciones responden JSON con `error` en español; si existe, se muestra ese mensaje.
+    const context = (error as { context?: Response }).context
+    const detail = context && typeof context.json === 'function' ? ((await context.json().catch(() => null)) as { error?: string } | null) : null
+    throw new Error(detail?.error ?? 'No se pudo contactar al servidor. Intenta de nuevo.')
+  }
+  return data as Result
+}
+
 /** Consulta libre de solo lectura para pantallas que no caben en `listRows` (joins, sin paginar). */
 export async function selectRows<Row = Record<string, unknown>>(table: string, select: string, options: { filters?: Record<string, string | boolean | null | undefined>; orderBy?: { column: string; ascending?: boolean }; limit?: number } = {}): Promise<Row[]> {
   let query = db().from(table).select(select)

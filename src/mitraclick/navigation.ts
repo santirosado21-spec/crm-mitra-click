@@ -88,7 +88,7 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
     modules: [
       { path: '/usuarios', label: 'Usuarios y permisos', icon: Users, phase: 'A', ready: true, summary: 'Quién entra al sistema y con qué roles.' },
       { path: '/bitacora', label: 'Bitácora', icon: History, phase: 'A', ready: true, summary: 'Registro de cada cambio: quién, cuándo, antes y después.' },
-      { path: '/shopify', label: 'Shopify', icon: Warehouse, phase: 'E', ready: false, summary: 'Estado de la conexión con Shopify y de cada sincronización.' },
+      { path: '/shopify', label: 'Shopify', icon: Warehouse, phase: 'E', ready: true, summary: 'Estado de la conexión con Shopify y de cada sincronización.' },
     ],
   },
 ]

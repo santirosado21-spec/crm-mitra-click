@@ -23,6 +23,7 @@ import { ProductsPage } from './mitraclick/pages/ProductsPage'
 import { PurchasePage } from './mitraclick/pages/PurchasePage'
 import { QuotePage } from './mitraclick/pages/QuotePage'
 import { SalesRepsPage } from './mitraclick/pages/SalesRepsPage'
+import { ShopifyPage } from './mitraclick/pages/ShopifyPage'
 import { SuppliersPage } from './mitraclick/pages/SuppliersPage'
 import { TagPage } from './mitraclick/pages/TagPage'
 import { TagSheetPage } from './mitraclick/pages/TagSheetPage'
@@ -52,6 +53,7 @@ const READY: Record<string, ReactNode> = {
   '/facturas': <InvoicesPage />,
   '/pagos': <PaymentsPage />,
   '/pendientes': <PendingPage />,
+  '/shopify': <ShopifyPage />,
   '/dashboard': <Suspense fallback={<p className="py-10 text-center text-sm text-mc-muted" role="status">Cargando…</p>}><DashboardPage /></Suspense>,
 }
 
