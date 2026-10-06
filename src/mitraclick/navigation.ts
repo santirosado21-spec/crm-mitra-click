@@ -35,15 +35,15 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
     modules: [
       { path: '/clientes', label: 'Clientes', icon: Users, phase: 'B', ready: true, summary: 'Clientes con su vendedor asignado, datos fiscales y de contacto.' },
       { path: '/vendedores', label: 'Vendedores', icon: UserCheck, phase: 'B', ready: true, summary: 'Personas a las que se asignan clientes, cotizaciones y pedidos.' },
-      { path: '/cotizaciones', label: 'Cotizaciones', icon: FileSignature, phase: 'D', ready: false, summary: 'Cotizaciones con seguimiento y conversión a pedido sin volver a capturar.' },
-      { path: '/pedidos', label: 'Pedidos', icon: ShoppingCart, phase: 'D', ready: false, summary: 'Pedidos de Shopify y de venta directa, con su línea de tiempo de punta a punta.' },
+      { path: '/cotizaciones', label: 'Cotizaciones', icon: FileSignature, phase: 'D', ready: true, summary: 'Cotizaciones con seguimiento y conversión a pedido sin volver a capturar.' },
+      { path: '/pedidos', label: 'Pedidos', icon: ShoppingCart, phase: 'D', ready: true, summary: 'Pedidos de Shopify y de venta directa, con su línea de tiempo de punta a punta.' },
     ],
   },
   {
     label: 'Compras',
     modules: [
       { path: '/proveedores', label: 'Proveedores', icon: UsersRound, phase: 'B', ready: true, summary: 'Proveedores con condiciones y tiempos de entrega.' },
-      { path: '/compras', label: 'Compras', icon: ShoppingBag, phase: 'D', ready: false, summary: 'Órdenes de compra ligadas al pedido que las originó y su recepción en bodega.' },
+      { path: '/compras', label: 'Compras', icon: ShoppingBag, phase: 'D', ready: true, summary: 'Órdenes de compra ligadas al pedido que las originó y su recepción en bodega.' },
     ],
   },
   {
@@ -58,15 +58,15 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
   {
     label: 'Logística',
     modules: [
-      { path: '/envios', label: 'Envíos y rutas', icon: Truck, phase: 'D', ready: false, summary: 'Programación de entregas, rutas y estado de cada envío.' },
-      { path: '/remisiones', label: 'Remisiones', icon: FileText, phase: 'D', ready: false, summary: 'Remisiones con evidencia de entrega y verificación.' },
+      { path: '/envios', label: 'Envíos y rutas', icon: Truck, phase: 'D', ready: true, summary: 'Programación de entregas, rutas y estado de cada envío.' },
+      { path: '/remisiones', label: 'Remisiones', icon: FileText, phase: 'D', ready: true, summary: 'Remisiones con evidencia de entrega y verificación.' },
     ],
   },
   {
     label: 'Finanzas',
     modules: [
-      { path: '/facturas', label: 'Facturas', icon: Receipt, phase: 'D', ready: false, summary: 'Registro de facturas por pedido y su estado de cobro.' },
-      { path: '/pagos', label: 'Pagos y estados de cuenta', icon: Wallet, phase: 'D', ready: false, summary: 'Pagos recibidos y estado de cuenta por cliente.' },
+      { path: '/facturas', label: 'Facturas', icon: Receipt, phase: 'D', ready: true, summary: 'Registro de facturas por pedido y su estado de cobro.' },
+      { path: '/pagos', label: 'Pagos y estados de cuenta', icon: Wallet, phase: 'D', ready: true, summary: 'Pagos recibidos y estado de cuenta por cliente.' },
     ],
   },
   {
