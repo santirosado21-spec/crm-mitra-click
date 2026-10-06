@@ -24,7 +24,7 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
     label: 'Dirección',
     modules: [
       { path: '/', label: 'Inicio', icon: Home, phase: 'A', ready: true, summary: 'Avance de la implementación y estado del sistema.' },
-      { path: '/dashboard', label: 'Dashboard ejecutivo', icon: LayoutDashboard, phase: 'G', ready: false, summary: 'Qué está pasando, qué cambió y qué requiere atención: ventas, familias, vendedores, pedidos, entregas e inventario.' },
+      { path: '/dashboard', label: 'Dashboard ejecutivo', icon: LayoutDashboard, phase: 'G', ready: true, summary: 'Qué está pasando, qué cambió y qué requiere atención: ventas, familias, vendedores, pedidos, entregas e inventario.' },
       { path: '/pendientes', label: 'Pendientes', icon: ClipboardCheck, phase: 'F', ready: true, summary: 'Excepciones detectadas por las reglas de calidad de datos, con responsable y estado de resolución.' },
       { path: '/reportes', label: 'Reportes', icon: FileBarChart, phase: 'H', ready: false, summary: 'Reportes semanales, quincenales y mensuales: ejecutivo, comercial, productos, operación e inventario.' },
       { path: '/agentes', label: 'Agentes', icon: Bot, phase: 'H', ready: false, summary: 'Supervisión, comercial, marketing y ejecutivo: hallazgos con evidencia y acción sugerida.' },

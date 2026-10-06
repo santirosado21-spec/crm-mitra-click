@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { Suspense, lazy, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthGate } from './mitraclick/auth/AuthGate'
 import { SessionProvider } from './mitraclick/auth/SessionProvider'
@@ -28,6 +28,9 @@ import { TagPage } from './mitraclick/pages/TagPage'
 import { TagSheetPage } from './mitraclick/pages/TagSheetPage'
 import { UsersPage } from './mitraclick/pages/UsersPage'
 
+// El dashboard trae la librería de gráficas: se descarga solo al abrirlo.
+const DashboardPage = lazy(() => import('./mitraclick/pages/DashboardPage').then((module) => ({ default: module.DashboardPage })))
+
 /** Pantalla de cada módulo terminado. Los que no están aquí se muestran "en construcción". */
 const READY: Record<string, ReactNode> = {
   '/usuarios': <UsersPage />,
@@ -49,6 +52,7 @@ const READY: Record<string, ReactNode> = {
   '/facturas': <InvoicesPage />,
   '/pagos': <PaymentsPage />,
   '/pendientes': <PendingPage />,
+  '/dashboard': <Suspense fallback={<p className="py-10 text-center text-sm text-mc-muted" role="status">Cargando…</p>}><DashboardPage /></Suspense>,
 }
 
 export default function App() {
