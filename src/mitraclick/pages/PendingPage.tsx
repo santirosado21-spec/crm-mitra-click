@@ -170,14 +170,14 @@ export function PendingPage() {
     rowActions: can(['direccion', 'admin'])
       ? (row) => (
           <span className="flex items-center gap-1">
-            <Button variant="outline" className={smallButton} disabled={Number(row.value) <= 0} onClick={() => { void act(() => callSetting(String(row.id), Number(row.value) - 1)) }} aria-label={`Reducir un día: ${String(row.label)}`}>−1</Button>
-            <Button variant="outline" className={smallButton} onClick={() => { void act(() => callSetting(String(row.id), Number(row.value) + 1)) }} aria-label={`Aumentar un día: ${String(row.label)}`}>+1</Button>
+            <Button variant="outline" className={smallButton} disabled={Number(row.value) <= 0} onClick={() => { void act(() => callSetting(String(row.id), Math.max(0, Number(row.value) - stepFor(row)))) }} aria-label={`Reducir: ${String(row.label)}`}>−{stepFor(row).toLocaleString('es-MX')}</Button>
+            <Button variant="outline" className={smallButton} onClick={() => { void act(() => callSetting(String(row.id), Number(row.value) + stepFor(row))) }} aria-label={`Aumentar: ${String(row.label)}`}>+{stepFor(row).toLocaleString('es-MX')}</Button>
           </span>
         )
       : undefined,
     columns: [
       { key: 'label', label: 'Regla' },
-      { key: 'value', label: 'Umbral', align: 'right', render: (row) => `${String(row.value)} ${String(row.unit)}` },
+      { key: 'value', label: 'Umbral', align: 'right', render: (row) => `${Number(row.value).toLocaleString('es-MX')} ${String(row.unit)}` },
     ],
   }
 
@@ -205,3 +205,6 @@ export function PendingPage() {
 async function callSetting(key: string, value: number) {
   await callFunction('set_control_setting', { p_key: key, p_value: value })
 }
+
+/** Cuánto cambia el umbral por clic, según su unidad. */
+const stepFor = (row: Row) => (row.unit === 'pesos' ? 1000 : row.unit === '%' ? 5 : 1)

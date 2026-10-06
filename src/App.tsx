@@ -4,6 +4,7 @@ import { AuthGate } from './mitraclick/auth/AuthGate'
 import { SessionProvider } from './mitraclick/auth/SessionProvider'
 import { AppShell } from './mitraclick/components/AppShell'
 import { ALL_MODULES } from './mitraclick/navigation'
+import { AgentsPage } from './mitraclick/pages/AgentsPage'
 import { AuditPage } from './mitraclick/pages/AuditPage'
 import { ComingSoonPage } from './mitraclick/pages/ComingSoonPage'
 import { CountsPage } from './mitraclick/pages/CountsPage'
@@ -15,6 +16,7 @@ import { HomePage } from './mitraclick/pages/HomePage'
 import { ImportPage } from './mitraclick/pages/ImportPage'
 import { InventoryPage } from './mitraclick/pages/InventoryPage'
 import { LocationsPage } from './mitraclick/pages/LocationsPage'
+import { ReportsPage } from './mitraclick/pages/ReportsPage'
 import { RemissionsPage, ShipmentsPage } from './mitraclick/pages/LogisticsPages'
 import { MovementsPage } from './mitraclick/pages/MovementsPage'
 import { OrderPage } from './mitraclick/pages/OrderPage'
@@ -54,6 +56,8 @@ const READY: Record<string, ReactNode> = {
   '/pagos': <PaymentsPage />,
   '/pendientes': <PendingPage />,
   '/shopify': <ShopifyPage />,
+  '/agentes': <AgentsPage />,
+  '/reportes': <ReportsPage />,
   '/dashboard': <Suspense fallback={<p className="py-10 text-center text-sm text-mc-muted" role="status">Cargando…</p>}><DashboardPage /></Suspense>,
 }
 
