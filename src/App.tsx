@@ -18,6 +18,7 @@ import { LocationsPage } from './mitraclick/pages/LocationsPage'
 import { RemissionsPage, ShipmentsPage } from './mitraclick/pages/LogisticsPages'
 import { MovementsPage } from './mitraclick/pages/MovementsPage'
 import { OrderPage } from './mitraclick/pages/OrderPage'
+import { PendingPage } from './mitraclick/pages/PendingPage'
 import { ProductsPage } from './mitraclick/pages/ProductsPage'
 import { PurchasePage } from './mitraclick/pages/PurchasePage'
 import { QuotePage } from './mitraclick/pages/QuotePage'
@@ -47,6 +48,7 @@ const READY: Record<string, ReactNode> = {
   '/remisiones': <RemissionsPage />,
   '/facturas': <InvoicesPage />,
   '/pagos': <PaymentsPage />,
+  '/pendientes': <PendingPage />,
 }
 
 export default function App() {
