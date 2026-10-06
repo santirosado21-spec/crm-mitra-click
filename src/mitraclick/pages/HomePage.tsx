@@ -26,7 +26,7 @@ export function HomePage() {
       <PageHeader
         eyebrow="Mitra Click · Sistema operativo"
         title={firstName ? `Hola, ${firstName}` : 'Inicio'}
-        description="Avance de la construcción del sistema. Cada módulo se activa cuando su fase queda terminada y verificada; lo que aún no existe se marca como en construcción."
+        description="Avance de la construcción del sistema. Un módulo marcado como construido ya tiene pantalla y reglas; su validación con datos y usuarios reales es la última fase."
       />
 
       <Panel title="Tu acceso" testId="home-access">
@@ -37,7 +37,7 @@ export function HomePage() {
         </dl>
       </Panel>
 
-      <Panel title="Avance por fase" description="Los módulos listos se pueden abrir; los demás muestran qué van a resolver." padding={false} testId="home-phases">
+      <Panel title="Avance por fase" description="Los módulos construidos se pueden abrir; los demás muestran qué van a resolver." padding={false} testId="home-phases">
         <ol className="divide-y divide-mc-line-soft">
           {PHASES.map((phase) => {
             const modules = ALL_MODULES.filter((module) => module.phase === phase.key && module.path !== '/')
@@ -48,7 +48,7 @@ export function HomePage() {
                   <p className="text-xs font-semibold text-mc-yellow-ink">Fase {phase.key}</p>
                   <h3 className="mt-0.5 text-sm font-bold text-mc-ink">{phase.name}</h3>
                   <p className="mt-1 text-xs leading-5 text-mc-muted">{phase.goal}</p>
-                  {modules.length > 0 && <p className="mt-2 text-xs font-semibold text-mc-gray-700 tabular">{ready} de {modules.length} módulos listos</p>}
+                  {modules.length > 0 && <p className="mt-2 text-xs font-semibold text-mc-gray-700 tabular">{ready} de {modules.length} módulos construidos</p>}
                 </div>
                 <ul className="flex flex-wrap content-start gap-2">
                   {modules.map((module) => (
@@ -56,7 +56,7 @@ export function HomePage() {
                       <Link to={module.path} className={`inline-flex min-h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold ${module.ready ? 'border-mc-success/30 bg-mc-success-soft text-mc-ink' : 'border-mc-line bg-white text-mc-muted hover:border-mc-charcoal'}`}>
                         {module.ready ? <CheckCircle2 size={14} className="text-mc-success" aria-hidden="true" /> : <CircleDashed size={14} aria-hidden="true" />}
                         {module.label}
-                        <span className="sr-only">{module.ready ? ' (listo)' : ' (en construcción)'}</span>
+                        <span className="sr-only">{module.ready ? ' (construido)' : ' (en construcción)'}</span>
                       </Link>
                     </li>
                   ))}

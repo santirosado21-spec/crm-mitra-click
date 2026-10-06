@@ -60,16 +60,19 @@ Principios:
 
 | Fase | Contenido | Estado |
 |---|---|---|
-| A | Fundación: modelo operativo, roles y RLS, auditoría, sesión obligatoria, menú, patrón lista + formulario | App lista; esquema escrito, pendiente de aplicar |
-| B | Catálogo, clientes y proveedores; importador CSV (exportaciones de Shopify) | Escrita; sin verificar contra la base |
-| C | Inventario y bodega: movimientos, existencias, conteos, etiquetas NFC/QR (`/b/:codigo`) | Escrita; sin verificar contra la base. Falta el dibujo del QR (dependencia `qrcode`) |
-| D | Ciclo comercial y trazabilidad de punta a punta | Pendiente |
-| E | Conector de Shopify (webhooks con HMAC, sincronización; inventario hacia Shopify apagado) | Pendiente |
-| F | Calidad de datos, pendientes y alertas | Pendiente |
-| G | KPIs (vistas SQL) y dashboard ejecutivo | Pendiente |
-| H | Agentes (supervisión, comercial, marketing, ejecutivo) y reportes | Pendiente |
-| I | Adquisición medible: links, leads, prospección, SEO | Pendiente |
-| J | Validación operativa con usuarios reales | Pendiente |
+| A | Fundación: modelo operativo, roles y RLS, auditoría, sesión obligatoria, menú, patrón lista + formulario | Escrita |
+| B | Catálogo, clientes y proveedores; importador CSV (exportaciones de Shopify) | Escrita |
+| C | Inventario y bodega: movimientos, existencias, conteos, etiquetas NFC/QR (`/b/:codigo`) | Escrita. Falta dibujar el QR |
+| D | Ciclo comercial y trazabilidad de punta a punta | Escrita |
+| E | Conector de Shopify (webhooks con HMAC, sincronización) | Escrita. Falta el envío de existencias a Shopify |
+| F | Calidad de datos, pendientes y alertas | Escrita |
+| G | KPIs y dashboard ejecutivo | Escrita |
+| H | Agentes (supervisión, comercial, marketing, ejecutivo) y reportes | Escrita |
+| I | Adquisición medible: links, leads, prospección, SEO | Escrita |
+| J | Validación operativa con usuarios reales | **Pendiente: nada se ha aplicado ni probado con datos** |
+
+"Escrita" significa: pantallas, migraciones y pruebas de las reglas puras en el repositorio.
+No significa validada. La validación está en `docs/PUESTA_EN_MARCHA.md`.
 
 Las fases B y C permiten el piloto de bodega de 10 productos y no dependen de Shopify.
 

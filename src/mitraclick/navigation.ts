@@ -79,8 +79,8 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
   {
     label: 'Marketing',
     modules: [
-      { path: '/leads', label: 'Leads y prospección', icon: UserPlus, phase: 'I', ready: false, summary: 'Leads por fuente y seguimiento de la prospección B2B en LinkedIn.' },
-      { path: '/links', label: 'Links NFC / QR', icon: Link2, phase: 'I', ready: false, summary: 'Enlaces medibles para tarjetas NFC y códigos QR, con conteo de escaneos.' },
+      { path: '/leads', label: 'Leads y prospección', icon: UserPlus, phase: 'I', ready: true, summary: 'Leads por fuente y seguimiento de la prospección B2B en LinkedIn.' },
+      { path: '/links', label: 'Links NFC / QR', icon: Link2, phase: 'I', ready: true, summary: 'Enlaces medibles para tarjetas NFC y códigos QR, con conteo de escaneos.' },
     ],
   },
   {

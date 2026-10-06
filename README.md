@@ -5,10 +5,10 @@ clientes, proveedores, catálogo, cotizaciones, pedidos (Shopify y venta directa
 compras, bodega con etiquetas NFC/QR, logística, remisiones, facturas y pagos, con
 bitácora de cambios, pendientes, KPIs, agentes y reportes.
 
-> Estado: **fases A, B y C escritas** (acceso, catálogo, clientes, proveedores,
-> inventario y bodega con etiquetas). El modelo de la base está en
-> `supabase/migrations/pending_op*.sql` y **aún no se aplica en Supabase**, así que
-> las pantallas interiores no se han verificado con datos. Sin conexión con Shopify.
+> Estado: **todas las fases están escritas, ninguna está aplicada ni validada.** El
+> esquema vive en `supabase/migrations/pending_op*.sql` y no se ha ejecutado en
+> Supabase; las Edge Functions no están desplegadas. Lo verificado hoy son las reglas
+> puras (pruebas), el tipado y el build. Ver `docs/PUESTA_EN_MARCHA.md`.
 
 ## Stack
 
@@ -36,5 +36,6 @@ npm run build
 
 - `AGENTS.md`: reglas para cualquier agente de IA que modifique el repositorio.
 - `docs/MITRACLICK_ARCHITECTURE_AND_SCOPE.md`: alcance, fases y límites.
-- `docs/DATABASE.md`: modelo de datos, roles, seguridad y cómo aplicar el esquema.
+- `docs/DATABASE.md`: modelo de datos, roles y seguridad.
+- `docs/PUESTA_EN_MARCHA.md`: pasos para dejarlo operando, decisiones por defecto y validación.
 - `.claude/skills/`: skills del proyecto y su procedencia.

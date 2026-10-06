@@ -38,9 +38,9 @@ export const initials = (name: string) =>
 
 /** Tono de una etiqueta de estado. Lo que no está en la lista se muestra neutro. */
 export const statusTone = (status: string) => {
-  if (['Activo', 'Activa', 'Suficiente', 'Sin diferencia', 'Ajustado', 'Resuelta', 'Ganada', 'Entregado', 'Entregada', 'Recibida', 'Verificada', 'Pagada', 'Pagado', 'Resuelto', 'Exitosa'].includes(status)) return 'success'
-  if (['Negativo', 'Abierta', 'Perdida', 'Cancelado', 'Cancelada', 'Rechazada', 'Con incidencia', 'Vencida', 'Alta', 'Fallida'].includes(status)) return 'danger'
-  if (['Pendiente', 'Bajo', 'Sin familia', 'En negociación', 'Parcial', 'En compra', 'En surtido', 'Abierto', 'En proceso', 'Media'].includes(status)) return 'warning'
+  if (['Activo', 'Activa', 'Suficiente', 'Sin diferencia', 'Ajustado', 'Resuelta', 'Ganada', 'Entregado', 'Entregada', 'Recibida', 'Verificada', 'Pagada', 'Pagado', 'Resuelto', 'Exitosa', 'Ganado', 'Aceptado', 'Atendida'].includes(status)) return 'success'
+  if (['Negativo', 'Abierta', 'Perdida', 'Cancelado', 'Cancelada', 'Rechazada', 'Con incidencia', 'Vencida', 'Alta', 'Fallida', 'Perdido'].includes(status)) return 'danger'
+  if (['Pendiente', 'Bajo', 'Sin familia', 'En negociación', 'Parcial', 'En compra', 'En surtido', 'Abierto', 'En proceso', 'Media', 'Contactado', 'En conversación', 'Calificado', 'Cotizado', 'Convertido en pendiente'].includes(status)) return 'warning'
   if (['Enviada', 'Enviado', 'Confirmado', 'En ruta', 'Programado', 'Emitida', 'Nuevo', 'Nueva'].includes(status)) return 'info'
   return 'neutral'
 }

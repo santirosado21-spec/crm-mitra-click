@@ -8,28 +8,17 @@ us-east-2, plan gratuito). Es la única fuente de verdad del sistema.
 | Qué | Estado |
 |---|---|
 | Migraciones `20260925*` (tablero de solo lectura, dos negocios) | Aplicadas. Modelo anterior, **vacío**, se reemplaza |
-| `pending_op1_reset_readonly_model.sql` | Escrita, **sin aplicar** |
-| `pending_op2_access_roles_audit.sql` | Escrita, **sin aplicar** |
-| `pending_op3_operational_model.sql` | Escrita, **sin aplicar** |
-| `pending_op4_catalog_inventory_functions.sql` | Escrita, **sin aplicar** |
+| `pending_op1` … `pending_op10` | Escritas, **sin aplicar y sin ejecutar nunca** |
+| Edge Functions `shopify-webhook`, `shopify-sync`, `agent-narrate`, `go` | En el repo, **sin desplegar** |
 | `src/mitraclick/lib/database.types.ts` | Provisional, escrito a mano; se regenera al aplicar |
-| Edge Function `ingest` (desplegada) | Obsoleta: apunta al modelo anterior. Retirarla al aplicar el reinicio |
+| Edge Function `ingest` (desplegada) | Obsoleta: apunta al modelo anterior. Retirarla |
 
-Mientras las cuatro migraciones `pending_op*` no se apliquen, la app solo muestra el
-inicio de sesión: la función `my_profile()` y las tablas nuevas todavía no existen.
+Mientras las migraciones `pending_op*` no se apliquen, la app solo muestra el inicio de
+sesión. El orden, los secretos y la validación están en `docs/PUESTA_EN_MARCHA.md`.
 
-## Cómo aplicar el modelo operativo
-
-Requiere autorización explícita: la primera migración **borra** el modelo anterior
-(tablas `wholesale_*`, `retail_*`, `clients`, `products`, `sales_reps`, `app_users`,
-`audit_log` y las funciones de carga). Están vacías, pero es una operación destructiva.
-
-1. Aplicar en orden `op1` → `op2` → `op3` → `op4` (MCP `apply_migration` o SQL Editor).
-2. Renombrar cada archivo `pending_*` con la versión que asigne Supabase
-   (`list_migrations`), para que el repo y la base coincidan.
-3. Revisar advisors de seguridad y rendimiento.
-4. Regenerar `database.types.ts`.
-5. Dar de alta al primer usuario (ver "Primer acceso").
+La migración 1 **borra** el modelo anterior (tablas `wholesale_*`, `retail_*`, `clients`,
+`products`, `sales_reps`, `app_users`, `audit_log` y las funciones de carga). Están vacías,
+pero es destructiva y requiere que la ejecute una persona.
 
 ## Modelo operativo (migración 3)
 
@@ -71,6 +60,21 @@ Corren con los permisos de quien las llama (`SECURITY INVOKER`); la RLS sigue ap
 
 Además, un trigger en `stock_counts` fija la existencia del sistema, el estado y quién
 contó: quien cuenta solo envía la cantidad contada.
+
+## Migraciones 5 a 10
+
+| Migración | Contenido |
+|---|---|
+| 5 · Ciclo comercial | `save_quote`, `convert_quote_to_order`, `save_order`, `save_purchase`, `receive_purchase`, `ship_order`, `register_delivery`, `verify_remission`, `register_invoice`, `register_payment`, cambios de estado, vistas `invoice_balances` y `customer_statements`, `order_timeline`, bucket privado `remisiones` |
+| 6 · Calidad de datos | `control_settings` (umbrales), vista `data_quality_findings`, sincronización a `issues`, alertas con `dedupe_key`, revisión cada hora |
+| 7 · KPIs | `kpi_commercial`, `kpi_sales_by_day`, `kpi_by_family`, `kpi_by_product`, `kpi_by_rep`, `kpi_operations` |
+| 8 · Shopify | `shopify_apply_order/product/customer`, crudo y bitácora, `integration_settings`, diferencias de inventario |
+| 9 · Agentes y reportes | `run_agent`, `generate_reports`, `convert_finding_to_issue`, programación diaria y por periodo |
+| 10 · Adquisición | `track_link`, `convert_lead_to_customer`, `kpi_acquisition`, `seo_metrics` e importación |
+
+Las funciones del ciclo comercial son `SECURITY DEFINER` porque cruzan áreas (bodega
+actualiza lo surtido de un pedido; finanzas, su estado de pago): cada una valida primero
+el rol con `private.require_role`. Las funciones `shopify_*` solo las ejecuta `service_role`.
 
 ## Seguridad
 
