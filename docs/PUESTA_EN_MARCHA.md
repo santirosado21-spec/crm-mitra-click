@@ -1,7 +1,7 @@
 # Puesta en marcha — Mitra Click
 
 Todo el sistema está escrito en el repositorio y el esquema está aplicado en Supabase. Lo que
-falta es desplegar las Edge Functions, conectar Shopify y **validar con datos y personas reales**. Esta guía es el camino de "código en la rama" a "sistema
+falta es conectar Shopify y **validar con datos y personas reales**. Esta guía es el camino de "código en la rama" a "sistema
 funcionando", en orden. Cada paso dice quién puede hacerlo.
 
 ## 1. Esquema
