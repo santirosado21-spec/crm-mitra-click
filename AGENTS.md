@@ -17,7 +17,7 @@ No presentar el sistema como productivo. Hoy:
 - **Escrito y aplicado:** las fases A a I completas en la app, y las 10 migraciones aplicadas en Supabase (7-oct-2026). El detalle está en `docs/DATABASE.md`.
 - **Verificado:** reglas puras (pruebas unitarias), tipado, build, advisors, y un recorrido completo de cotización a pago dentro de una transacción revertida, con permisos por rol. No hay datos reales ni de prueba cargados.
 - **Sin validar:** ninguna pantalla se ha usado con sesión real, ni revisado visualmente en 1440 px y 390 px con datos.
-- **Sin desplegar:** las Edge Functions de `supabase/functions/`. Shopify y la redacción con IA esperan credenciales. El envío de existencias a Shopify no está construido (solo su interruptor, apagado).
+- **Edge Functions desplegadas** (`go`, `shopify-webhook`, `shopify-sync`, `agent-narrate`); `ingest` quedó retirada. Shopify y la redacción con IA esperan credenciales. El envío de existencias a Shopify no está construido (solo su interruptor, apagado).
 - El código QR de la hoja de etiquetas está pendiente: falta instalar la dependencia `qrcode`.
 
 El camino para dejarlo funcionando, las decisiones tomadas por defecto y la lista de validación están en `docs/PUESTA_EN_MARCHA.md`.

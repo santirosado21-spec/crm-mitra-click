@@ -19,6 +19,9 @@ se dan de alta en la pantalla **Usuarios y permisos**; entran con ese mismo corr
 
 ## 3. Edge Functions
 
+**Desplegadas el 7-oct-2026** (sin secretos configurados todavía, así que Shopify y la redacción
+con IA siguen inactivas).
+
 | Función | `verify_jwt` | Quién la llama |
 |---|---|---|
 | `shopify-webhook` | **false** | Shopify (autentica con la firma HMAC) |
@@ -26,7 +29,11 @@ se dan de alta en la pantalla **Usuarios y permisos**; entran con ese mismo corr
 | `agent-narrate` | true | Dirección o admin (redacción con IA) |
 | `go` | **false** | Cualquiera que escanea un link NFC/QR |
 
-Retirar la función anterior `ingest`: quedó obsoleta.
+La función anterior `ingest` quedó retirada (responde 410). Si se quiere borrar del todo:
+panel de Supabase → Edge Functions → ingest → Delete.
+
+Cuando cambie el código de una función, hay que volver a desplegarla (el repositorio no la
+despliega solo).
 
 Secretos (Edge Functions → Secrets). Ninguno va en el navegador ni en el repositorio:
 

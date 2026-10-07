@@ -21,7 +21,8 @@ Las 10 migraciones del sistema operativo están **aplicadas** (7-oct-2026).
 | `20261007185613_op_acquisition.sql` | Migración |
 
 - `src/mitraclick/lib/database.types.ts` está **generado** con `generate_typescript_types`; no se edita a mano.
-- Edge Functions `shopify-webhook`, `shopify-sync`, `agent-narrate`, `go`: en el repo; ver `docs/PUESTA_EN_MARCHA.md` para su despliegue. La función anterior `ingest` quedó obsoleta.
+- Edge Functions desplegadas el 7-oct-2026: `go` (pública), `shopify-webhook` (pública, exige firma HMAC), `shopify-sync` y `agent-narrate` (exigen sesión de dirección o admin). Probadas sin credenciales: `go` responde 404 a un código desconocido, el webhook rechaza lo no firmado (401) y las otras dos rechazan llamadas sin sesión (401).
+- `ingest` (obsoleta) quedó reemplazada por un aviso 410: no se pudo borrar desde la herramienta; se puede eliminar desde el panel de Supabase.
 - Tareas programadas (`pg_cron`): `mitra-calidad-de-datos` (cada hora), `mitra-agentes-diario`, `mitra-reportes-semanal`, `mitra-reportes-quincenal` y `mitra-reportes-mensual`.
 
 ### Verificación hecha
