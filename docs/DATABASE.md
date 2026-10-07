@@ -5,24 +5,33 @@ us-east-2, plan gratuito). Es la única fuente de verdad del sistema.
 
 ## Estado
 
-| Qué | Estado |
+Las 10 migraciones del sistema operativo están **aplicadas** (7-oct-2026).
+
+| Archivo | Cómo se aplicó |
 |---|---|
-| Migraciones `20260925*` (tablero de solo lectura, dos negocios) | Aplicadas. Modelo anterior, **vacío**, se reemplaza |
-| `pending_op1_reset_readonly_model.sql` | **Ejecutada a mano** en el SQL Editor (7-oct-2026). No aparece en el historial de migraciones de Supabase |
-| `20261007183636_op_access_roles_audit.sql` (op2) | **Aplicada** |
-| `20261007183752_op_operational_model.sql` (op3) | **Aplicada** |
-| `20261007183816_op_catalog_inventory_functions.sql` (op4) | **Aplicada** |
-| `pending_op5` … `pending_op10` | Escritas, **sin aplicar** (la op5 fue rechazada por el control de permisos) |
-| Edge Functions `shopify-webhook`, `shopify-sync`, `agent-narrate`, `go` | En el repo, **sin desplegar** |
-| `src/mitraclick/lib/database.types.ts` | Provisional, escrito a mano; se regenera al aplicar |
-| Edge Function `ingest` (desplegada) | Obsoleta: apunta al modelo anterior. Retirarla |
+| `manual_op1_reset_readonly_model.sql` | A mano en el SQL Editor (borró el modelo anterior, vacío). No aparece en el historial de Supabase |
+| `20261007183636_op_access_roles_audit.sql` | Migración |
+| `20261007183752_op_operational_model.sql` | Migración |
+| `20261007183816_op_catalog_inventory_functions.sql` | Migración |
+| `manual_op5_commercial_cycle.sql` | A mano en el SQL Editor. No aparece en el historial de Supabase |
+| `20261007185322_op_data_quality_alerts.sql` | Migración |
+| `20261007185358_op_kpis.sql` | Migración |
+| `20261007185431_op_shopify_connector.sql` | Migración |
+| `20261007185552_op_agents_reports.sql` | Migración |
+| `20261007185613_op_acquisition.sql` | Migración |
 
-Mientras las migraciones `pending_op*` no se apliquen, la app solo muestra el inicio de
-sesión. El orden, los secretos y la validación están en `docs/PUESTA_EN_MARCHA.md`.
+- `src/mitraclick/lib/database.types.ts` está **generado** con `generate_typescript_types`; no se edita a mano.
+- Edge Functions `shopify-webhook`, `shopify-sync`, `agent-narrate`, `go`: en el repo; ver `docs/PUESTA_EN_MARCHA.md` para su despliegue. La función anterior `ingest` quedó obsoleta.
+- Tareas programadas (`pg_cron`): `mitra-calidad-de-datos` (cada hora), `mitra-agentes-diario`, `mitra-reportes-semanal`, `mitra-reportes-quincenal` y `mitra-reportes-mensual`.
 
-La migración 1 **borra** el modelo anterior (tablas `wholesale_*`, `retail_*`, `clients`,
-`products`, `sales_reps`, `app_users`, `audit_log` y las funciones de carga). Están vacías,
-pero es destructiva y requiere que la ejecute una persona.
+### Verificación hecha
+
+Un recorrido dentro de una transacción que siempre se revierte, con un usuario de dirección y otro solo de ventas: cotización → pedido → compra → recepción → envío → entrega → verificación → factura → pagos; traspaso, conteo y ajuste; KPIs; revisión de calidad con apertura y cierre automático de pendientes; los cuatro agentes y los reportes; redirección de links y embudo de leads; pedido de Shopify aplicado dos veces sin duplicar y cancelado; y permisos (ventas no crea productos, no paga, no ejecuta agentes ni ajusta inventario; anónimo sin acceso). Todo pasó. Esta prueba **no** sustituye la validación con personas reales.
+
+### Advisors
+
+- Seguridad: solo `raw.api_payloads` sin políticas (intencional: no se expone) y 22 avisos de funciones `SECURITY DEFINER` ejecutables por usuarios con sesión. Es el diseño: cada una valida el rol con `private.require_role` antes de escribir, y las que son solo del servidor (`shopify_*`, `track_link`, `save_ai_narrative`) están restringidas a `service_role`.
+- Rendimiento: solo índices sin uso, esperable con la base vacía.
 
 ## Modelo operativo (migración 3)
 
@@ -65,7 +74,7 @@ Corren con los permisos de quien las llama (`SECURITY INVOKER`); la RLS sigue ap
 Además, un trigger en `stock_counts` fija la existencia del sistema, el estado y quién
 contó: quien cuenta solo envía la cantidad contada.
 
-## Migraciones 5 a 10
+## Migraciones 5 a 10 (ya aplicadas)
 
 | Migración | Contenido |
 |---|---|

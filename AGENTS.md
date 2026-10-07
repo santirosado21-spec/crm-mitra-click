@@ -10,16 +10,15 @@ Este repositorio es el **sistema operativo propio de Mitra Click**: clientes, pr
 - **Documento base:** "Plan de Trabajo Mitra Click AI Implementation" (Ángel Secades, Santiago Rosado, Lorenzo Stoopen), 17 puntos. El plan de construcción aprobado se resume en `docs/MITRACLICK_ARCHITECTURE_AND_SCOPE.md`.
 - **Agentes, reportes y alertas viven dentro de esta app** (decisión de oct-2026, que revierte la anterior de dejarlos en Grok Bot).
 
-### Estado actual (todo escrito; nada aplicado ni validado)
+### Estado actual (esquema aplicado; sin validar con personas)
 
 No presentar el sistema como productivo. Hoy:
 
-- **Escrito en la app y en migraciones:** las fases A a I completas: acceso y bitácora; catálogo, clientes y proveedores con importador CSV; bodega con etiquetas; ciclo de cotización a pago; calidad de datos, pendientes y alertas; KPIs y dashboard; conector de Shopify; agentes y reportes; links, leads y SEO.
-- **Aplicado en Supabase (7-oct-2026):** migraciones 1 a 4 (accesos, tablas, catálogo y bodega). **Sin aplicar:** `supabase/migrations/pending_op5..10` (ciclo comercial, calidad de datos, KPIs, Shopify, agentes y reportes, adquisición); no se han ejecutado nunca. Las Edge Functions de `supabase/functions/` no están desplegadas.
-- **Sin validar:** ninguna pantalla se ha probado con datos ni con sesión. Lo único verificado son las reglas puras (pruebas unitarias), el tipado y el build.
-- Shopify y la redacción con IA esperan credenciales. El envío de existencias a Shopify no está construido (solo su interruptor, apagado).
+- **Escrito y aplicado:** las fases A a I completas en la app, y las 10 migraciones aplicadas en Supabase (7-oct-2026). El detalle está en `docs/DATABASE.md`.
+- **Verificado:** reglas puras (pruebas unitarias), tipado, build, advisors, y un recorrido completo de cotización a pago dentro de una transacción revertida, con permisos por rol. No hay datos reales ni de prueba cargados.
+- **Sin validar:** ninguna pantalla se ha usado con sesión real, ni revisado visualmente en 1440 px y 390 px con datos.
+- **Sin desplegar:** las Edge Functions de `supabase/functions/`. Shopify y la redacción con IA esperan credenciales. El envío de existencias a Shopify no está construido (solo su interruptor, apagado).
 - El código QR de la hoja de etiquetas está pendiente: falta instalar la dependencia `qrcode`.
-- No hay datos reales ni de prueba cargados.
 
 El camino para dejarlo funcionando, las decisiones tomadas por defecto y la lista de validación están en `docs/PUESTA_EN_MARCHA.md`.
 
@@ -73,7 +72,7 @@ Responsabilidades:
 - `src/mitraclick/components/`: shell, primitivas, controles y `ResourcePage`.
 - `src/mitraclick/pages/`: una pantalla por módulo.
 - `src/mitraclick/seed/`: catálogo de ejemplo para sembrar datos de prueba en la base.
-- `supabase/migrations/`: esquema. `supabase/functions/`: Edge Functions (`shopify-webhook`, `shopify-sync`, `agent-narrate`, `go`) y su código compartido en `_shared/` (con pruebas).
+- `supabase/migrations/`: esquema (los `manual_*` se ejecutaron a mano; el resto, como migraciones). `supabase/functions/`: Edge Functions (`shopify-webhook`, `shopify-sync`, `agent-narrate`, `go`) y su código compartido en `_shared/` (con pruebas).
 
 ### Reglas de dependencia
 

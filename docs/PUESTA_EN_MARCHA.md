@@ -1,44 +1,21 @@
 # Puesta en marcha — Mitra Click
 
-Todo el sistema está escrito en el repositorio. Las migraciones 1 a 4 están aplicadas en
-Supabase; el resto no, y **nada se ha probado con datos**. Esta guía es el camino de "código en la rama" a "sistema
+Todo el sistema está escrito en el repositorio y el esquema está aplicado en Supabase. Lo que
+falta es desplegar las Edge Functions, conectar Shopify y **validar con datos y personas reales**. Esta guía es el camino de "código en la rama" a "sistema
 funcionando", en orden. Cada paso dice quién puede hacerlo.
 
-## 1. Aplicar el esquema
+## 1. Esquema
 
-Estado al 7-oct-2026: las migraciones 1 a 4 están aplicadas; la 5 a la 10 no.
+**Aplicado al 7-oct-2026**: las 10 migraciones. El detalle, los advisors y la verificación
+que se hizo están en `docs/DATABASE.md`. Los archivos `manual_*` se ejecutaron a mano en el
+SQL Editor y no aparecen en el historial de migraciones de Supabase.
 
-| # | Archivo | Estado |
-|---|---|---|
-| 1 | `pending_op1_reset_readonly_model.sql` | Ejecutada a mano (borró el modelo anterior) |
-| 2 | `20261007183636_op_access_roles_audit.sql` | Aplicada |
-| 3 | `20261007183752_op_operational_model.sql` | Aplicada |
-| 4 | `20261007183816_op_catalog_inventory_functions.sql` | Aplicada |
-| 5 | `pending_op5_commercial_cycle.sql` | **Rechazada** por el control de permisos; pendiente |
-| 6 | `pending_op6_data_quality_alerts.sql` | Pendiente |
-| 7 | `pending_op7_kpis.sql` | Pendiente |
-| 8 | `pending_op8_shopify_connector.sql` | Pendiente |
-| 9 | `pending_op9_agents_reports.sql` | Pendiente |
-| 10 | `pending_op10_acquisition.sql` | Pendiente |
-
-- Las migraciones 6 y 9 usan `pg_cron`. Si la extensión no está disponible, activarla en
-  Database → Extensions antes de correrlas.
-- Las pendientes **no se han ejecutado nunca**. Es esperable que alguna falle por un detalle
-  de sintaxis o de dependencias: corregir y dejar el archivo igual a lo que quedó aplicado.
-- Al aplicar cada una: renombrar el archivo con la versión que asigne Supabase, revisar
-  advisors y regenerar `src/mitraclick/lib/database.types.ts` al terminar todas.
-- Revisión de advisors tras aplicar 1 a 4: seguridad sin hallazgos (solo el aviso informativo
-  de `raw.api_payloads`, que no se expone a propósito); rendimiento solo con índices sin uso,
-  esperable con la base vacía.
+Falta, de este paso: la validación con datos reales y la revisión visual (ver el punto 7).
 
 ## 2. Primer usuario
 
-```sql
-insert into public.app_users (email, display_name, roles)
-values ('correo@ejemplo.com', 'Nombre', '{direccion,admin}');
-```
-
-Los demás se dan de alta en la pantalla **Usuarios y permisos**.
+Dado de alta el 7-oct-2026: `santirosado21@gmail.com` con roles dirección y admin. Los demás
+se dan de alta en la pantalla **Usuarios y permisos**; entran con ese mismo correo.
 
 ## 3. Edge Functions
 

@@ -69,7 +69,7 @@ Principios:
 | G | KPIs y dashboard ejecutivo | Escrita |
 | H | Agentes (supervisión, comercial, marketing, ejecutivo) y reportes | Escrita |
 | I | Adquisición medible: links, leads, prospección, SEO | Escrita |
-| J | Validación operativa con usuarios reales | **Pendiente: nada se ha aplicado ni probado con datos** |
+| J | Validación operativa con usuarios reales | **Pendiente.** Esquema aplicado y probado en una transacción revertida; falta usarlo con datos y personas reales |
 
 "Escrita" significa: pantallas, migraciones y pruebas de las reglas puras en el repositorio.
 No significa validada. La validación está en `docs/PUESTA_EN_MARCHA.md`.
