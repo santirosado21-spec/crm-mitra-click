@@ -5,10 +5,10 @@ clientes, proveedores, catálogo, cotizaciones, pedidos (Shopify y venta directa
 compras, bodega con etiquetas NFC/QR, logística, remisiones, facturas y pagos, con
 bitácora de cambios, pendientes, KPIs, agentes y reportes.
 
-> Estado: **todas las fases están escritas, ninguna está aplicada ni validada.** El
-> esquema vive en `supabase/migrations/pending_op*.sql` y no se ha ejecutado en
-> Supabase; las Edge Functions no están desplegadas. Lo verificado hoy son las reglas
-> puras (pruebas), el tipado y el build. Ver `docs/PUESTA_EN_MARCHA.md`.
+> Estado: **todas las fases están escritas; solo las migraciones 1 a 4 están aplicadas** en
+> Supabase (accesos, catálogo, clientes y bodega). Las migraciones 5 a 10 y las Edge
+> Functions siguen pendientes, y nada se ha probado con datos. Lo verificado son las
+> reglas puras (pruebas), el tipado y el build. Ver `docs/PUESTA_EN_MARCHA.md`.
 
 ## Stack
 

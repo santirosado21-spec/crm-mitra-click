@@ -15,8 +15,8 @@ Este repositorio es el **sistema operativo propio de Mitra Click**: clientes, pr
 No presentar el sistema como productivo. Hoy:
 
 - **Escrito en la app y en migraciones:** las fases A a I completas: acceso y bitácora; catálogo, clientes y proveedores con importador CSV; bodega con etiquetas; ciclo de cotización a pago; calidad de datos, pendientes y alertas; KPIs y dashboard; conector de Shopify; agentes y reportes; links, leads y SEO.
-- **Sin aplicar:** el esquema está en `supabase/migrations/pending_op1..10` y **no se ha ejecutado nunca** en Supabase. Las Edge Functions de `supabase/functions/` no están desplegadas. Hasta entonces la app solo llega al inicio de sesión.
-- **Sin validar:** ninguna pantalla interior se ha probado con datos. Lo único verificado son las reglas puras (pruebas unitarias), el tipado y el build.
+- **Aplicado en Supabase (7-oct-2026):** migraciones 1 a 4 (accesos, tablas, catálogo y bodega). **Sin aplicar:** `supabase/migrations/pending_op5..10` (ciclo comercial, calidad de datos, KPIs, Shopify, agentes y reportes, adquisición); no se han ejecutado nunca. Las Edge Functions de `supabase/functions/` no están desplegadas.
+- **Sin validar:** ninguna pantalla se ha probado con datos ni con sesión. Lo único verificado son las reglas puras (pruebas unitarias), el tipado y el build.
 - Shopify y la redacción con IA esperan credenciales. El envío de existencias a Shopify no está construido (solo su interruptor, apagado).
 - El código QR de la hoja de etiquetas está pendiente: falta instalar la dependencia `qrcode`.
 - No hay datos reales ni de prueba cargados.

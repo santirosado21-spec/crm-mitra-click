@@ -8,7 +8,11 @@ us-east-2, plan gratuito). Es la única fuente de verdad del sistema.
 | Qué | Estado |
 |---|---|
 | Migraciones `20260925*` (tablero de solo lectura, dos negocios) | Aplicadas. Modelo anterior, **vacío**, se reemplaza |
-| `pending_op1` … `pending_op10` | Escritas, **sin aplicar y sin ejecutar nunca** |
+| `pending_op1_reset_readonly_model.sql` | **Ejecutada a mano** en el SQL Editor (7-oct-2026). No aparece en el historial de migraciones de Supabase |
+| `20261007183636_op_access_roles_audit.sql` (op2) | **Aplicada** |
+| `20261007183752_op_operational_model.sql` (op3) | **Aplicada** |
+| `20261007183816_op_catalog_inventory_functions.sql` (op4) | **Aplicada** |
+| `pending_op5` … `pending_op10` | Escritas, **sin aplicar** (la op5 fue rechazada por el control de permisos) |
 | Edge Functions `shopify-webhook`, `shopify-sync`, `agent-narrate`, `go` | En el repo, **sin desplegar** |
 | `src/mitraclick/lib/database.types.ts` | Provisional, escrito a mano; se regenera al aplicar |
 | Edge Function `ingest` (desplegada) | Obsoleta: apunta al modelo anterior. Retirarla |

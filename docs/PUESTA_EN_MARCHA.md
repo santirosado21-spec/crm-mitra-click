@@ -1,35 +1,35 @@
 # Puesta en marcha — Mitra Click
 
-Todo el sistema está escrito en el repositorio, pero **nada se ha aplicado en Supabase
-ni probado con datos**. Esta guía es el camino de "código en la rama" a "sistema
+Todo el sistema está escrito en el repositorio. Las migraciones 1 a 4 están aplicadas en
+Supabase; el resto no, y **nada se ha probado con datos**. Esta guía es el camino de "código en la rama" a "sistema
 funcionando", en orden. Cada paso dice quién puede hacerlo.
 
 ## 1. Aplicar el esquema
 
-En el SQL Editor de Supabase (proyecto `mitraclick-intelligence`), correr en orden los
-archivos de `supabase/migrations/`:
+Estado al 7-oct-2026: las migraciones 1 a 4 están aplicadas; la 5 a la 10 no.
 
-| # | Archivo | Qué hace |
+| # | Archivo | Estado |
 |---|---|---|
-| 1 | `pending_op1_reset_readonly_model.sql` | **Borra** el modelo anterior (vacío) |
-| 2 | `pending_op2_access_roles_audit.sql` | Usuarios, roles, RLS, bitácora |
-| 3 | `pending_op3_operational_model.sql` | Tablas del sistema |
-| 4 | `pending_op4_catalog_inventory_functions.sql` | Catálogo y bodega |
-| 5 | `pending_op5_commercial_cycle.sql` | Cotización → pago |
-| 6 | `pending_op6_data_quality_alerts.sql` | Reglas, pendientes, alertas |
-| 7 | `pending_op7_kpis.sql` | Métricas |
-| 8 | `pending_op8_shopify_connector.sql` | Conector de Shopify |
-| 9 | `pending_op9_agents_reports.sql` | Agentes y reportes |
-| 10 | `pending_op10_acquisition.sql` | Links, leads, SEO |
+| 1 | `pending_op1_reset_readonly_model.sql` | Ejecutada a mano (borró el modelo anterior) |
+| 2 | `20261007183636_op_access_roles_audit.sql` | Aplicada |
+| 3 | `20261007183752_op_operational_model.sql` | Aplicada |
+| 4 | `20261007183816_op_catalog_inventory_functions.sql` | Aplicada |
+| 5 | `pending_op5_commercial_cycle.sql` | **Rechazada** por el control de permisos; pendiente |
+| 6 | `pending_op6_data_quality_alerts.sql` | Pendiente |
+| 7 | `pending_op7_kpis.sql` | Pendiente |
+| 8 | `pending_op8_shopify_connector.sql` | Pendiente |
+| 9 | `pending_op9_agents_reports.sql` | Pendiente |
+| 10 | `pending_op10_acquisition.sql` | Pendiente |
 
-- El paso 1 es destructivo y por eso el agente de IA no pudo ejecutarlo: lo corre una persona.
 - Las migraciones 6 y 9 usan `pg_cron`. Si la extensión no está disponible, activarla en
   Database → Extensions antes de correrlas.
-- **Estas migraciones no se han ejecutado nunca.** Es esperable que alguna falle por un
-  detalle de sintaxis o de dependencias: corregir sobre la marcha y dejar el archivo igual
-  a lo que quedó aplicado.
-- Al terminar: renombrar cada `pending_*` con su versión, revisar advisors de seguridad y
-  rendimiento, y regenerar `src/mitraclick/lib/database.types.ts`.
+- Las pendientes **no se han ejecutado nunca**. Es esperable que alguna falle por un detalle
+  de sintaxis o de dependencias: corregir y dejar el archivo igual a lo que quedó aplicado.
+- Al aplicar cada una: renombrar el archivo con la versión que asigne Supabase, revisar
+  advisors y regenerar `src/mitraclick/lib/database.types.ts` al terminar todas.
+- Revisión de advisors tras aplicar 1 a 4: seguridad sin hallazgos (solo el aviso informativo
+  de `raw.api_payloads`, que no se expone a propósito); rendimiento solo con índices sin uso,
+  esperable con la base vacía.
 
 ## 2. Primer usuario
 
