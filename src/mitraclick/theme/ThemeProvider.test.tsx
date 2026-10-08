@@ -24,5 +24,8 @@ describe('tema de la aplicación', () => {
     expect(html).toContain('Cambiar a modo claro')
     expect(html).toContain('Modo claro')
     expect(html).toContain('aria-pressed="true"')
+    expect(html).toContain('id="mc-brand-dark"')
+    expect(html).toContain('in="SourceGraphic" in2="yellow-mask" operator="in"')
+    expect(html).toContain('color-interpolation-filters="sRGB"')
   })
 })

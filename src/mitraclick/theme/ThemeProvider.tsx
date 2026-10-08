@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { ThemeContext } from './ThemeContext'
+import { BrandColorFilter } from './BrandColorFilter'
 import { applyTheme, readInitialTheme, saveTheme, type Theme } from './theme'
 
 export function ThemeProvider({ children, initialTheme }: { children: ReactNode; initialTheme?: Theme }) {
@@ -13,5 +14,5 @@ export function ThemeProvider({ children, initialTheme }: { children: ReactNode;
   const toggleTheme = useCallback(() => setTheme((current) => current === 'dark' ? 'light' : 'dark'), [])
   const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme])
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  return <ThemeContext.Provider value={value}><BrandColorFilter />{children}</ThemeContext.Provider>
 }
