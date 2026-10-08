@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildSearchFilter, describeError } from './crud'
+import { buildSearchFilter, describeError, setSignedIn } from './crud'
 import { validateValues, type FieldDef } from './forms'
 
 describe('describeError', () => {
@@ -13,8 +13,19 @@ describe('describeError', () => {
       .toBe('No se puede completar: el registro está relacionado con otros que dependen de él.')
   })
 
-  it('explica la falta de permiso (RLS o privilegios)', () => {
-    expect(describeError({ code: '42501', message: 'new row violates row-level security policy for table "products"' })).toBe('Tu rol no tiene permiso para esta acción.')
+  // Postgres responde lo mismo (42501) si entraste sin sesión y si tu rol no alcanza, y
+  // para quien usa la app son problemas distintos: uno se arregla entrando, el otro
+  // pidiendo permisos. El mensaje tiene que distinguirlos.
+  it('con sesión, explica que el rol no alcanza', () => {
+    setSignedIn(true)
+    expect(describeError({ code: '42501', message: 'new row violates row-level security policy for table "products"' }))
+      .toBe('Tu rol no tiene permiso para esta acción.')
+  })
+
+  it('sin sesión, dice que hay que entrar en vez de culpar al rol', () => {
+    setSignedIn(false)
+    expect(describeError({ code: '42501', message: 'permission denied for table products' }))
+      .toBe('No hay sesión: entra con tu cuenta para ver estos datos.')
   })
 
   it('muestra tal cual los mensajes de reglas de negocio de la base', () => {

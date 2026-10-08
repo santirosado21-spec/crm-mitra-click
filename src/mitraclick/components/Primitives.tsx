@@ -97,6 +97,7 @@ export function KpiCard({
   period,
   testId,
   emphasis = false,
+  unknown = false,
 }: {
   label: string
   value: string | number
@@ -109,7 +110,15 @@ export function KpiCard({
   period?: string
   testId?: string
   emphasis?: boolean
+  /**
+   * La consulta falló: no se sabe el número. Sin esto la tarjeta muestra el 0 que sale de
+   * una lista vacía, y un 0 afirma algo —«no hay nada»— cuando la verdad es que no se
+   * pudo saber. Se dibuja un guion y se dice por qué.
+   */
+  unknown?: boolean
 }) {
+  const shownDelta = unknown ? undefined : delta
+  const shownHelper = unknown ? 'No se pudo consultar' : helper
   return (
     <article
       className={`flex min-w-0 flex-col rounded-2xl border p-3 shadow-mc-card sm:p-4 ${emphasis ? 'border-mc-charcoal bg-mc-charcoal text-white' : 'border-mc-line bg-mc-surface'}`}
@@ -121,10 +130,10 @@ export function KpiCard({
           <Icon size={16} aria-hidden="true" />
         </span>
       </div>
-      <p className={`mt-2 break-words text-xl font-extrabold leading-tight tabular sm:text-[26px] ${emphasis ? 'text-white' : 'text-mc-ink'}`} data-testid={testId ? `${testId}-value` : undefined}>{value}</p>
+      <p className={`mt-2 break-words text-xl font-extrabold leading-tight tabular sm:text-[26px] ${emphasis ? 'text-white' : 'text-mc-ink'}`} data-testid={testId ? `${testId}-value` : undefined}>{unknown ? '—' : value}</p>
       <div className="mt-1 flex flex-wrap items-center gap-2">
-        {delta !== undefined && <Delta value={delta} />}
-        {helper && <span className={`text-[11px] ${emphasis ? 'text-white/75' : 'text-mc-muted'}`}>{helper}</span>}
+        {shownDelta !== undefined && <Delta value={shownDelta} />}
+        {shownHelper && <span className={`text-[11px] ${emphasis ? 'text-white/75' : 'text-mc-muted'}`}>{shownHelper}</span>}
       </div>
       {(source || period) && !emphasis && <div className="mt-3 border-t border-mc-line-soft pt-2"><SourceStamp source={source ?? 'Datos simulados'} period={period} /></div>}
     </article>

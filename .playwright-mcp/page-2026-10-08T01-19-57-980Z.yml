@@ -1,0 +1,135 @@
+- generic [ref=f1e3]:
+  - complementary [ref=f1e4]:
+    - img "Mitra Click" [ref=f1e6]
+    - navigation "Navegación principal" [ref=f1e7]:
+      - generic [ref=f1e8]:
+        - paragraph [ref=f1e9]: Dirección
+        - list [ref=f1e10]:
+          - listitem [ref=f1e11]:
+            - link "Inicio" [ref=f1e12] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=f1e17]:
+            - link "Dashboard ejecutivo" [ref=f1e18] [cursor=pointer]:
+              - /url: /dashboard
+          - listitem [ref=f1e25]:
+            - link "Pendientes" [ref=f1e26] [cursor=pointer]:
+              - /url: /pendientes
+          - listitem [ref=f1e32]:
+            - link "Reportes" [ref=f1e33] [cursor=pointer]:
+              - /url: /reportes
+          - listitem [ref=f1e38]:
+            - link "Agentes" [ref=f1e39] [cursor=pointer]:
+              - /url: /agentes
+      - generic [ref=f1e44]:
+        - paragraph [ref=f1e45]: Ventas
+        - list [ref=f1e46]:
+          - listitem [ref=f1e47]:
+            - link "Clientes" [ref=f1e48] [cursor=pointer]:
+              - /url: /clientes
+          - listitem [ref=f1e55]:
+            - link "Vendedores" [ref=f1e56] [cursor=pointer]:
+              - /url: /vendedores
+          - listitem [ref=f1e62]:
+            - link "Cotizaciones" [ref=f1e63] [cursor=pointer]:
+              - /url: /cotizaciones
+          - listitem [ref=f1e69]:
+            - link "Pedidos" [ref=f1e70] [cursor=pointer]:
+              - /url: /pedidos
+      - generic [ref=f1e76]:
+        - paragraph [ref=f1e77]: Compras
+        - list [ref=f1e78]:
+          - listitem [ref=f1e79]:
+            - link "Proveedores" [ref=f1e80] [cursor=pointer]:
+              - /url: /proveedores
+          - listitem [ref=f1e86]:
+            - link "Compras" [ref=f1e87] [cursor=pointer]:
+              - /url: /compras
+      - generic [ref=f1e92]:
+        - paragraph [ref=f1e93]: Bodega
+        - list [ref=f1e94]:
+          - listitem [ref=f1e95]:
+            - link "Operación del día" [ref=f1e96] [cursor=pointer]:
+              - /url: /bodega
+          - listitem [ref=f1e101]:
+            - link "Inventario" [ref=f1e102] [cursor=pointer]:
+              - /url: /inventario
+          - listitem [ref=f1e114]:
+            - link "Movimientos" [ref=f1e115] [cursor=pointer]:
+              - /url: /movimientos
+          - listitem [ref=f1e122]:
+            - link "Surtido" [ref=f1e123] [cursor=pointer]:
+              - /url: /surtido
+          - listitem [ref=f1e128]:
+            - link "Conteos" [ref=f1e129] [cursor=pointer]:
+              - /url: /conteos
+          - listitem [ref=f1e134]:
+            - link "Mapa de la bodega" [ref=f1e135] [cursor=pointer]:
+              - /url: /mapa
+          - listitem [ref=f1e139]:
+            - link "Ubicaciones y etiquetas" [ref=f1e140] [cursor=pointer]:
+              - /url: /ubicaciones
+      - generic [ref=f1e145]:
+        - paragraph [ref=f1e146]: Logística
+        - list [ref=f1e147]:
+          - listitem [ref=f1e148]:
+            - link "Envíos y rutas" [ref=f1e149] [cursor=pointer]:
+              - /url: /envios
+          - listitem [ref=f1e156]:
+            - link "Remisiones" [ref=f1e157] [cursor=pointer]:
+              - /url: /remisiones
+      - generic [ref=f1e162]:
+        - paragraph [ref=f1e163]: Finanzas
+        - list [ref=f1e164]:
+          - listitem [ref=f1e165]:
+            - link "Facturas" [ref=f1e166] [cursor=pointer]:
+              - /url: /facturas
+          - listitem [ref=f1e171]:
+            - link "Pagos y estados de cuenta" [ref=f1e172] [cursor=pointer]:
+              - /url: /pagos
+      - generic [ref=f1e177]:
+        - paragraph [ref=f1e178]: Catálogo
+        - list [ref=f1e179]:
+          - listitem [ref=f1e180]:
+            - link "Productos" [ref=f1e181] [cursor=pointer]:
+              - /url: /productos
+          - listitem [ref=f1e189]:
+            - link "Familias y categorías" [ref=f1e190] [cursor=pointer]:
+              - /url: /familias
+      - generic [ref=f1e197]:
+        - paragraph [ref=f1e198]: Marketing
+        - list [ref=f1e199]:
+          - listitem [ref=f1e200]:
+            - link "Leads y prospección" [ref=f1e201] [cursor=pointer]:
+              - /url: /leads
+          - listitem [ref=f1e206]:
+            - link "Links NFC / QR" [ref=f1e207] [cursor=pointer]:
+              - /url: /links
+      - generic [ref=f1e212]:
+        - paragraph [ref=f1e213]: Sistema
+        - list [ref=f1e214]:
+          - listitem [ref=f1e215]:
+            - link "Usuarios y permisos" [ref=f1e216] [cursor=pointer]:
+              - /url: /usuarios
+          - listitem [ref=f1e223]:
+            - link "Bitácora" [ref=f1e224] [cursor=pointer]:
+              - /url: /bitacora
+          - listitem [ref=f1e230]:
+            - link "Shopify" [ref=f1e231] [cursor=pointer]:
+              - /url: /shopify
+    - generic [ref=f1e236]:
+      - generic [ref=f1e237]:
+        - img "Desarrollo (sin sesión)" [ref=f1e238]: D(
+        - generic [ref=f1e239]:
+          - paragraph [ref=f1e240]: Desarrollo (sin sesión)
+          - paragraph [ref=f1e241]: Dirección, Administración, Ventas, Compras, Almacén, Logística, Finanzas, Marketing
+        - button "Cerrar sesión" [ref=f1e242] [cursor=pointer]
+      - button "Contraer menú" [ref=f1e246] [cursor=pointer]
+  - main [ref=f1e252]:
+    - generic [ref=f1e253]:
+      - generic [ref=f1e255]:
+        - paragraph [ref=f1e256]: Bodega
+        - heading "Mapa de la bodega" [level=1] [ref=f1e257]
+        - paragraph [ref=f1e258]: "El mapa se dibuja a partir de las ubicaciones: zona, posición y nivel."
+      - generic [ref=f1e261]:
+        - paragraph [ref=f1e265]: Cargando…
+        - paragraph [ref=f1e266]: Crea el layout en Ubicaciones y etiquetas → Generar ubicaciones. Con la plantilla de bodega chica quedan tres anaqueles y las zonas de servicio en un paso.

@@ -1,0 +1,147 @@
+- generic [ref=f4e3]:
+  - complementary [ref=f4e4]:
+    - img "Mitra Click" [ref=f4e6]
+    - navigation "Navegación principal" [ref=f4e7]:
+      - generic [ref=f4e8]:
+        - paragraph [ref=f4e9]: Dirección
+        - list [ref=f4e10]:
+          - listitem [ref=f4e11]:
+            - link "Inicio" [ref=f4e12] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=f4e17]:
+            - link "Dashboard ejecutivo" [ref=f4e18] [cursor=pointer]:
+              - /url: /dashboard
+          - listitem [ref=f4e25]:
+            - link "Pendientes" [ref=f4e26] [cursor=pointer]:
+              - /url: /pendientes
+          - listitem [ref=f4e32]:
+            - link "Reportes" [ref=f4e33] [cursor=pointer]:
+              - /url: /reportes
+          - listitem [ref=f4e38]:
+            - link "Agentes" [ref=f4e39] [cursor=pointer]:
+              - /url: /agentes
+      - generic [ref=f4e44]:
+        - paragraph [ref=f4e45]: Ventas
+        - list [ref=f4e46]:
+          - listitem [ref=f4e47]:
+            - link "Clientes" [ref=f4e48] [cursor=pointer]:
+              - /url: /clientes
+          - listitem [ref=f4e55]:
+            - link "Vendedores" [ref=f4e56] [cursor=pointer]:
+              - /url: /vendedores
+          - listitem [ref=f4e62]:
+            - link "Cotizaciones" [ref=f4e63] [cursor=pointer]:
+              - /url: /cotizaciones
+          - listitem [ref=f4e69]:
+            - link "Pedidos" [ref=f4e70] [cursor=pointer]:
+              - /url: /pedidos
+      - generic [ref=f4e76]:
+        - paragraph [ref=f4e77]: Compras
+        - list [ref=f4e78]:
+          - listitem [ref=f4e79]:
+            - link "Proveedores" [ref=f4e80] [cursor=pointer]:
+              - /url: /proveedores
+          - listitem [ref=f4e86]:
+            - link "Compras" [ref=f4e87] [cursor=pointer]:
+              - /url: /compras
+      - generic [ref=f4e92]:
+        - paragraph [ref=f4e93]: Bodega
+        - list [ref=f4e94]:
+          - listitem [ref=f4e95]:
+            - link "Operación del día" [ref=f4e96] [cursor=pointer]:
+              - /url: /bodega
+          - listitem [ref=f4e101]:
+            - link "Inventario" [ref=f4e102] [cursor=pointer]:
+              - /url: /inventario
+          - listitem [ref=f4e114]:
+            - link "Movimientos" [ref=f4e115] [cursor=pointer]:
+              - /url: /movimientos
+          - listitem [ref=f4e122]:
+            - link "Surtido" [ref=f4e123] [cursor=pointer]:
+              - /url: /surtido
+          - listitem [ref=f4e128]:
+            - link "Conteos" [ref=f4e129] [cursor=pointer]:
+              - /url: /conteos
+          - listitem [ref=f4e134]:
+            - link "Mapa de la bodega" [ref=f4e135] [cursor=pointer]:
+              - /url: /mapa
+          - listitem [ref=f4e139]:
+            - link "Ubicaciones y etiquetas" [ref=f4e140] [cursor=pointer]:
+              - /url: /ubicaciones
+      - generic [ref=f4e145]:
+        - paragraph [ref=f4e146]: Logística
+        - list [ref=f4e147]:
+          - listitem [ref=f4e148]:
+            - link "Envíos y rutas" [ref=f4e149] [cursor=pointer]:
+              - /url: /envios
+          - listitem [ref=f4e156]:
+            - link "Remisiones" [ref=f4e157] [cursor=pointer]:
+              - /url: /remisiones
+      - generic [ref=f4e162]:
+        - paragraph [ref=f4e163]: Finanzas
+        - list [ref=f4e164]:
+          - listitem [ref=f4e165]:
+            - link "Facturas" [ref=f4e166] [cursor=pointer]:
+              - /url: /facturas
+          - listitem [ref=f4e171]:
+            - link "Pagos y estados de cuenta" [ref=f4e172] [cursor=pointer]:
+              - /url: /pagos
+      - generic [ref=f4e177]:
+        - paragraph [ref=f4e178]: Catálogo
+        - list [ref=f4e179]:
+          - listitem [ref=f4e180]:
+            - link "Productos" [ref=f4e181] [cursor=pointer]:
+              - /url: /productos
+          - listitem [ref=f4e189]:
+            - link "Familias y categorías" [ref=f4e190] [cursor=pointer]:
+              - /url: /familias
+      - generic [ref=f4e197]:
+        - paragraph [ref=f4e198]: Marketing
+        - list [ref=f4e199]:
+          - listitem [ref=f4e200]:
+            - link "Leads y prospección" [ref=f4e201] [cursor=pointer]:
+              - /url: /leads
+          - listitem [ref=f4e206]:
+            - link "Links NFC / QR" [ref=f4e207] [cursor=pointer]:
+              - /url: /links
+      - generic [ref=f4e212]:
+        - paragraph [ref=f4e213]: Sistema
+        - list [ref=f4e214]:
+          - listitem [ref=f4e215]:
+            - link "Usuarios y permisos" [ref=f4e216] [cursor=pointer]:
+              - /url: /usuarios
+          - listitem [ref=f4e223]:
+            - link "Bitácora" [ref=f4e224] [cursor=pointer]:
+              - /url: /bitacora
+          - listitem [ref=f4e230]:
+            - link "Shopify" [ref=f4e231] [cursor=pointer]:
+              - /url: /shopify
+    - generic [ref=f4e236]:
+      - generic [ref=f4e237]:
+        - img "Desarrollo local" [ref=f4e238]: DL
+        - generic [ref=f4e239]:
+          - paragraph [ref=f4e240]: Desarrollo local
+          - paragraph [ref=f4e241]: Dirección, Administración, Ventas, Compras, Almacén, Logística, Finanzas, Marketing
+        - button "Cerrar sesión" [ref=f4e242] [cursor=pointer]
+      - button "Contraer menú" [ref=f4e246] [cursor=pointer]
+  - main [ref=f4e252]:
+    - generic [ref=f4e253]:
+      - generic [ref=f4e254]:
+        - generic [ref=f4e255]:
+          - paragraph [ref=f4e256]: Bodega
+          - heading "Surtido" [level=1] [ref=f4e257]
+          - paragraph [ref=f4e258]: "Qué recoger, cuánto y de qué ubicación, en orden de recorrido. La lista es un plan: el inventario baja al registrar el envío del pedido, no al surtir."
+        - button "Nueva lista" [ref=f4e260] [cursor=pointer]
+      - generic [ref=f4e262]:
+        - article [ref=f4e263]:
+          - paragraph [ref=f4e265]: Listas abiertas
+          - paragraph [ref=f4e272]: "0"
+        - article [ref=f4e273]:
+          - paragraph [ref=f4e275]: Unidades por recoger
+          - paragraph [ref=f4e280]: "0"
+        - article [ref=f4e281]:
+          - paragraph [ref=f4e283]: Renglones sin existencia
+          - paragraph [ref=f4e287]: "0"
+      - generic [ref=f4e290]:
+        - paragraph [ref=f4e294]: Cargando…
+        - paragraph [ref=f4e295]: Arma una con los pedidos confirmados que estén esperando.

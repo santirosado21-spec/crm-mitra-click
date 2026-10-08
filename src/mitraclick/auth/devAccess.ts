@@ -29,6 +29,6 @@ export const DEV_CREDENTIALS = DEV_ACCESS && import.meta.env.VITE_DEV_EMAIL && i
 export const DEV_PROFILE: Profile = {
   id: '00000000-0000-0000-0000-000000000000',
   email: 'dev@local',
-  displayName: 'Desarrollo (sin sesión)',
+  displayName: 'Desarrollo local',
   roles: [...ALL_ROLES],
 }

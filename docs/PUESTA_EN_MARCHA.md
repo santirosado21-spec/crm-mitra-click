@@ -17,6 +17,41 @@ Falta, de este paso: la validación con datos reales y la revisión visual (ver 
 Dado de alta el 7-oct-2026: `santirosado21@gmail.com` con roles dirección y admin. Los demás
 se dan de alta en la pantalla **Usuarios y permisos**; entran con ese mismo correo.
 
+La pertenencia se resuelve **por correo**, no por id: `private.current_app_user_id()` cruza
+`app_users.email` contra `auth.users.email`. Así que basta entrar con Google en `/entrar`
+usando ese correo para quedar con dirección y admin; no hay que crear nada más.
+
+### Datos de prueba
+
+La base tiene dos funciones, ejecutables solo por `service_role`:
+
+- `select public.seed_demo();` — siembra bodega de 100 ubicaciones, 23 productos del
+  catálogo de Mitra Click, clientes, cotizaciones, 9 pedidos en distintos estados, una
+  compra con recepción parcial y una lista de surtido a medias. Es idempotente: correrla
+  dos veces no duplica. **Sembrada el 7-oct-2026.**
+- `select public.purge_demo();` — borra todo lo marcado como `source = 'demo'` y deja lo
+  real intacto. Correrla el día que entren los datos de verdad.
+
+### Acceso de desarrollo (temporal, quitar al terminar)
+
+`VITE_DEV_AUTO_LOGIN=1` en `.env.local` entra a la app sin pasar por el login. Sirve para
+recorrer la interfaz mientras se construye. No llega a producción por dos razones
+independientes: `import.meta.env.DEV` es `false` al compilar, así que el bloque se elimina
+del bundle, y además la variable solo vive en `.env.local`, que está en `.gitignore`.
+
+Deja ver el shell, la navegación y los estados de error, pero **no los datos**: la seguridad
+vive en la base, y sin sesión Postgres entra como `anon`, que no tiene permiso sobre ninguna
+tabla. Las pantallas dicen "No hay sesión: entra con tu cuenta para ver estos datos".
+
+Para ver los datos hay que tener sesión de verdad. Dos caminos:
+
+- Entrar con Google en `/entrar` con `santirosado21@gmail.com`.
+- Agregar `VITE_DEV_EMAIL` y `VITE_DEV_PASSWORD` a `.env.local` con una cuenta creada en
+  Supabase (Authentication → Add user, con el correo confirmado). La app inicia sesión sola.
+
+Al terminar: borrar `src/mitraclick/auth/devAccess.ts`, su uso en `SessionProvider.tsx` y
+las variables de `.env.local`.
+
 ## 3. Edge Functions
 
 **Desplegadas el 7-oct-2026** (sin secretos configurados todavía, así que Shopify y la redacción

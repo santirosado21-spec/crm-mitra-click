@@ -258,6 +258,9 @@ function ListsView({ onOpen }: { onOpen: (id: string) => void }) {
   const open = rows.filter((row) => ['pendiente', 'en_proceso'].includes(row.status))
   const pendingUnits = open.reduce((sum, row) => sum + (Number(row.units_requested) - Number(row.units_picked)), 0)
   const missing = open.reduce((sum, row) => sum + Number(row.missing), 0)
+  // Si la consulta falló, estos totales son 0 porque no hay renglones, no porque no haya
+  // nada que surtir. Las tarjetas lo dicen en vez de afirmar un cero.
+  const unknown = query.error !== null
 
   return (
     <div className="space-y-5">
@@ -270,9 +273,9 @@ function ListsView({ onOpen }: { onOpen: (id: string) => void }) {
       {notice && <Notice tone="ok">{notice}</Notice>}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        <KpiCard label="Listas abiertas" value={formatNumber(open.length)} icon={Truck} testId="kpi-listas" emphasis />
-        <KpiCard label="Unidades por recoger" value={formatNumber(pendingUnits)} icon={MapPin} testId="kpi-unidades" />
-        <KpiCard label="Renglones sin existencia" value={formatNumber(missing)} helper={missing > 0 ? 'Revisa el inventario de esos productos' : undefined} icon={Check} testId="kpi-faltantes" />
+        <KpiCard label="Listas abiertas" value={formatNumber(open.length)} unknown={unknown} icon={Truck} testId="kpi-listas" emphasis />
+        <KpiCard label="Unidades por recoger" value={formatNumber(pendingUnits)} unknown={unknown} icon={MapPin} testId="kpi-unidades" />
+        <KpiCard label="Renglones sin existencia" value={formatNumber(missing)} unknown={unknown} helper={missing > 0 ? 'Revisa el inventario de esos productos' : undefined} icon={Check} testId="kpi-faltantes" />
       </div>
 
       <Panel padding={false} testId="pick-lists">

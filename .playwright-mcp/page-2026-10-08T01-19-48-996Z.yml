@@ -1,0 +1,135 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - img "Mitra Click" [ref=e6]
+    - navigation "Navegación principal" [ref=e7]:
+      - generic [ref=e8]:
+        - paragraph [ref=e9]: Dirección
+        - list [ref=e10]:
+          - listitem [ref=e11]:
+            - link "Inicio" [ref=e12] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e17]:
+            - link "Dashboard ejecutivo" [ref=e18] [cursor=pointer]:
+              - /url: /dashboard
+          - listitem [ref=e25]:
+            - link "Pendientes" [ref=e26] [cursor=pointer]:
+              - /url: /pendientes
+          - listitem [ref=e32]:
+            - link "Reportes" [ref=e33] [cursor=pointer]:
+              - /url: /reportes
+          - listitem [ref=e38]:
+            - link "Agentes" [ref=e39] [cursor=pointer]:
+              - /url: /agentes
+      - generic [ref=e44]:
+        - paragraph [ref=e45]: Ventas
+        - list [ref=e46]:
+          - listitem [ref=e47]:
+            - link "Clientes" [ref=e48] [cursor=pointer]:
+              - /url: /clientes
+          - listitem [ref=e55]:
+            - link "Vendedores" [ref=e56] [cursor=pointer]:
+              - /url: /vendedores
+          - listitem [ref=e62]:
+            - link "Cotizaciones" [ref=e63] [cursor=pointer]:
+              - /url: /cotizaciones
+          - listitem [ref=e69]:
+            - link "Pedidos" [ref=e70] [cursor=pointer]:
+              - /url: /pedidos
+      - generic [ref=e76]:
+        - paragraph [ref=e77]: Compras
+        - list [ref=e78]:
+          - listitem [ref=e79]:
+            - link "Proveedores" [ref=e80] [cursor=pointer]:
+              - /url: /proveedores
+          - listitem [ref=e86]:
+            - link "Compras" [ref=e87] [cursor=pointer]:
+              - /url: /compras
+      - generic [ref=e92]:
+        - paragraph [ref=e93]: Bodega
+        - list [ref=e94]:
+          - listitem [ref=e95]:
+            - link "Operación del día" [ref=e96] [cursor=pointer]:
+              - /url: /bodega
+          - listitem [ref=e101]:
+            - link "Inventario" [ref=e102] [cursor=pointer]:
+              - /url: /inventario
+          - listitem [ref=e114]:
+            - link "Movimientos" [ref=e115] [cursor=pointer]:
+              - /url: /movimientos
+          - listitem [ref=e122]:
+            - link "Surtido" [ref=e123] [cursor=pointer]:
+              - /url: /surtido
+          - listitem [ref=e128]:
+            - link "Conteos" [ref=e129] [cursor=pointer]:
+              - /url: /conteos
+          - listitem [ref=e134]:
+            - link "Mapa de la bodega" [ref=e135] [cursor=pointer]:
+              - /url: /mapa
+          - listitem [ref=e139]:
+            - link "Ubicaciones y etiquetas" [ref=e140] [cursor=pointer]:
+              - /url: /ubicaciones
+      - generic [ref=e145]:
+        - paragraph [ref=e146]: Logística
+        - list [ref=e147]:
+          - listitem [ref=e148]:
+            - link "Envíos y rutas" [ref=e149] [cursor=pointer]:
+              - /url: /envios
+          - listitem [ref=e156]:
+            - link "Remisiones" [ref=e157] [cursor=pointer]:
+              - /url: /remisiones
+      - generic [ref=e162]:
+        - paragraph [ref=e163]: Finanzas
+        - list [ref=e164]:
+          - listitem [ref=e165]:
+            - link "Facturas" [ref=e166] [cursor=pointer]:
+              - /url: /facturas
+          - listitem [ref=e171]:
+            - link "Pagos y estados de cuenta" [ref=e172] [cursor=pointer]:
+              - /url: /pagos
+      - generic [ref=e177]:
+        - paragraph [ref=e178]: Catálogo
+        - list [ref=e179]:
+          - listitem [ref=e180]:
+            - link "Productos" [ref=e181] [cursor=pointer]:
+              - /url: /productos
+          - listitem [ref=e189]:
+            - link "Familias y categorías" [ref=e190] [cursor=pointer]:
+              - /url: /familias
+      - generic [ref=e197]:
+        - paragraph [ref=e198]: Marketing
+        - list [ref=e199]:
+          - listitem [ref=e200]:
+            - link "Leads y prospección" [ref=e201] [cursor=pointer]:
+              - /url: /leads
+          - listitem [ref=e206]:
+            - link "Links NFC / QR" [ref=e207] [cursor=pointer]:
+              - /url: /links
+      - generic [ref=e212]:
+        - paragraph [ref=e213]: Sistema
+        - list [ref=e214]:
+          - listitem [ref=e215]:
+            - link "Usuarios y permisos" [ref=e216] [cursor=pointer]:
+              - /url: /usuarios
+          - listitem [ref=e223]:
+            - link "Bitácora" [ref=e224] [cursor=pointer]:
+              - /url: /bitacora
+          - listitem [ref=e230]:
+            - link "Shopify" [ref=e231] [cursor=pointer]:
+              - /url: /shopify
+    - generic [ref=e236]:
+      - generic [ref=e237]:
+        - img "Desarrollo (sin sesión)" [ref=e238]: D(
+        - generic [ref=e239]:
+          - paragraph [ref=e240]: Desarrollo (sin sesión)
+          - paragraph [ref=e241]: Dirección, Administración, Ventas, Compras, Almacén, Logística, Finanzas, Marketing
+        - button "Cerrar sesión" [ref=e242] [cursor=pointer]
+      - button "Contraer menú" [ref=e246] [cursor=pointer]
+  - main [ref=e252]:
+    - generic [ref=e253]:
+      - generic [ref=e254]:
+        - generic [ref=e255]:
+          - paragraph [ref=e256]: Bodega
+          - heading "Operación del día" [level=1] [ref=e257]
+          - paragraph [ref=e258]: Qué falta por surtir antes de que se vaya la moto, qué entró y qué salió. Las horas de corte se ajustan en Pendientes → Umbrales.
+        - textbox "Día" [ref=e260]: 2026-10-07
+      - status [ref=e261]: Cargando la operación…

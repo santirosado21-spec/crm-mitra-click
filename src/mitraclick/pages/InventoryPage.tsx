@@ -61,6 +61,9 @@ export function InventoryPage() {
   }).length
   const negative = all.filter((row) => row.quantity < 0).length
   const status = (row: LevelRow) => (row.quantity < 0 ? <StatusBadge status="Negativo" /> : isLow(row) ? <StatusBadge status="Bajo" /> : <StatusBadge status="Suficiente" />)
+  // Si la consulta falló, estos totales son 0 por falta de renglones, no porque la bodega
+  // esté vacía. Las tarjetas lo dicen en vez de afirmar un cero.
+  const unknown = query.error !== null
 
   return (
     <div className="space-y-5">
@@ -72,9 +75,9 @@ export function InventoryPage() {
       />
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <KpiCard label="Productos con existencia registrada" value={formatNumber(totals.size)} icon={Boxes} testId="kpi-productos" />
-        <KpiCard label="En o bajo punto de reorden" value={formatNumber(lowProducts)} icon={TrendingDown} testId="kpi-bajo" />
-        <KpiCard label="Ubicaciones en negativo" value={formatNumber(negative)} icon={AlertTriangle} testId="kpi-negativo" />
+        <KpiCard label="Productos con existencia registrada" value={formatNumber(totals.size)} unknown={unknown} icon={Boxes} testId="kpi-productos" />
+        <KpiCard label="En o bajo punto de reorden" value={formatNumber(lowProducts)} unknown={unknown} icon={TrendingDown} testId="kpi-bajo" />
+        <KpiCard label="Ubicaciones en negativo" value={formatNumber(negative)} unknown={unknown} icon={AlertTriangle} testId="kpi-negativo" />
       </div>
 
       <Panel padding={false} testId="inventory-table">

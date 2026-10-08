@@ -13,6 +13,16 @@ interface DbError {
   details?: string | null
 }
 
+// Postgres responde 42501 («permission denied») en dos situaciones que para quien usa la
+// app son muy distintas: entró sin sesión, o entró pero su rol no alcanza. Sin esto, el
+// primer caso se anuncia como el segundo y manda a la persona a pedir permisos que ya
+// tiene. SessionProvider mantiene la bandera al día.
+let signedIn = false
+
+export function setSignedIn(value: boolean) {
+  signedIn = value
+}
+
 /** Convierte un error de Postgres/PostgREST en un mensaje que el usuario pueda entender. */
 export function describeError(error: unknown): string {
   if (error instanceof TypeError || (error instanceof Error && /failed to fetch|networkerror|load failed/i.test(error.message))) {
@@ -31,7 +41,9 @@ export function describeError(error: unknown): string {
     case '23514':
       return 'Algún dato no cumple las reglas del sistema. Revisa los valores capturados.'
     case '42501':
-      return 'Tu rol no tiene permiso para esta acción.'
+      return signedIn
+        ? 'Tu rol no tiene permiso para esta acción.'
+        : 'No hay sesión: entra con tu cuenta para ver estos datos.'
     case 'P0001':
       return message
     default:

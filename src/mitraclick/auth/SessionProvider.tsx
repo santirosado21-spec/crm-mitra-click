@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
+import { setSignedIn } from '../lib/crud'
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase'
 import { SessionContext, type Profile, type SessionStatus, type SessionValue } from './SessionContext'
 import { DEV_ACCESS, DEV_CREDENTIALS, DEV_PROFILE } from './devAccess'
@@ -14,6 +15,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const devOnly = DEV_ACCESS && !DEV_CREDENTIALS
   const [profile, setProfile] = useState<Profile | null>(devOnly ? DEV_PROFILE : null)
   const [status, setStatus] = useState<SessionStatus>(devOnly ? 'listo' : configured ? 'cargando' : 'sin-configurar')
+
+  // Lo que decide si la base va a responder es la sesión, no el perfil: con el acceso de
+  // desarrollo sin credenciales hay perfil pero no sesión, y los datos no se ven.
+  useEffect(() => {
+    setSignedIn(session !== null)
+  }, [session])
 
   useEffect(() => {
     if (devOnly || !configured) return
