@@ -94,10 +94,43 @@ Se eligieron valores razonables para no detener la construcción. Todos se puede
 No se construyó como regla fija "producto asignado a una familia incorrecta": requiere
 criterio, no una comparación. Queda para la redacción con IA o revisión manual.
 
-## 7. Validación (fase J)
+## 7. Arrancar la bodega (fase K)
+
+Lo único que se puede usar sin una sola venta. En este orden:
+
+1. **Crear el almacén**: Bodega → Ubicaciones y etiquetas → pestaña Almacenes.
+2. **Generar el layout**: en Ubicaciones, botón *Generar ubicaciones*. La plantilla de
+   bodega chica deja tres anaqueles de 8 posiciones × 4 niveles más recepción, embarque,
+   devoluciones y cuarentena: 100 ubicaciones. Se ajusta a la bodega real cuando haya
+   plano; volver a generar actualiza, no duplica.
+3. **Rotular** los anaqueles con esos códigos (`A-01-1`) y, si se quiere abrir desde el
+   teléfono, crear etiquetas NFC/QR en la misma pantalla.
+4. **Capacidad por ubicación** (opcional): sin ella la ocupación se reporta en unidades
+   sin porcentaje. Se captura al editar la ubicación.
+5. **Cargar existencias**: Inventario → Carga inicial. Captura por ubicación desde el
+   teléfono o CSV con columnas `ubicacion, sku, cantidad`. Recontar y recargar corrige por
+   la diferencia; no suma dos veces.
+6. **Ajustar las horas de corte**: Pendientes → Umbrales. Vienen en 8:00 (abre), 14:00
+   (último pedido del día) y 17:00 (todo surtido).
+7. **Revisar el mapa** y la pantalla de operación del día.
+
+Con el primer pedido confirmado: Surtido → Nueva lista, recorrer con el teléfono, cerrar
+la lista y enviar el pedido desde Pedidos (ahí es donde baja el inventario).
+
+## 8. Validación (fase J)
+
 
 Una casilla se marca cuando está **implementado y validado con datos**, no antes.
 Hoy ninguna está validada.
+
+### Bodega (fase K)
+- [ ] Generar el layout y comprobar que los códigos coinciden con el rótulo físico.
+- [ ] Carga inicial por teléfono frente al anaquel; recontar una ubicación y ver que corrige, no suma.
+- [ ] Armar una lista con dos pedidos y comprobar que el recorrido no obliga a ir y volver.
+- [ ] Surtir con el teléfono de pie, con una mano.
+- [ ] Enviar el pedido desde la lista y verificar que el inventario bajó una sola vez.
+- [ ] La pantalla de operación del día responde "cuánto falta antes del corte" de un vistazo.
+- [ ] El mapa coincide con lo que hay físicamente en los anaqueles.
 
 ### Con datos de prueba
 - [ ] Iniciar sesión; un correo no dado de alta no entra.

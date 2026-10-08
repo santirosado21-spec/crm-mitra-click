@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   Bot, Boxes, ClipboardCheck, Clock, ClipboardList, FileBarChart, FileSignature, FileText, FolderTree, History,
-  Home, LayoutDashboard, Link2, ListChecks, MapPin, PackageSearch, Receipt, Repeat, ShoppingBag, ShoppingCart, Truck,
+  Home, LayoutDashboard, Link2, ListChecks, Map, MapPin, PackageSearch, Receipt, Repeat, ShoppingBag, ShoppingCart, Truck,
   UserCheck, UserPlus, Users, UsersRound, Wallet, Warehouse,
 } from 'lucide-react'
 
@@ -54,6 +54,7 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
       { path: '/movimientos', label: 'Movimientos', icon: Repeat, phase: 'C', ready: true, summary: 'Entradas, salidas, traspasos y ajustes con usuario, fecha, motivo y documento.' },
       { path: '/surtido', label: 'Surtido', icon: ListChecks, phase: 'K', ready: true, summary: 'Lista de recorrido: qué recoger, cuánto y de qué ubicación, en orden por pasillo.' },
       { path: '/conteos', label: 'Conteos', icon: ClipboardList, phase: 'C', ready: true, summary: 'Conteos físicos: generan una diferencia para revisión, nunca sobrescriben.' },
+      { path: '/mapa', label: 'Mapa de la bodega', icon: Map, phase: 'K', ready: true, summary: 'Planta y elevación de los anaqueles, coloreados por la existencia real. Clic en una ubicación para ver qué hay.' },
       { path: '/ubicaciones', label: 'Ubicaciones y etiquetas', icon: MapPin, phase: 'C', ready: true, summary: 'Almacenes, ubicaciones y etiquetas NFC/QR para abrir el registro desde el teléfono.' },
     ],
   },

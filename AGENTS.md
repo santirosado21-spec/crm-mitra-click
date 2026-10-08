@@ -14,10 +14,11 @@ Este repositorio es el **sistema operativo propio de Mitra Click**: clientes, pr
 
 No presentar el sistema como productivo. Hoy:
 
-- **Escrito y aplicado:** las fases A a I completas en la app, y las 10 migraciones aplicadas en Supabase (7-oct-2026). El detalle está en `docs/DATABASE.md`.
-- **Verificado:** reglas puras (pruebas unitarias), tipado, build, advisors, y un recorrido completo de cotización a pago dentro de una transacción revertida, con permisos por rol. No hay datos reales ni de prueba cargados.
-- **Sin validar:** ninguna pantalla se ha usado con sesión real, ni revisado visualmente en 1440 px y 390 px con datos.
-- **Edge Functions desplegadas** (`go`, `shopify-webhook`, `shopify-sync`, `agent-narrate`); `ingest` quedó retirada. Shopify y la redacción con IA esperan credenciales. El envío de existencias a Shopify no está construido (solo su interruptor, apagado).
+- **Fases A a I:** completas en la app y aplicadas en Supabase. Detalle en `docs/DATABASE.md`.
+- **Fase K (WMS de bodega):** layout de ubicaciones con generador por zonas, carga inicial de existencias, surtido por recorrido, tablero de operación del día con horas de corte y mapa de la bodega.
+- **Verificado:** reglas puras (pruebas unitarias), tipado, build, advisors, y recorridos completos dentro de transacciones revertidas, incluido que el inventario baje **una sola vez** del surtido al envío.
+- **Sin validar:** ninguna pantalla se ha usado con sesión real ni revisado visualmente con datos. No hay datos reales ni de prueba cargados.
+- **Edge Functions desplegadas** (`go`, `shopify-webhook`, `shopify-sync`, `agent-narrate`); `ingest` quedó retirada. Shopify y la redacción con IA esperan credenciales.
 - El código QR de la hoja de etiquetas está pendiente: falta instalar la dependencia `qrcode`.
 
 El camino para dejarlo funcionando, las decisiones tomadas por defecto y la lista de validación están en `docs/PUESTA_EN_MARCHA.md`.
@@ -92,7 +93,7 @@ Definidos en `src/mitraclick/navigation.ts`. Fuera del menú: `/b/:codigo` (fich
 | Dirección | `/dashboard`, `/pendientes`, `/reportes`, `/agentes` | G, F, H |
 | Ventas | `/clientes`, `/vendedores`, `/cotizaciones`, `/pedidos` | B, D |
 | Compras | `/proveedores`, `/compras` | B, D |
-| Bodega | `/inventario`, `/movimientos`, `/conteos`, `/ubicaciones` | C |
+| Bodega | `/bodega`, `/mapa`, `/inventario`, `/movimientos`, `/surtido`, `/conteos`, `/ubicaciones` | C, K |
 | Logística | `/envios`, `/remisiones` | D |
 | Finanzas | `/facturas`, `/pagos` | D |
 | Catálogo | `/productos`, `/familias` | B |
@@ -102,6 +103,20 @@ Definidos en `src/mitraclick/navigation.ts`. Fuera del menú: `/b/:codigo` (fich
 Al terminar un módulo: marcar `ready: true` en `navigation.ts` y agregarlo a `READY` en `App.tsx`.
 
 Roles (`app_role`): dirección, admin, ventas, compras, almacén, logística, finanzas, marketing. Una persona puede tener varios.
+
+Reglas de bodega que no se negocian:
+
+- **El libro de movimientos es el único que mueve inventario.** La lista de surtido es un
+  plan; `ship_order` sigue siendo el único lugar que descuenta, y recibe de la lista la
+  ubicación y la cantidad. Nunca agregar un segundo camino que mueva existencias.
+- **La ocupación no se estima.** Se muestran las unidades reales del libro; el porcentaje
+  solo aparece donde alguien capturó `max_units`, y donde no, se dice que falta el dato.
+  El mapa del CEDIS pintaba una escala con `unidades / 100` fijo: ese es el error a evitar.
+- **Un conteo no sobrescribe**, genera diferencia. La carga inicial sí corrige por la
+  diferencia contra lo ya cargado como inicial, para poder recontar sin duplicar.
+- **El orden de recorrido** (`locations.pick_order`) se calcula igual en la base
+  (`private.location_pick_order`) y en `src/mitraclick/lib/warehouse.ts` (`pickOrder`). Si
+  cambia uno, cambia el otro: hay pruebas de los límites en ambos lados.
 
 Límites importantes:
 

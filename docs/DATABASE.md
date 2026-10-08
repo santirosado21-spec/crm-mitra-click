@@ -5,7 +5,7 @@ us-east-2, plan gratuito). Es la única fuente de verdad del sistema.
 
 ## Estado
 
-Las 10 migraciones del sistema operativo están **aplicadas** (7-oct-2026).
+Las 13 migraciones del sistema operativo están **aplicadas** (7 y 8-oct-2026).
 
 | Archivo | Cómo se aplicó |
 |---|---|
@@ -19,6 +19,10 @@ Las 10 migraciones del sistema operativo están **aplicadas** (7-oct-2026).
 | `20261007185431_op_shopify_connector.sql` | Migración |
 | `20261007185552_op_agents_reports.sql` | Migración |
 | `20261007185613_op_acquisition.sql` | Migración |
+| `20261008000832_op_warehouse_layout.sql` | Migración |
+| `20261008001337_op_warehouse_pick_order_fix.sql` | Migración (corrige el desbordamiento de `pick_order`) |
+| `20261008002818_op_picking.sql` | Migración |
+| `20261008003124_op_warehouse_dashboard.sql` | Migración |
 
 - `src/mitraclick/lib/database.types.ts` está **generado** con `generate_typescript_types`; no se edita a mano.
 - Edge Functions desplegadas el 7-oct-2026: `go` (pública), `shopify-webhook` (pública, exige firma HMAC), `shopify-sync` y `agent-narrate` (exigen sesión de dirección o admin). Probadas sin credenciales: `go` responde 404 a un código desconocido, el webhook rechaza lo no firmado (401) y las otras dos rechazan llamadas sin sesión (401).
@@ -85,6 +89,9 @@ contó: quien cuenta solo envía la cantidad contada.
 | 8 · Shopify | `shopify_apply_order/product/customer`, crudo y bitácora, `integration_settings`, diferencias de inventario |
 | 9 · Agentes y reportes | `run_agent`, `generate_reports`, `convert_finding_to_issue`, programación diaria y por periodo |
 | 10 · Adquisición | `track_link`, `convert_lead_to_customer`, `kpi_acquisition`, `seo_metrics` e importación |
+| 11 · Layout de bodega | `locations` con zona, posición, nivel, tipo, medidas y `pick_order`; `generate_locations`, `load_initial_stock`, vistas `warehouse_occupancy` y `location_contents` |
+| 12 · Surtido | `pick_lists`, `pick_list_orders`, `pick_list_lines`; `create_pick_list`, `confirm_pick`, `set_pick_list_status`, `pick_list_shipment_lines`, vista `pick_list_progress` |
+| 13 · Tablero de bodega | `kpi_warehouse` y las horas de corte en `control_settings` |
 
 Las funciones del ciclo comercial son `SECURITY DEFINER` porque cruzan áreas (bodega
 actualiza lo surtido de un pedido; finanzas, su estado de pago): cada una valida primero

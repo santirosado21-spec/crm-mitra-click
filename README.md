@@ -2,8 +2,8 @@
 
 Sistema propio de **Mitra Click** para operar el negocio de punta a punta:
 clientes, proveedores, catálogo, cotizaciones, pedidos (Shopify y venta directa),
-compras, bodega con etiquetas NFC/QR, logística, remisiones, facturas y pagos, con
-bitácora de cambios, pendientes, KPIs, agentes y reportes.
+compras, bodega (layout, mapa, surtido por recorrido y operación del día), logística,
+remisiones, facturas y pagos, con bitácora de cambios, pendientes, KPIs, agentes y reportes.
 
 > Estado: **todas las fases están escritas y el esquema está aplicado en Supabase.** Las Edge Functions están
 > desplegadas. Falta conectar Shopify y validar con datos y personas reales.

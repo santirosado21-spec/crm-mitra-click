@@ -33,6 +33,7 @@ import { ShopifyPage } from './mitraclick/pages/ShopifyPage'
 import { SuppliersPage } from './mitraclick/pages/SuppliersPage'
 import { TagPage } from './mitraclick/pages/TagPage'
 import { TagSheetPage } from './mitraclick/pages/TagSheetPage'
+import { WarehouseMapPage } from './mitraclick/pages/WarehouseMapPage'
 import { WarehousePage } from './mitraclick/pages/WarehousePage'
 import { UsersPage } from './mitraclick/pages/UsersPage'
 
@@ -53,6 +54,7 @@ const READY: Record<string, ReactNode> = {
   '/conteos': <CountsPage />,
   '/surtido': <PickingPage />,
   '/bodega': <WarehousePage />,
+  '/mapa': <WarehouseMapPage />,
   '/ubicaciones': <LocationsPage />,
   '/cotizaciones': <QuotesPage />,
   '/pedidos': <OrdersPage />,
