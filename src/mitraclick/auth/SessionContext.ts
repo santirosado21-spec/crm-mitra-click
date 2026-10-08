@@ -24,8 +24,6 @@ export interface SessionValue {
   profile: Profile | null
   /** ¿El usuario tiene alguno de estos roles? */
   can: (roles: readonly AppRole[]) => boolean
-  signInWithGoogle: () => Promise<void>
-  signInWithEmail: (email: string) => Promise<void>
   signInWithPassword: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
 }

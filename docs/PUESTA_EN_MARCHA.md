@@ -18,27 +18,15 @@ Dado de alta el 7-oct-2026: `santirosado21@gmail.com` con roles dirección y adm
 se dan de alta en la pantalla **Usuarios y permisos**; entran con ese mismo correo.
 
 La pertenencia se resuelve **por correo**, no por id: `private.current_app_user_id()` cruza
-`app_users.email` contra `auth.users.email`. Así que basta abrir la app y entrar con Google
-usando ese correo para quedar con dirección y admin; no hay que crear nada más.
+`app_users.email` contra `auth.users.email`. El acceso es únicamente con correo y contraseña;
+Google OAuth y los enlaces mágicos no se usan.
 
-Antes del primer acceso, en Supabase → Authentication → URL Configuration:
+Cada persona necesita el mismo correo en dos lugares:
 
-- poner como **Site URL** la raíz del sitio desplegado (por ejemplo, `https://app.ejemplo.com/`);
-- agregar esa misma raíz a **Redirect URLs**;
-- para desarrollo local, agregar también `http://localhost:5173/`.
+1. Supabase → Authentication → Users → Add user, con una contraseña y el correo confirmado.
+2. La pantalla **Usuarios y permisos**, con los roles que le correspondan.
 
-OAuth y los enlaces por correo regresan siempre a la raíz. Cada dominio de preview que se
-quiera probar necesita su propia Redirect URL (o un patrón permitido configurado deliberadamente).
-
-Google está deshabilitado mientras no se configure su proveedor. Para activarlo:
-
-1. En Google Auth Platform, crear un cliente OAuth de tipo **Web application**.
-2. En **Authorized JavaScript origins**, agregar el origen de la app desplegada, sin ruta.
-3. En **Authorized redirect URIs**, agregar exactamente
-   `https://drdaenkvtjjrtyjjxnrr.supabase.co/auth/v1/callback`.
-4. Copiar el Client ID y Client Secret a Supabase → Authentication → Providers → Google,
-   habilitar el proveedor y guardar. El secret vive únicamente en Supabase/Google, nunca
-   en variables `VITE_`, archivos locales ni el repositorio.
+El registro en `app_users` autoriza y asigna permisos, pero no crea la cuenta de Auth.
 
 ### Datos de prueba
 
@@ -64,7 +52,7 @@ tabla. Las pantallas dicen "No hay sesión: entra con tu cuenta para ver estos d
 
 Para ver los datos hay que tener sesión de verdad. Dos caminos:
 
-- Abrir la app y entrar con Google con `santirosado21@gmail.com`.
+- Entrar con correo y contraseña usando una cuenta creada y confirmada en Supabase Auth.
 - Agregar `VITE_DEV_EMAIL` y `VITE_DEV_PASSWORD` a `.env.local` con una cuenta creada en
   Supabase (Authentication → Add user, con el correo confirmado). La app inicia sesión sola.
 

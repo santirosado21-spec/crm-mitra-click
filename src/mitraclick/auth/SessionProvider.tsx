@@ -6,14 +6,6 @@ import { SessionContext, type Profile, type SessionStatus, type SessionValue } f
 import { DEV_ACCESS, DEV_CREDENTIALS, DEV_PROFILE } from './devAccess'
 import { hasAnyRole, type AppRole } from './roles'
 
-/**
- * A dónde regresa Supabase después de entrar: siempre la raíz del sitio. Con la ruta
- * actual cada pantalla sería una URL distinta que autorizar en Authentication → URL
- * Configuration, y el enlace falla en cualquiera que no esté en la lista. Con el origen
- * basta una entrada por sitio (producción, preview y localhost).
- */
-const returnUrl = () => `${window.location.origin}/`
-
 /** Mantiene la sesión de Supabase Auth y el perfil (roles) del usuario dado de alta en app_users. */
 export function SessionProvider({ children }: { children: ReactNode }) {
   const configured = isSupabaseConfigured()
@@ -74,16 +66,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [configured, devOnly])
 
-  const signInWithGoogle = useCallback(async () => {
-    const { error } = await getSupabaseClient().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: returnUrl() } })
-    if (error) throw error
-  }, [])
-
-  const signInWithEmail = useCallback(async (email: string) => {
-    const { error } = await getSupabaseClient().auth.signInWithOtp({ email, options: { emailRedirectTo: returnUrl() } })
-    if (error) throw error
-  }, [])
-
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const { error } = await getSupabaseClient().auth.signInWithPassword({ email, password })
     if (error) throw error
@@ -99,12 +81,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       session,
       profile,
       can: (roles) => hasAnyRole(profile?.roles ?? [], roles),
-      signInWithGoogle,
-      signInWithEmail,
       signInWithPassword,
       signOut,
     }),
-    [status, session, profile, signInWithGoogle, signInWithEmail, signInWithPassword, signOut],
+    [status, session, profile, signInWithPassword, signOut],
   )
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
