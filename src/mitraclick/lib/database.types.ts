@@ -1,4 +1,4 @@
-// Generado con Supabase (generate_typescript_types) tras aplicar las migraciones 1 a 10.
+// Generado con Supabase (generate_typescript_types) tras aplicar las migraciones.
 // No se edita a mano: se regenera cada vez que cambia el esquema.
 
 export type Json =
@@ -380,6 +380,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "incidents_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "location_contents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "incidents_location_id_fkey"
             columns: ["location_id"]
@@ -780,27 +787,57 @@ export type Database = {
           code: string
           created_at: string
           description: string | null
+          height: number | null
           id: string
+          kind: string
+          length: number | null
+          level: number | null
+          max_units: number | null
+          max_weight: number | null
+          pick_order: number
+          position: number | null
           updated_at: string
           warehouse_id: string
+          width: number | null
+          zone: string | null
         }
         Insert: {
           active?: boolean
           code: string
           created_at?: string
           description?: string | null
+          height?: number | null
           id?: string
+          kind?: string
+          length?: number | null
+          level?: number | null
+          max_units?: number | null
+          max_weight?: number | null
+          pick_order?: number
+          position?: number | null
           updated_at?: string
           warehouse_id: string
+          width?: number | null
+          zone?: string | null
         }
         Update: {
           active?: boolean
           code?: string
           created_at?: string
           description?: string | null
+          height?: number | null
           id?: string
+          kind?: string
+          length?: number | null
+          level?: number | null
+          max_units?: number | null
+          max_weight?: number | null
+          pick_order?: number
+          position?: number | null
           updated_at?: string
           warehouse_id?: string
+          width?: number | null
+          zone?: string | null
         }
         Relationships: [
           {
@@ -1432,6 +1469,13 @@ export type Database = {
             foreignKeyName: "receipt_lines_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
+            referencedRelation: "location_contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_lines_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
             referencedRelation: "locations"
             referencedColumns: ["id"]
           },
@@ -1934,6 +1978,13 @@ export type Database = {
             foreignKeyName: "shipment_lines_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
+            referencedRelation: "location_contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_lines_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
             referencedRelation: "locations"
             referencedColumns: ["id"]
           },
@@ -2170,6 +2221,13 @@ export type Database = {
             foreignKeyName: "stock_counts_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
+            referencedRelation: "location_contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_counts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
             referencedRelation: "locations"
             referencedColumns: ["id"]
           },
@@ -2216,6 +2274,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_levels_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "location_contents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_levels_location_id_fkey"
             columns: ["location_id"]
@@ -2283,6 +2348,13 @@ export type Database = {
           transfer_group?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_movements_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "location_contents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_movements_location_id_fkey"
             columns: ["location_id"]
@@ -2435,6 +2507,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tags_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "location_contents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tags_location_id_fkey"
             columns: ["location_id"]
@@ -2606,6 +2685,32 @@ export type Database = {
           },
         ]
       }
+      location_contents: {
+        Row: {
+          active: boolean | null
+          code: string | null
+          fill_rate: number | null
+          id: string | null
+          kind: string | null
+          level: number | null
+          max_units: number | null
+          pick_order: number | null
+          position: number | null
+          products: number | null
+          units: number | null
+          warehouse_id: string | null
+          zone: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_line_facts: {
         Row: {
           amount: number | null
@@ -2704,6 +2809,28 @@ export type Database = {
         }
         Relationships: []
       }
+      warehouse_occupancy: {
+        Row: {
+          empty: number | null
+          fill_rate: number | null
+          locations: number | null
+          occupied: number | null
+          units: number | null
+          warehouse: string | null
+          warehouse_id: string | null
+          with_capacity: number | null
+          zone: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       cancel_invoice: {
@@ -2713,6 +2840,10 @@ export type Database = {
       convert_finding_to_issue: { Args: { p_id: number }; Returns: number }
       convert_lead_to_customer: { Args: { p_id: string }; Returns: string }
       convert_quote_to_order: { Args: { p_quote_id: string }; Returns: string }
+      generate_locations: {
+        Args: { p_warehouse_id: string; p_zones: Json }
+        Returns: Json
+      }
       generate_reports: { Args: { p_frequency: string }; Returns: number }
       import_customers: { Args: { p_rows: Json }; Returns: Json }
       import_products: { Args: { p_rows: Json }; Returns: Json }
@@ -2792,6 +2923,10 @@ export type Database = {
           orders: number
           sales: number
         }[]
+      }
+      load_initial_stock: {
+        Args: { p_notes?: string; p_rows: Json }
+        Returns: Json
       }
       log_quote_follow_up: { Args: { p_id: string }; Returns: undefined }
       my_profile: {

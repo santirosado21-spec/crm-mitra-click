@@ -14,6 +14,7 @@ import { FamiliesPage } from './mitraclick/pages/FamiliesPage'
 import { InvoicesPage, PaymentsPage } from './mitraclick/pages/FinancePages'
 import { HomePage } from './mitraclick/pages/HomePage'
 import { ImportPage } from './mitraclick/pages/ImportPage'
+import { InitialStockPage } from './mitraclick/pages/InitialStockPage'
 import { InventoryPage } from './mitraclick/pages/InventoryPage'
 import { LeadsPage } from './mitraclick/pages/LeadsPage'
 import { LinksPage } from './mitraclick/pages/LinksPage'
@@ -78,6 +79,7 @@ export default function App() {
               <Route index element={<HomePage />} />
               <Route path="productos/importar" element={<ImportPage key="productos" kind="productos" />} />
               <Route path="clientes/importar" element={<ImportPage key="clientes" kind="clientes" />} />
+              <Route path="inventario/carga-inicial" element={<InitialStockPage />} />
               <Route path="cotizaciones/:id" element={<QuotePage />} />
               <Route path="pedidos/:id" element={<OrderPage />} />
               <Route path="compras/:id" element={<PurchasePage />} />
