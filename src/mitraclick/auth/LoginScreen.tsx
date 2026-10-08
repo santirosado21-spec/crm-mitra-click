@@ -47,7 +47,7 @@ export function LoginScreen() {
         <div className="mt-6 rounded-2xl border border-mc-line bg-mc-surface p-5 shadow-mc-card">
           <form onSubmit={submit} className="space-y-3">
             <Field id="login-email" label="Correo" required>
-              <TextInput id="login-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nombre@mitraclick.com" />
+              <TextInput id="login-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="correo@icloud.com" />
             </Field>
             <Field id="login-password" label="Contraseña" required>
               <TextInput id="login-password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} />

@@ -27,6 +27,7 @@ Cada persona necesita el mismo correo en dos lugares:
 2. La pantalla **Usuarios y permisos**, con los roles que le correspondan.
 
 El registro en `app_users` autoriza y asigna permisos, pero no crea la cuenta de Auth.
+Se permiten direcciones `@icloud.com` y de otros proveedores; no hay restricción de dominio.
 
 ### Datos de prueba
 

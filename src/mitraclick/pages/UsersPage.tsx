@@ -25,7 +25,7 @@ const config: ResourceConfig = {
   ],
   fields: [
     { name: 'display_name', label: 'Nombre', type: 'text', required: true },
-    { name: 'email', label: 'Correo', type: 'email', required: true, transform: 'lower', hint: 'Debe ser el mismo correo con el que inicia sesión.' },
+    { name: 'email', label: 'Correo', type: 'email', required: true, transform: 'lower', hint: 'Se permiten correos de iCloud y otros proveedores. Debe coincidir exactamente con la cuenta de Supabase Auth.' },
     { name: 'roles', label: 'Roles', type: 'multiselect', required: true, options: ALL_ROLES.map((role) => ({ value: role, label: ROLE_LABEL[role] })) },
     { name: 'active', label: 'Activo (puede entrar al sistema)', type: 'checkbox' },
   ],
