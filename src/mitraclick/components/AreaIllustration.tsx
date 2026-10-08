@@ -1,0 +1,22 @@
+import type { ReactNode } from 'react'
+
+const drawings: Record<string, ReactNode> = {
+  'Dirección': <><rect x="77" y="43" width="206" height="132" rx="12" fill="var(--color-mc-surface)" /><path d="M95 63h57M95 74h32" /><path d="M108 149v-30h25v30m20 0V97h25v52m20 0V79h25v70" fill="var(--color-mc-yellow)" /><path d="m246 130 24-24 24 4 22-37m-15 0h15v15" /><path d="M161 175v17m38-17v17m-57 0h76" /></>,
+  'Ventas': <><rect x="89" y="42" width="151" height="148" rx="12" fill="var(--color-mc-surface)" /><path d="M110 66h58m-58 13h35M110 109h104m-104 24h63m-63 24h45" /><circle cx="215" cy="147" r="43" fill="var(--color-mc-yellow)" /><path d="m190 144 17 17 34-36" /><rect x="187" y="29" width="71" height="45" rx="10" fill="var(--color-mc-surface)" /><path d="m199 60 14-14 12 8 20-15" /></>,
+  'Compras': <><path d="M99 87h146l-12 97H111Z" fill="var(--color-mc-surface)" /><path d="M142 94V70a30 30 0 0 1 60 0v24" /><path d="m215 102 45-23 44 23v55l-44 24-45-24Z" fill="var(--color-mc-yellow)" /><path d="m215 102 45 24 44-24m-44 24v55m-66-93 44 24" /><path d="M132 138h43m-43 15h28" /></>,
+  'Bodega': <><path d="m62 87 118-53 118 53v99H62Z" fill="var(--color-mc-surface)" /><path d="m47 90 133-61 133 61M83 99h194M92 101v83m176-83v83M92 142h176" /><path d="M108 109h43v33h-43Zm64 0h43v33h-43Zm-45 41h43v34h-43Z" fill="var(--color-mc-yellow)" /><path d="M191 150h43v34h-43ZM130 109v10m64-10v10m-45 31v11m64-11v11" /><path d="M51 188h258" /></>,
+  'Logística': <><path d="M58 67h151v97H58Z" fill="var(--color-mc-surface)" /><path d="M209 105h46l40 40v19h-86Z" fill="var(--color-mc-yellow)" /><path d="M229 116h20l22 24h-42Z" fill="var(--color-mc-surface)" /><circle cx="104" cy="168" r="19" fill="var(--color-mc-surface)" /><circle cx="256" cy="168" r="19" fill="var(--color-mc-surface)" /><circle cx="104" cy="168" r="6" /><circle cx="256" cy="168" r="6" /><path d="M77 90h102m-102 18h70M45 191h270" /><path d="M281 43a17 17 0 0 1 17 17c0 15-17 29-17 29s-17-14-17-29a17 17 0 0 1 17-17Z" fill="var(--color-mc-yellow)" /><circle cx="281" cy="60" r="5" /></>,
+  'Finanzas': <><rect x="93" y="39" width="132" height="153" rx="12" fill="var(--color-mc-surface)" /><rect x="112" y="59" width="94" height="31" rx="5" fill="var(--color-mc-yellow)" /><path d="M115 112h13m20 0h13m20 0h13m-79 25h13m20 0h13m20 0h13m-79 25h13m20 0h13" /><rect x="204" y="129" width="71" height="49" rx="8" fill="var(--color-mc-yellow)" /><path d="M204 140c0 9 71 9 71 0m-71 17c0 9 71 9 71 0" /><ellipse cx="239.5" cy="129" rx="35.5" ry="12" fill="var(--color-mc-yellow)" /></>,
+  'Catálogo': <><rect x="67" y="42" width="227" height="146" rx="12" fill="var(--color-mc-surface)" /><path d="M67 69h227m-211-13h3m10 0h3m10 0h3" /><rect x="87" y="87" width="84" height="81" rx="8" fill="var(--color-mc-yellow)" /><path d="m104 113 25-13 25 13v30l-25 13-25-13Zm0 0 25 13 25-13m-25 13v30M191 94h81m-81 14h51m-51 27h81m-81 14h51m-51 14h30" /></>,
+  'Marketing': <><path d="m99 94 121-47v126L99 133Z" fill="var(--color-mc-surface)" /><path d="M83 94h37v40H83a10 10 0 0 1-10-10v-20a10 10 0 0 1 10-10Z" fill="var(--color-mc-yellow)" /><path d="m120 140 13 46h32l-16-37M220 47v126m22-83 35-19m-33 42h47m-49 24 35 19" /><circle cx="271" cy="49" r="13" fill="var(--color-mc-yellow)" /><path d="m160 70 17-6v94l-17-6" /></>,
+  'Sistema': <><rect x="79" y="44" width="172" height="130" rx="12" fill="var(--color-mc-surface)" /><path d="M79 75h172m-151-16h3m10 0h3m10 0h3M100 96h78m-78 19h52m-52 19h39m12 40v18m-22 0h44" /><path d="m244 93 42 16v35c0 27-42 47-42 47s-42-20-42-47v-35Z" fill="var(--color-mc-yellow)" /><path d="m226 140 13 13 25-29" /></>,
+}
+
+/** Ilustraciones decorativas, no representan métricas ni datos del negocio. */
+export function AreaIllustration({ area }: { area: string }) {
+  return <svg viewBox="0 0 360 220" fill="none" aria-hidden="true" focusable="false" className="h-full w-full">
+    <ellipse cx="180" cy="196" rx="135" ry="9" fill="currentColor" opacity=".07" />
+    <circle cx="180" cy="109" r="94" fill="currentColor" opacity=".05" />
+    <g stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">{drawings[area]}</g>
+  </svg>
+}

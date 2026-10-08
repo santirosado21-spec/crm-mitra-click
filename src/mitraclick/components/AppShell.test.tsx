@@ -5,6 +5,7 @@ import { SessionContext, type SessionValue } from '../auth/SessionContext'
 import { HomePage } from '../pages/HomePage'
 import { ThemeProvider } from '../theme/ThemeProvider'
 import { AppShell } from './AppShell'
+import { NAV_GROUPS } from '../navigation'
 
 const session: SessionValue = {
   status: 'listo',
@@ -39,9 +40,32 @@ describe('AppShell', () => {
     expect(html).not.toContain('Abrir navegación')
     expect(html).toContain('Bienvenido, Ángel')
     expect(html).toContain('Módulos del sistema')
-    expect(html).toContain('data-row-tone="1"')
-    expect(html).toContain('data-row-tone="5"')
-    expect(html).toContain('h-28')
+    expect(html.match(/data-testid="home-area-/g)).toHaveLength(9)
+    expect(html.match(/data-testid="area-artwork"/g)).toHaveLength(9)
+    expect(html).not.toContain('data-testid="home-module-')
+    expect(html).toContain('lg:grid-cols-3')
+    expect(html).toContain('auto-rows-fr')
+  })
+
+  it.each(NAV_GROUPS)('abre solamente las secciones de $label y conserva el acceso al inicio', (group) => {
+    const key = group.label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    const html = renderShell('/?area=' + key)
+    expect(html).not.toContain('id="app-sidebar"')
+    expect(html).toContain('Todas las áreas')
+    expect(html.match(/<h1\b/g)).toHaveLength(1)
+    for (const other of NAV_GROUPS) {
+      for (const module of other.modules.filter((item) => item.path !== '/')) {
+        const marker = 'data-testid="home-module-' + module.path.slice(1) + '"'
+        if (other === group) expect(html).toContain(marker)
+        else expect(html).not.toContain(marker)
+      }
+    }
+  })
+
+  it('vuelve al selector si el área de la URL no existe', () => {
+    const html = renderShell('/?area=inexistente')
+    expect(html).toContain('data-testid="home-main-menu"')
+    expect(html).not.toContain('data-testid="home-area-sections"')
   })
 
   it('muestra el sidebar al entrar a un módulo', () => {
