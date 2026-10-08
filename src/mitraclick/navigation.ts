@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import {
-  Bot, Boxes, ClipboardCheck, ClipboardList, FileBarChart, FileSignature, FileText, FolderTree, History,
+  Bot, Boxes, ClipboardCheck, Clock, ClipboardList, FileBarChart, FileSignature, FileText, FolderTree, History,
   Home, LayoutDashboard, Link2, ListChecks, MapPin, PackageSearch, Receipt, Repeat, ShoppingBag, ShoppingCart, Truck,
   UserCheck, UserPlus, Users, UsersRound, Wallet, Warehouse,
 } from 'lucide-react'
@@ -49,6 +49,7 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
   {
     label: 'Bodega',
     modules: [
+      { path: '/bodega', label: 'Operación del día', icon: Clock, phase: 'K', ready: true, summary: 'Qué falta por surtir antes de la hora de corte, qué entró y qué salió, y la ocupación por zona.' },
       { path: '/inventario', label: 'Inventario', icon: Boxes, phase: 'C', ready: true, summary: 'Existencia por producto y ubicación, derivada del libro de movimientos.' },
       { path: '/movimientos', label: 'Movimientos', icon: Repeat, phase: 'C', ready: true, summary: 'Entradas, salidas, traspasos y ajustes con usuario, fecha, motivo y documento.' },
       { path: '/surtido', label: 'Surtido', icon: ListChecks, phase: 'K', ready: true, summary: 'Lista de recorrido: qué recoger, cuánto y de qué ubicación, en orden por pasillo.' },

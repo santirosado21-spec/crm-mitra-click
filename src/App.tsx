@@ -33,6 +33,7 @@ import { ShopifyPage } from './mitraclick/pages/ShopifyPage'
 import { SuppliersPage } from './mitraclick/pages/SuppliersPage'
 import { TagPage } from './mitraclick/pages/TagPage'
 import { TagSheetPage } from './mitraclick/pages/TagSheetPage'
+import { WarehousePage } from './mitraclick/pages/WarehousePage'
 import { UsersPage } from './mitraclick/pages/UsersPage'
 
 // El dashboard trae la librería de gráficas: se descarga solo al abrirlo.
@@ -51,6 +52,7 @@ const READY: Record<string, ReactNode> = {
   '/movimientos': <MovementsPage />,
   '/conteos': <CountsPage />,
   '/surtido': <PickingPage />,
+  '/bodega': <WarehousePage />,
   '/ubicaciones': <LocationsPage />,
   '/cotizaciones': <QuotesPage />,
   '/pedidos': <OrdersPage />,
