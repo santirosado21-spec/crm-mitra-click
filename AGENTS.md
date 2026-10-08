@@ -17,7 +17,9 @@ No presentar el sistema como productivo. Hoy:
 - **Fases A a I:** completas en la app y aplicadas en Supabase. Detalle en `docs/DATABASE.md`.
 - **Fase K (WMS de bodega):** layout de ubicaciones con generador por zonas, carga inicial de existencias, surtido por recorrido, tablero de operación del día con horas de corte y mapa de la bodega.
 - **Verificado:** reglas puras (pruebas unitarias), tipado, build, advisors, y recorridos completos dentro de transacciones revertidas, incluido que el inventario baje **una sola vez** del surtido al envío.
-- **Sin validar:** ninguna pantalla se ha usado con sesión real ni revisado visualmente con datos. No hay datos reales ni de prueba cargados.
+- **Datos de prueba sembrados** (7-oct-2026) con `public.seed_demo()`: bodega de 100 ubicaciones, 23 productos, clientes, cotizaciones, pedidos en varios estados, una compra con recepción parcial y una lista de surtido a medias. Todo con `source = 'demo'`; `public.purge_demo()` lo quita.
+- **Recorrido visual hecho sin sesión** (7-oct-2026): 33 rutas en 1440 px y 390 px, sin crashes, sin desborde horizontal y con un `<h1>` por pantalla.
+- **Sin validar:** ninguna pantalla se ha usado **con sesión**, así que no se ha visto una sola con datos. La pertenencia se resuelve por correo (`app_users.email` contra `auth.users.email`), así que basta entrar con Google en `/entrar`.
 - **Edge Functions desplegadas** (`go`, `shopify-webhook`, `shopify-sync`, `agent-narrate`); `ingest` quedó retirada. Shopify y la redacción con IA esperan credenciales.
 - El código QR de la hoja de etiquetas está pendiente: falta instalar la dependencia `qrcode`.
 
@@ -72,7 +74,9 @@ Responsabilidades:
 - `src/mitraclick/lib/`: acceso a datos, formularios, CSV, fechas, formato, tipos generados y las reglas puras de cada área (`catalog`, `inventory`, `documents`, `issues`, `kpis`, `reports`, `acquisition`).
 - `src/mitraclick/components/`: shell, primitivas, controles y `ResourcePage`.
 - `src/mitraclick/pages/`: una pantalla por módulo.
-- `src/mitraclick/seed/`: catálogo de ejemplo para sembrar datos de prueba en la base.
+- Datos de prueba: viven **solo en la base**, en `public.seed_demo()` y `public.purge_demo()`
+  (ambas únicamente para `service_role`). El catálogo de ejemplo está dentro de `seed_demo()`,
+  no en el repositorio: no hay generador de datos en el navegador.
 - `supabase/migrations/`: esquema (los `manual_*` se ejecutaron a mano; el resto, como migraciones). `supabase/functions/`: Edge Functions (`shopify-webhook`, `shopify-sync`, `agent-narrate`, `go`) y su código compartido en `_shared/` (con pruebas).
 
 ### Reglas de dependencia

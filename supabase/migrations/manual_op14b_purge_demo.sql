@@ -76,8 +76,31 @@ begin
   delete from public.products where source = 'demo';
   delete from public.product_categories where source = 'demo';
   delete from public.product_families where source = 'demo';
-  delete from public.locations where source = 'demo';
-  delete from public.warehouses where source = 'demo';
+
+  -- Las ubicaciones son el caso delicado. La bodega se siembra como demo, pero en cuanto
+  -- alguien registra un movimiento de verdad en el anaquel A-01-1, ese renglón guarda
+  -- historia real: borrarlo rompería el libro, y forzar el borrado sería peor. Así que
+  -- solo se van las que ya no guardan nada, y las que se quedan pasan a 'manual', porque
+  -- una ubicación con movimientos reales dejó de ser de prueba.
+  with libres as (
+    select l.id from public.locations l
+    where l.source = 'demo'
+      and not exists (select 1 from public.stock_movements m where m.location_id = l.id)
+      and not exists (select 1 from public.stock_levels s where s.location_id = l.id)
+      and not exists (select 1 from public.tags t where t.location_id = l.id)
+      and not exists (select 1 from public.incidents i where i.location_id = l.id)
+      and not exists (select 1 from public.stock_counts c where c.location_id = l.id)
+      and not exists (select 1 from public.receipt_lines r where r.location_id = l.id)
+  )
+  delete from public.locations where id in (select id from libres);
+
+  update public.locations set source = 'manual' where source = 'demo';
+
+  -- Lo mismo con el almacén: solo se va si se quedó sin ubicaciones.
+  delete from public.warehouses w where w.source = 'demo'
+    and not exists (select 1 from public.locations l where l.warehouse_id = w.id);
+  update public.warehouses set source = 'manual' where source = 'demo';
+
   delete from public.customers where source = 'demo';
   delete from public.suppliers where source = 'demo';
   delete from public.sales_reps where source = 'demo';
@@ -85,7 +108,10 @@ begin
 
   perform set_config('app.purging_demo', 'off', true);
 
-  return jsonb_build_object('borrado', v_antes,
+  return jsonb_build_object(
+    'borrado', v_antes,
+    -- Ubicaciones que guardaban movimientos reales: se conservaron y pasaron a 'manual'.
+    'ubicaciones_conservadas', (select count(*) from public.locations where source = 'manual'),
     'quedan_movimientos_demo', (select count(*) from public.stock_movements where source = 'demo'));
 end;
 $$;
