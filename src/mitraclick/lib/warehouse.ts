@@ -214,3 +214,177 @@ export function allocatePick(stock: StockAtLocation[], required: number): PickAl
   }
   return { lines, missing: Math.max(0, pending) }
 }
+
+// ── Acomodo guiado ──────────────────────────────────────────────────────────────
+
+/** Ubicación candidata a recibir mercancía, con lo que ya tiene dentro. */
+export interface PutawayCandidate {
+  locationId: string
+  code: string
+  pick_order: number
+  kind: LocationKind
+  /** Unidades que ya hay ahí, de cualquier producto. */
+  quantity: number
+  /** Capacidad capturada. `null` significa que no se sabe, no que sea cero. */
+  max_units: number | null
+  /** Cuántos productos distintos conviven ahí. */
+  productCount: number
+}
+
+export interface PutawayLine {
+  locationId: string
+  code: string
+  pick_order: number
+  quantity: number
+  /** Por qué se propuso: ya hay del mismo producto, o es la más cercana al recorrido. */
+  reason: 'mismo-producto' | 'cercania'
+}
+
+export interface PutawayPlan {
+  lines: PutawayLine[]
+  /** Lo que no cabe en las ubicaciones candidatas. */
+  missing: number
+}
+
+/** Las zonas de servicio no son destino de acomodo: de ahí justamente hay que sacar. */
+const STORABLE: LocationKind[] = ['almacenaje', 'picking']
+
+/**
+ * Propone dónde acomodar lo que acaba de entrar. Dos criterios, en orden:
+ *
+ *  1. Donde ya hay de ese producto, para no dispersarlo por la bodega. Un producto en
+ *     cinco ubicaciones obliga a cinco paradas al surtir y vuelve los conteos un lío.
+ *  2. Si no hay, la ubicación más cercana al inicio del recorrido, que es la que menos
+ *     cuesta caminar después.
+ *
+ * Nunca propone más de lo que cabe, y lo que no cabe se reporta en vez de inventarle un
+ * destino. Sin capacidad capturada no supone un límite: `max_units` en `null` quiere decir
+ * "no se sabe", y suponer un número ahí es justo el error que el mapa del CEDIS cometía.
+ */
+export function suggestPutaway(
+  candidates: PutawayCandidate[],
+  { quantity, sameProductLocations }: { quantity: number; sameProductLocations: string[] },
+): PutawayPlan {
+  const preferred = new Set(sameProductLocations)
+  const usable = candidates
+    .filter((item) => STORABLE.includes(item.kind))
+    .sort((a, b) => {
+      const byProduct = Number(preferred.has(b.code)) - Number(preferred.has(a.code))
+      return byProduct !== 0 ? byProduct : a.pick_order - b.pick_order
+    })
+
+  const lines: PutawayLine[] = []
+  let pending = round3(quantity)
+
+  for (const item of usable) {
+    if (pending <= 0) break
+    const room = item.max_units === null ? pending : round3(item.max_units - item.quantity)
+    if (room <= 0) continue
+    const take = round3(Math.min(room, pending))
+    lines.push({
+      locationId: item.locationId,
+      code: item.code,
+      pick_order: item.pick_order,
+      quantity: take,
+      reason: preferred.has(item.code) ? 'mismo-producto' : 'cercania',
+    })
+    pending = round3(pending - take)
+  }
+  return { lines, missing: Math.max(0, pending) }
+}
+
+// ── Reposición del pick face ────────────────────────────────────────────────────
+
+/** Mínimo de unidades que debe tener una ubicación de surtido para no tropezar. */
+export const DEFAULT_PICK_FACE_MIN = 5
+
+export interface PickFace {
+  locationId: string
+  code: string
+  pick_order: number
+  quantity: number
+  max_units: number | null
+}
+
+export interface ReserveStock {
+  code: string
+  quantity: number
+  pick_order: number
+}
+
+export interface ReplenishmentInput {
+  productId: string
+  sku: string
+  name: string
+  pickFace: PickFace
+  /** Lo mismo, en niveles altos u otras ubicaciones de almacenaje. */
+  reserve: ReserveStock[]
+  /** Unidades comprometidas en pedidos por surtir. */
+  demand: number
+}
+
+export interface ReplenishmentPlan {
+  productId: string
+  sku: string
+  name: string
+  pickFace: PickFace
+  lines: { code: string; quantity: number; pick_order: number }[]
+  /** Lo que la reserva no alcanza a cubrir. */
+  missing: number
+  /** `demanda`: hay pedidos que no alcanzan. `minimo`: quedó por debajo del mínimo. */
+  reason: 'demanda' | 'minimo'
+  /** Cuántas unidades faltan respecto a lo que debería haber. Ordena lo urgente primero. */
+  shortfall: number
+}
+
+/**
+ * Qué bajar de los niveles altos al nivel de surtido, antes de que el surtido se tropiece.
+ *
+ * Dispara por dos razones distintas: porque hay pedidos que el pick face no alcanza a
+ * cubrir, o porque quedó por debajo del mínimo aunque hoy no haya pedidos. La segunda
+ * evita que la primera ocurra con la moto esperando.
+ *
+ * No propone nada si no hay de dónde bajar: una sugerencia sin respaldo manda a alguien a
+ * caminar en balde. Ese caso es un faltante de compra, no de acomodo.
+ */
+export function planReplenishment(
+  items: ReplenishmentInput[],
+  { minUnits = DEFAULT_PICK_FACE_MIN }: { minUnits?: number } = {},
+): ReplenishmentPlan[] {
+  const plans: ReplenishmentPlan[] = []
+
+  for (const item of items) {
+    const target = Math.max(item.demand, minUnits)
+    const shortfall = round3(target - item.pickFace.quantity)
+    if (shortfall <= 0) continue
+
+    // Nunca por encima de la capacidad del pick face: no cabría físicamente.
+    const room = item.pickFace.max_units === null
+      ? shortfall
+      : round3(item.pickFace.max_units - item.pickFace.quantity)
+    const wanted = round3(Math.min(shortfall, Math.max(0, room)))
+
+    const lines: { code: string; quantity: number; pick_order: number }[] = []
+    let pending = wanted
+    for (const source of [...item.reserve].sort((a, b) => a.pick_order - b.pick_order)) {
+      if (pending <= 0) break
+      if (source.quantity <= 0) continue
+      const take = round3(Math.min(source.quantity, pending))
+      lines.push({ code: source.code, quantity: take, pick_order: source.pick_order })
+      pending = round3(pending - take)
+    }
+    if (!lines.length) continue
+
+    plans.push({
+      productId: item.productId,
+      sku: item.sku,
+      name: item.name,
+      pickFace: item.pickFace,
+      lines,
+      missing: round3(Math.max(0, shortfall - lines.reduce((sum, line) => sum + line.quantity, 0))),
+      reason: item.demand > item.pickFace.quantity ? 'demanda' : 'minimo',
+      shortfall,
+    })
+  }
+  return plans.sort((a, b) => b.shortfall - a.shortfall)
+}

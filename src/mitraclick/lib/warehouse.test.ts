@@ -10,6 +10,8 @@ import {
   parseLocationCode,
   pickOrder,
   planLayout,
+  planReplenishment,
+  suggestPutaway,
   validateLayout,
   type StockAtLocation,
 } from './warehouse'
@@ -195,5 +197,138 @@ describe('límites del orden de recorrido', () => {
 
   it('validateLayout rechaza lo que no cabe en la fórmula', () => {
     expect(validateLayout([{ zone: 'A', positions: 1, levels: 10 }])).toEqual([`Zona A: el máximo son ${MAX_POSITION} posiciones y ${MAX_LEVEL} niveles.`])
+  })
+})
+
+// ── Acomodo guiado ──────────────────────────────────────────────────────────────
+// Al recibir una compra, hoy la persona elige la ubicación a mano entre 100. El sistema
+// propone: junto a lo que ya hay de ese producto, o lo más cerca posible del picking.
+
+describe('suggestPutaway', () => {
+  const vacia = (code: string, pick_order: number, max_units: number | null = 60) =>
+    ({ locationId: code, code, pick_order, kind: 'almacenaje' as const, quantity: 0, max_units, productCount: 0 })
+
+  it('propone primero donde ya hay del mismo producto, para no dispersarlo', () => {
+    const candidatos = [
+      vacia('A-01-2', 120),
+      { ...vacia('C-05-3', 980), quantity: 10, productCount: 1 },
+    ]
+    const plan = suggestPutaway(candidatos, { quantity: 5, sameProductLocations: ['C-05-3'] })
+    expect(plan.lines.map((line) => line.code)).toEqual(['C-05-3'])
+    expect(plan.missing).toBe(0)
+  })
+
+  it('si no hay del producto en ninguna parte, usa la vacía más cercana al recorrido', () => {
+    const plan = suggestPutaway([vacia('C-05-3', 980), vacia('A-01-2', 120)], { quantity: 5, sameProductLocations: [] })
+    expect(plan.lines.map((line) => line.code)).toEqual(['A-01-2'])
+  })
+
+  it('respeta la capacidad y reparte el resto en la siguiente ubicación', () => {
+    const plan = suggestPutaway([vacia('A-01-2', 120, 40), vacia('A-02-2', 130, 40)], { quantity: 55, sameProductLocations: [] })
+    expect(plan.lines).toEqual([
+      expect.objectContaining({ code: 'A-01-2', quantity: 40 }),
+      expect.objectContaining({ code: 'A-02-2', quantity: 15 }),
+    ])
+    expect(plan.missing).toBe(0)
+  })
+
+  it('cuenta la existencia que ya hay al calcular el hueco que queda', () => {
+    const casi = { ...vacia('A-01-2', 120, 40), quantity: 35, productCount: 1 }
+    const plan = suggestPutaway([casi], { quantity: 10, sameProductLocations: ['A-01-2'] })
+    expect(plan.lines).toEqual([expect.objectContaining({ code: 'A-01-2', quantity: 5 })])
+    expect(plan.missing).toBe(5)
+  })
+
+  it('sin capacidad capturada no inventa un límite: cabe todo', () => {
+    const plan = suggestPutaway([vacia('A-01-2', 120, null)], { quantity: 999, sameProductLocations: [] })
+    expect(plan.lines).toEqual([expect.objectContaining({ code: 'A-01-2', quantity: 999 })])
+    expect(plan.missing).toBe(0)
+  })
+
+  it('reporta lo que no cabe en vez de proponer una ubicación inventada', () => {
+    const plan = suggestPutaway([vacia('A-01-2', 120, 10)], { quantity: 30, sameProductLocations: [] })
+    expect(plan.missing).toBe(20)
+  })
+
+  it('no propone recepción, embarque, cuarentena ni devoluciones', () => {
+    const servicio = [
+      { ...vacia('RECEPCION', 1_000_000_001), kind: 'recepcion' as const },
+      { ...vacia('CUARENTENA', 1_000_000_004), kind: 'cuarentena' as const },
+      { ...vacia('A-01-2', 120), kind: 'almacenaje' as const },
+    ]
+    expect(suggestPutaway(servicio, { quantity: 5, sameProductLocations: [] }).lines.map((l) => l.code)).toEqual(['A-01-2'])
+  })
+
+  it('sin candidatos no propone nada y reporta todo como pendiente', () => {
+    expect(suggestPutaway([], { quantity: 7, sameProductLocations: [] })).toEqual({ lines: [], missing: 7 })
+  })
+})
+
+// ── Reposición del pick face ────────────────────────────────────────────────────
+// El nivel 1 es de donde se surte y es el que se vacía. Hay que avisar cuándo bajar
+// producto de los niveles altos antes de que el surtido se tropiece.
+
+describe('planReplenishment', () => {
+  const pf = (quantity: number, reserve: { code: string; quantity: number; pick_order: number }[] = []) => ({
+    productId: 'p1',
+    sku: 'MC-1001',
+    name: 'Rotomartillo',
+    pickFace: { locationId: 'A-01-1', code: 'A-01-1', pick_order: 111, quantity, max_units: 60 },
+    reserve,
+    demand: 0,
+  })
+
+  it('no propone nada si el pick face alcanza para la demanda', () => {
+    expect(planReplenishment([{ ...pf(20), demand: 10 }])).toEqual([])
+  })
+
+  it('propone bajar lo que falta cuando la demanda supera el pick face', () => {
+    const plan = planReplenishment([{ ...pf(4, [{ code: 'A-01-3', quantity: 30, pick_order: 113 }]), demand: 10 }])
+    expect(plan).toHaveLength(1)
+    expect(plan[0].lines).toEqual([expect.objectContaining({ code: 'A-01-3', quantity: 6 })])
+    expect(plan[0].reason).toBe('demanda')
+  })
+
+  it('avisa aunque no haya demanda si el pick face quedó por debajo del mínimo', () => {
+    const plan = planReplenishment([{ ...pf(2, [{ code: 'A-01-3', quantity: 30, pick_order: 113 }]), demand: 0 }], { minUnits: 6 })
+    expect(plan[0].reason).toBe('minimo')
+    expect(plan[0].lines[0].quantity).toBe(4)
+  })
+
+  it('baja primero del nivel más cercano al recorrido', () => {
+    const plan = planReplenishment([{
+      ...pf(0, [{ code: 'A-09-4', quantity: 50, pick_order: 194 }, { code: 'A-01-2', quantity: 3, pick_order: 112 }]),
+      demand: 10,
+    }])
+    expect(plan[0].lines.map((l) => l.code)).toEqual(['A-01-2', 'A-09-4'])
+    expect(plan[0].lines.map((l) => l.quantity)).toEqual([3, 7])
+  })
+
+  it('no sobrepasa la capacidad del pick face', () => {
+    const plan = planReplenishment([{
+      productId: 'p1', sku: 'MC-1', name: 'x',
+      pickFace: { locationId: 'A-01-1', code: 'A-01-1', pick_order: 111, quantity: 0, max_units: 8 },
+      reserve: [{ code: 'A-01-3', quantity: 90, pick_order: 113 }],
+      demand: 50,
+    }])
+    expect(plan[0].lines[0].quantity).toBe(8)
+    expect(plan[0].missing).toBe(42)
+  })
+
+  it('reporta el faltante cuando la reserva no alcanza', () => {
+    const plan = planReplenishment([{ ...pf(1, [{ code: 'A-01-3', quantity: 2, pick_order: 113 }]), demand: 10 }])
+    expect(plan[0].missing).toBe(7)
+  })
+
+  it('no propone nada si no hay reserva de dónde bajar', () => {
+    expect(planReplenishment([{ ...pf(0, []), demand: 10 }])).toEqual([])
+  })
+
+  it('ordena lo más urgente primero', () => {
+    const plan = planReplenishment([
+      { ...pf(8, [{ code: 'A-01-3', quantity: 30, pick_order: 113 }]), productId: 'leve', demand: 10 },
+      { ...pf(0, [{ code: 'A-02-3', quantity: 30, pick_order: 123 }]), productId: 'urgente', demand: 20 },
+    ])
+    expect(plan.map((item) => item.productId)).toEqual(['urgente', 'leve'])
   })
 })
