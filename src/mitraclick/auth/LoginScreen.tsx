@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { KeyRound, Mail } from 'lucide-react'
+import { readAuthError } from './authErrors'
 import { useSession } from './SessionContext'
 import { Button, Field, TextInput } from '../components/Controls'
 
@@ -12,7 +13,12 @@ export function LoginScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
+  // Si volvimos de Supabase con un error en la URL, hay que decirlo: es la única pista de
+  // por qué el enlace o el proveedor no funcionaron. Se lee una vez, al montar.
+  const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(() => {
+    const text = readAuthError(window.location.hash, window.location.search)
+    return text ? { tone: 'error', text } : null
+  })
 
   const run = async (action: () => Promise<void>, success?: string) => {
     setBusy(true)
