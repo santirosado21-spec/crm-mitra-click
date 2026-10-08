@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { SessionContext, type SessionValue } from '../auth/SessionContext'
 import { HomePage } from '../pages/HomePage'
+import { ThemeProvider } from '../theme/ThemeProvider'
 import { AppShell } from './AppShell'
 
 const session: SessionValue = {
@@ -16,16 +17,18 @@ const session: SessionValue = {
 
 function renderShell(path: string) {
   return renderToStaticMarkup(
-    <SessionContext.Provider value={session}>
-      <MemoryRouter initialEntries={[path]}>
-        <Routes>
-          <Route element={<AppShell />}>
-            <Route index element={<HomePage />} />
-            <Route path="clientes" element={<h1>Clientes</h1>} />
-          </Route>
-        </Routes>
-      </MemoryRouter>
-    </SessionContext.Provider>,
+    <ThemeProvider initialTheme="light">
+      <SessionContext.Provider value={session}>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route element={<AppShell />}>
+              <Route index element={<HomePage />} />
+              <Route path="clientes" element={<h1>Clientes</h1>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </SessionContext.Provider>
+    </ThemeProvider>,
   )
 }
 
@@ -36,6 +39,9 @@ describe('AppShell', () => {
     expect(html).not.toContain('Abrir navegación')
     expect(html).toContain('Bienvenido, Ángel')
     expect(html).toContain('Módulos del sistema')
+    expect(html).toContain('data-row-tone="1"')
+    expect(html).toContain('data-row-tone="5"')
+    expect(html).toContain('h-28')
   })
 
   it('muestra el sidebar al entrar a un módulo', () => {

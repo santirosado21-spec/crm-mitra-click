@@ -29,8 +29,8 @@ type Action = 'entrada' | 'salida' | 'conteo' | 'incidencia'
 const ACTIONS: { key: Action; label: string; icon: LucideIcon; roles: AppRole[]; className: string }[] = [
   { key: 'entrada', label: 'Entrada', icon: ArrowDownToLine, roles: ['direccion', 'admin', 'almacen', 'logistica', 'compras'], className: 'bg-mc-charcoal text-white' },
   { key: 'salida', label: 'Salida', icon: ArrowUpFromLine, roles: ['direccion', 'admin', 'almacen', 'logistica', 'compras'], className: 'bg-mc-yellow text-mc-ink' },
-  { key: 'conteo', label: 'Conteo', icon: ClipboardList, roles: ['direccion', 'admin', 'almacen'], className: 'border border-mc-line bg-white text-mc-ink' },
-  { key: 'incidencia', label: 'Incidencia', icon: AlertTriangle, roles: ['direccion', 'admin', 'almacen', 'logistica'], className: 'border border-mc-line bg-white text-mc-ink' },
+  { key: 'conteo', label: 'Conteo', icon: ClipboardList, roles: ['direccion', 'admin', 'almacen'], className: 'border border-mc-line bg-mc-surface text-mc-ink' },
+  { key: 'incidencia', label: 'Incidencia', icon: AlertTriangle, roles: ['direccion', 'admin', 'almacen', 'logistica'], className: 'border border-mc-line bg-mc-surface text-mc-ink' },
 ]
 
 function Message({ title, children }: { title: string; children: string }) {

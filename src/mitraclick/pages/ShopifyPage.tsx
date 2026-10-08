@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { CheckCircle2, CircleDashed, RefreshCw } from 'lucide-react'
 import { useSession } from '../auth/SessionContext'
 import { Button, Checkbox } from '../components/Controls'
-import { EmptyState, PageHeader, Panel, StatusBadge } from '../components/Primitives'
+import { EmptyState, Panel, StatusBadge } from '../components/Primitives'
 import { callFunction, invokeFunction, selectRows } from '../lib/crud'
 import { formatDate, formatNumber } from '../lib/format'
 import { useQuery } from '../lib/useQuery'
+import { ShopifyDashboards } from './ShopifyDashboards'
 
 interface Status { configurado: { dominio: boolean; token: boolean; webhook: boolean }; version: string }
 interface RunRow { id: number; entity: string; status: string; started_at: string; rows_received: number; rows_upserted: number; error: string | null; triggered_by: string | null }
@@ -27,6 +28,10 @@ const SYNCS = [
 ]
 
 export function ShopifyPage() {
+  return <ShopifyDashboards integration={<ShopifyIntegration />} />
+}
+
+function ShopifyIntegration(): ReactNode {
   const { can } = useSession()
   const admin = can(['direccion', 'admin'])
   const [running, setRunning] = useState<string | null>(null)
@@ -71,7 +76,7 @@ export function ShopifyPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader eyebrow="Sistema" title="Shopify" description="Shopify sigue siendo la tienda. De allá llegan pedidos, clientes y productos; aquí vive la operación interna. Las credenciales se guardan como secretos del servidor: nunca se escriben ni se ven en esta pantalla." />
+      <p className="text-sm text-mc-muted">Conexión, sincronización e inventario de la tienda.</p>
 
       {demoRuns > 0 && <p className="rounded-xl border border-mc-yellow-strong/40 bg-mc-yellow-wash px-4 py-3 text-sm text-mc-ink" role="status"><strong>Datos de prueba activos.</strong> La conciliación y la bitácora incluyen {formatNumber(demoRuns)} corridas demo de Shopify; se pueden retirar con <code>purge_shopify_demo()</code>.</p>}
 

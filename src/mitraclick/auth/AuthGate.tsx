@@ -4,10 +4,12 @@ import { useSession } from './SessionContext'
 import { LoginScreen } from './LoginScreen'
 import { LoadingScreen } from '../components/Primitives'
 import { Button } from '../components/Controls'
+import { ThemeToggle } from '../components/ThemeToggle'
 
 function Notice({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <main className="grid min-h-dvh place-items-center bg-mc-bg px-4">
+    <main className="relative grid min-h-dvh place-items-center bg-mc-bg px-4">
+      <ThemeToggle className="absolute right-4 top-4" />
       <div className="w-full max-w-md rounded-2xl border border-mc-line bg-mc-surface p-6 text-center shadow-mc-card" role="alert">
         <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-mc-warning-soft text-mc-warning">{icon}</span>
         <h1 className="mt-4 text-lg font-extrabold text-mc-ink">{title}</h1>

@@ -8,7 +8,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const variants = {
   primary: 'bg-mc-charcoal text-white hover:bg-mc-ink border border-transparent',
   secondary: 'bg-mc-yellow text-mc-ink hover:bg-mc-yellow-strong border border-transparent',
-  outline: 'bg-white text-mc-ink border border-mc-line hover:border-mc-charcoal',
+  outline: 'bg-mc-surface text-mc-ink border border-mc-line hover:border-mc-charcoal',
 }
 
 export function Button({ variant = 'primary', children, className = '', type = 'button', ...props }: ButtonProps) {
@@ -35,7 +35,7 @@ export function Input({ label, error, id, className = '', ...props }: InputProps
       <input
         id={id}
         aria-invalid={error ? true : undefined}
-        className={`mc-field min-h-11 rounded-xl border bg-white px-3 py-2 text-sm text-mc-ink outline-none placeholder:text-mc-subtle focus:ring-2 focus:ring-mc-yellow/50 ${error ? 'border-mc-danger' : 'border-mc-line focus:border-mc-charcoal'} ${className}`}
+        className={`mc-field min-h-11 rounded-xl border bg-mc-surface px-3 py-2 text-sm text-mc-ink outline-none placeholder:text-mc-subtle focus:ring-2 focus:ring-mc-yellow/50 ${error ? 'border-mc-danger' : 'border-mc-line focus:border-mc-charcoal'} ${className}`}
         {...props}
       />
       {error && <span className="text-xs text-mc-danger">{error}</span>}
@@ -44,7 +44,7 @@ export function Input({ label, error, id, className = '', ...props }: InputProps
 }
 
 const fieldClass = (error?: string, className = '') =>
-  `mc-field min-h-11 max-w-full w-full rounded-xl border bg-white px-3 py-2 text-sm text-mc-ink outline-none placeholder:text-mc-subtle focus:ring-2 focus:ring-mc-yellow/50 disabled:bg-mc-surface-2 disabled:text-mc-muted ${error ? 'border-mc-danger' : 'border-mc-line focus:border-mc-charcoal'} ${className}`
+  `mc-field min-h-11 max-w-full w-full rounded-xl border bg-mc-surface px-3 py-2 text-sm text-mc-ink outline-none placeholder:text-mc-subtle focus:ring-2 focus:ring-mc-yellow/50 disabled:bg-mc-surface-2 disabled:text-mc-muted ${error ? 'border-mc-danger' : 'border-mc-line focus:border-mc-charcoal'} ${className}`
 
 /** Etiqueta + control + ayuda/errores, con los ids enlazados para lectores de pantalla. */
 export function Field({ id, label, required, hint, error, children }: { id: string; label: string; required?: boolean; hint?: string; error?: string; children: ReactNode }) {

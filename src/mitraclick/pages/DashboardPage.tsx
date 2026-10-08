@@ -16,7 +16,7 @@ interface RepRow { rep_id: string; rep: string; sales: number; orders: number; f
 interface DayRow { day: string; sales: number; orders: number }
 
 // Mismos valores que los tokens de index.css; Recharts necesita hex literales.
-const CHART = { bar: '#454a49', grid: '#ecebe5', axis: '#767a78' }
+const CHART = { bar: 'var(--color-mc-charcoal)', grid: 'var(--color-mc-line-soft)', axis: 'var(--color-mc-gray-400)' }
 
 const th = 'px-4 py-2.5 font-semibold'
 const td = 'px-4 py-2.5'

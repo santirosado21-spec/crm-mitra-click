@@ -126,7 +126,7 @@ export function ImportPage({ kind }: { kind: Kind }) {
       eyebrow={def.eyebrow}
       title={def.title}
       description={def.description}
-      actions={<Link to={def.back} className="inline-flex items-center gap-2 rounded-xl border border-mc-line bg-white px-4 py-2 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><ArrowLeft size={16} aria-hidden="true" />Volver</Link>}
+      actions={<Link to={def.back} className="inline-flex items-center gap-2 rounded-xl border border-mc-line bg-mc-surface px-4 py-2 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><ArrowLeft size={16} aria-hidden="true" />Volver</Link>}
     />
   )
 

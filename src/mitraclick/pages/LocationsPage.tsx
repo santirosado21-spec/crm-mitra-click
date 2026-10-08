@@ -141,7 +141,7 @@ export function LocationsPage() {
         headerActions={
           <>
             {view === 'ubicaciones' && can(WRITE_ROLES) && <Button variant="outline" onClick={() => setGenerating(true)} data-testid="generate-layout"><Wand2 size={16} aria-hidden="true" />Generar ubicaciones</Button>}
-            {view === 'etiquetas' && <Link to="/etiquetas" className="inline-flex items-center justify-center gap-2 rounded-xl border border-mc-line bg-white px-4 py-2 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><Printer size={16} aria-hidden="true" />Hoja de etiquetas</Link>}
+            {view === 'etiquetas' && <Link to="/etiquetas" className="inline-flex items-center justify-center gap-2 rounded-xl border border-mc-line bg-mc-surface px-4 py-2 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><Printer size={16} aria-hidden="true" />Hoja de etiquetas</Link>}
           </>
         }
       />

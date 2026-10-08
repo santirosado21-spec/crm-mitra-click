@@ -106,7 +106,7 @@ export function PendingPage() {
       const link = issueLink(String(row.entity_type), row.entity_id ? String(row.entity_id) : null)
       return (
         <>
-          {link && <Link to={link} className="inline-flex items-center rounded-xl border border-mc-line bg-white px-3 py-1.5 text-xs font-semibold text-mc-ink hover:border-mc-charcoal" aria-label={`Ir a corregir: ${String(row.title)}`}>Ir a corregir</Link>}
+          {link && <Link to={link} className="inline-flex items-center rounded-xl border border-mc-line bg-mc-surface px-3 py-1.5 text-xs font-semibold text-mc-ink hover:border-mc-charcoal" aria-label={`Ir a corregir: ${String(row.title)}`}>Ir a corregir</Link>}
           {open && row.assigned_to !== userId && <Button variant="outline" className={smallButton} onClick={() => { void act(() => saveRow('issues', String(row.id), { assigned_to: userId, status: 'en_proceso' })) }} aria-label={`Tomar el pendiente: ${String(row.title)}`}>Lo tomo</Button>}
           {open && <Button className={smallButton} onClick={() => setClosing(row)} aria-label={`Cerrar el pendiente: ${String(row.title)}`}>Cerrar</Button>}
         </>

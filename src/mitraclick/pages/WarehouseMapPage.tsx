@@ -62,8 +62,8 @@ function LocationDrawer({ location, onClose }: { location: MapLocation; onClose:
       )}
 
       <div className="mt-5 flex flex-wrap gap-2">
-        <Link to={`/movimientos?q=${encodeURIComponent(location.code)}`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-mc-line bg-white px-3 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><ExternalLink size={15} aria-hidden="true" />Movimientos</Link>
-        <Link to={`/ubicaciones?q=${encodeURIComponent(location.code)}`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-mc-line bg-white px-3 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><Tag size={15} aria-hidden="true" />Editar ubicación</Link>
+        <Link to={`/movimientos?q=${encodeURIComponent(location.code)}`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-mc-line bg-mc-surface px-3 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><ExternalLink size={15} aria-hidden="true" />Movimientos</Link>
+        <Link to={`/ubicaciones?q=${encodeURIComponent(location.code)}`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-mc-line bg-mc-surface px-3 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><Tag size={15} aria-hidden="true" />Editar ubicación</Link>
       </div>
     </RecordDrawer>
   )

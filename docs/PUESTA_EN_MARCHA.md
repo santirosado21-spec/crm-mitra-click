@@ -106,6 +106,15 @@ Secretos (Edge Functions → Secrets). Ninguno va en el navegador ni en el repos
 
 ## 4. Conectar Shopify
 
+La pantalla `/shopify` ahora reúne ocho vistas: ventas, canales de marketing, Paid Ads,
+Google Ads, SEO, AEO, LinkedIn outreach e integración. Ventas lee los KPIs existentes;
+canales y LinkedIn leen el embudo de leads. SEO muestra hasta 20 consultas o páginas
+importadas con las fechas exactas seleccionadas; el acceso a importar CSV está en la vista.
+Paid Ads, Google Ads y AEO son paneles preparados, **con integración y medición pendientes**;
+no muestran gasto, conversiones ni menciones inventadas. LinkedIn usa seguimiento manual
+en Leads, no envío automático de mensajes. La atribución de ventas por campaña aún no existe.
+Esta ampliación de pantallas no necesita migraciones adicionales.
+
 1. En Shopify: crear una app personalizada con lectura de pedidos, productos, clientes e inventario.
 2. Guardar los tres secretos.
 3. Registrar webhooks hacia `…/functions/v1/shopify-webhook` para: `orders/create`,

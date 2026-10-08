@@ -260,7 +260,7 @@ function OrderForm({ order, onChanged }: { order: OrderRow | null; onChanged: ()
               {sales && nextStatuses('order', status).map((next) => (
                 <Button key={next} variant="outline" disabled={busy} data-testid={`status-${next}`} onClick={() => { void run(async () => { await callFunction('set_order_status', { p_id: order.id, p_status: next }); refresh() }) }}>{ACTION_LABEL[next] ?? statusLabel(next)}</Button>
               ))}
-              {canBuy && <Link to={`/compras/nueva?pedido=${order.id}`} className="inline-flex items-center justify-center rounded-xl border border-mc-line bg-white px-4 py-2 text-sm font-semibold text-mc-ink hover:border-mc-charcoal">Crear compra</Link>}
+              {canBuy && <Link to={`/compras/nueva?pedido=${order.id}`} className="inline-flex items-center justify-center rounded-xl border border-mc-line bg-mc-surface px-4 py-2 text-sm font-semibold text-mc-ink hover:border-mc-charcoal">Crear compra</Link>}
               {canShip && <Button variant="secondary" disabled={busy} onClick={() => setDrawer('envio')} data-testid="ship-order">Surtir y enviar</Button>}
               {canInvoice && <Button variant="outline" disabled={busy} onClick={() => setDrawer('factura')} data-testid="invoice-order">Registrar factura</Button>}
             </>

@@ -24,14 +24,14 @@ export function TagSheetPage() {
   const tags = query.data ?? []
 
   return (
-    <div className="min-h-dvh bg-white p-4 text-mc-ink">
+    <div className="mc-print-sheet min-h-dvh bg-white p-4 text-mc-ink">
       <header className="no-print mx-auto mb-5 flex max-w-5xl flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-extrabold">Hoja de etiquetas</h1>
           <p className="mt-1 max-w-2xl text-sm text-mc-muted">Cada etiqueta lleva el link que se graba en el chip NFC. <strong className="text-mc-ink">El código QR está pendiente:</strong> falta instalar la librería que lo dibuja; por ahora se imprime el link en texto.</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/ubicaciones?vista=etiquetas" className="inline-flex items-center gap-2 rounded-xl border border-mc-line bg-white px-4 py-2 text-sm font-semibold hover:border-mc-charcoal"><ArrowLeft size={16} aria-hidden="true" />Volver</Link>
+          <Link to="/ubicaciones?vista=etiquetas" className="inline-flex items-center gap-2 rounded-xl border border-mc-line bg-mc-surface px-4 py-2 text-sm font-semibold hover:border-mc-charcoal"><ArrowLeft size={16} aria-hidden="true" />Volver</Link>
           <Button onClick={() => window.print()} disabled={!tags.length}><Printer size={16} aria-hidden="true" />Imprimir</Button>
         </div>
       </header>

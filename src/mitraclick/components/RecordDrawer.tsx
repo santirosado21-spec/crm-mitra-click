@@ -44,7 +44,7 @@ export function RecordDrawer({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="absolute inset-y-0 right-0 flex w-full max-w-[680px] animate-[drawerIn_.24s_ease-out] flex-col border-l border-mc-gray-200 bg-white shadow-2xl"
+        className="absolute inset-y-0 right-0 flex w-full max-w-[680px] animate-[drawerIn_.24s_ease-out] flex-col border-l border-mc-gray-200 bg-mc-surface shadow-2xl"
       >
         <header className="mc-panel-heading flex items-start justify-between gap-4 border-b border-mc-line-soft px-5 py-4 lg:px-6">
           <div className="min-w-0">

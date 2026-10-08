@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { readAuthError } from './authErrors'
 import { useSession } from './SessionContext'
 import { Button, Field, TextInput } from '../components/Controls'
+import { ThemeToggle } from '../components/ThemeToggle'
 
 /** Pantalla de entrada. Sin sesión no se ve nada del sistema. */
 export function LoginScreen() {
@@ -43,9 +44,10 @@ export function LoginScreen() {
   }
 
   return (
-    <main className="grid min-h-dvh place-items-center bg-mc-bg px-4 py-10">
+    <main className="relative grid min-h-dvh place-items-center bg-mc-bg px-4 py-10">
+      <ThemeToggle className="absolute right-4 top-4" />
       <div className="w-full max-w-sm">
-        <img src="/mitraclick-logo.jpg" alt="Mitra Click" className="mx-auto w-44 mix-blend-multiply" />
+        <img src="/mitraclick-logo.jpg" alt="Mitra Click" className="mc-brand-logo mx-auto w-44 mix-blend-multiply" />
         <h1 className="mt-6 text-center text-2xl font-extrabold text-mc-ink">Iniciar sesión</h1>
         <p className="mt-1 text-center text-sm text-mc-muted">Sistema operativo de Mitra Click. Solo cuentas autorizadas.</p>
 

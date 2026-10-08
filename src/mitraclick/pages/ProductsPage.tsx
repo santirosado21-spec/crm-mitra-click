@@ -132,7 +132,7 @@ export function ProductsPage() {
     <>
       <ResourcePage
         config={config}
-        headerActions={can(WRITE_ROLES) ? <Link to="/productos/importar" className="inline-flex items-center justify-center gap-2 rounded-xl border border-mc-line bg-white px-4 py-2 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><Upload size={16} aria-hidden="true" />Importar CSV</Link> : undefined}
+        headerActions={can(WRITE_ROLES) ? <Link to="/productos/importar" className="inline-flex items-center justify-center gap-2 rounded-xl border border-mc-line bg-mc-surface px-4 py-2 text-sm font-semibold text-mc-ink hover:border-mc-charcoal"><Upload size={16} aria-hidden="true" />Importar CSV</Link> : undefined}
       />
       {history && <HistoryDrawer product={history} onClose={() => setHistory(null)} />}
     </>

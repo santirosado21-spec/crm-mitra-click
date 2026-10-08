@@ -73,6 +73,66 @@
   color: var(--color-mc-ink);
 }
 
+:root[data-theme='dark'] {
+  --color-mc-ink: #f1f4f2;
+  --color-mc-muted: #b8c0bc;
+  --color-mc-subtle: #929b96;
+  --color-mc-yellow-soft: #493a0d;
+  --color-mc-yellow-wash: #30280f;
+  --color-mc-yellow-ink: #ffd45a;
+  --color-mc-bg: #111513;
+  --color-mc-surface: #191e1c;
+  --color-mc-surface-2: #222825;
+  --color-mc-line: #3a433f;
+  --color-mc-line-soft: #2b322f;
+  --color-mc-gray-50: #222825;
+  --color-mc-gray-100: #29302d;
+  --color-mc-gray-200: #3a433f;
+  --color-mc-gray-300: #505a55;
+  --color-mc-gray-400: #9ba49f;
+  --color-mc-gray-500: #afb7b3;
+  --color-mc-gray-600: #c1c7c4;
+  --color-mc-gray-700: #d2d7d4;
+  --color-mc-gray-800: #e1e5e2;
+  --color-mc-gray-900: #eef1ef;
+  --color-mc-gray-950: #f8faf8;
+  --color-mc-success: #70d7a4;
+  --color-mc-success-soft: #17372a;
+  --color-mc-warning: #ffc36b;
+  --color-mc-warning-soft: #3b2a12;
+  --color-mc-danger: #ff9389;
+  --color-mc-danger-soft: #3d201d;
+  --color-mc-info: #86bde3;
+  --color-mc-info-soft: #193142;
+  --shadow-mc-card: 0 1px 2px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.22);
+  --shadow-mc-pop: 0 12px 40px rgba(0, 0, 0, 0.38);
+}
+
+:root[data-theme='dark'] .hover\:bg-mc-ink:hover { background-color: color-mix(in srgb, var(--color-mc-charcoal) 82%, white); }
+:root[data-theme='dark'] .mc-sidebar-scrim { background-color: rgba(0, 0, 0, 0.64); }
+:root[data-theme='dark'] .mc-brand-logo {
+  border-radius: 0.75rem;
+  background: white;
+  padding: 0.2rem 0.4rem;
+  mix-blend-mode: normal;
+}
+:root[data-theme='dark'] .mc-field:focus { border-color: var(--color-mc-yellow-strong); }
+:root[data-theme='dark'] input[type='checkbox'] { accent-color: var(--color-mc-yellow); }
+:root[data-theme='dark'] ::-webkit-scrollbar-thumb { background: var(--color-mc-gray-300); }
+.mc-print-sheet {
+  color-scheme: light;
+  --color-mc-ink: #303536;
+  --color-mc-muted: #676b69;
+  --color-mc-subtle: #8a8d8b;
+  --color-mc-surface: #ffffff;
+  --color-mc-surface-2: #f6f6f1;
+  --color-mc-line: #deded8;
+  --color-mc-line-soft: #ecebe5;
+  --color-mc-gray-200: #deded8;
+  --color-mc-gray-500: #676b69;
+  --color-mc-gray-900: #303536;
+}
+
 /* Estilos base dentro de @layer base: así las utilidades de Tailwind (text-*, bg-*…)
    siempre ganan. Fuera de una capa, `a { color: inherit }` anulaba el color de los links. */
 @layer base {
