@@ -109,7 +109,12 @@ export function ShipmentsPage() {
 
   return (
     <>
-      <ResourcePage key={version} config={config} toolbar={failure ? <p className="rounded-xl border border-mc-danger/25 bg-mc-danger-soft px-4 py-3 text-sm font-semibold text-mc-danger" role="alert">{failure}</p> : undefined} />
+      <ResourcePage
+        key={version}
+        config={config}
+        headerActions={<Link to="/fletes" className="mc-press inline-flex min-h-11 items-center justify-center rounded-xl border border-mc-line bg-white px-4 py-2 text-sm font-semibold text-mc-ink hover:border-mc-charcoal">Cotizar flete o crear viaje</Link>}
+        toolbar={failure ? <p className="rounded-xl border border-mc-danger/25 bg-mc-danger-soft px-4 py-3 text-sm font-semibold text-mc-danger" role="alert">{failure}</p> : undefined}
+      />
       {delivering && <DeliveryDrawer shipment={delivering} onClose={() => setDelivering(null)} onSaved={() => { setDelivering(null); refresh() }} />}
     </>
   )

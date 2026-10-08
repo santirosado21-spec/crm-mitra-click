@@ -1,16 +1,18 @@
 # Puesta en marcha — Mitra Click
 
-Todo el sistema está escrito en el repositorio y el esquema está aplicado en Supabase. Lo que
-falta es conectar Shopify y **validar con datos y personas reales**. Esta guía es el camino de "código en la rama" a "sistema
+El esquema base está aplicado en Supabase. Las migraciones nuevas de fletes/viajes y datos demo
+de Shopify están escritas pero pendientes de aplicar. Además falta conectar Shopify y **validar
+con datos y personas reales**. Esta guía es el camino de "código en la rama" a "sistema
 funcionando", en orden. Cada paso dice quién puede hacerlo.
 
 ## 1. Esquema
 
-**Aplicado al 7-oct-2026**: las 10 migraciones. El detalle, los advisors y la verificación
+**Aplicado al 8-oct-2026**: las 13 migraciones base. El detalle, los advisors y la verificación
 que se hizo están en `docs/DATABASE.md`. Los archivos `manual_*` se ejecutaron a mano en el
 SQL Editor y no aparecen en el historial de migraciones de Supabase.
 
-Falta, de este paso: la validación con datos reales y la revisión visual (ver el punto 7).
+Falta, de este paso: aplicar `20261008190124_logistics_freight_trips.sql` y
+`20261008190133_shopify_demo_data.sql`; después, validar con datos reales (ver el punto 7).
 
 ## 2. Primer usuario
 
@@ -39,6 +41,18 @@ La base tiene dos funciones, ejecutables solo por `service_role`:
   dos veces no duplica. **Sembrada el 7-oct-2026.**
 - `select public.purge_demo();` — borra todo lo marcado como `source = 'demo'` y deja lo
   real intacto. Correrla el día que entren los datos de verdad.
+
+Después de aplicar `20261008190133_shopify_demo_data.sql` también quedan disponibles:
+
+- `select public.seed_shopify_demo();` — enlaza parte del catálogo, clientes y pedidos demo
+  con identificadores ficticios de Shopify, agrega existencias externas y corridas de
+  sincronización. No llama a Shopify y es idempotente.
+- `select public.purge_shopify_demo();` — retira únicamente esos identificadores, snapshots,
+  corridas y payloads demo. Conviene ejecutarla antes de conectar la tienda real.
+
+La migración `20261008190124_logistics_freight_trips.sql` agrega cotizaciones de flete y
+viajes. Ninguna de las dos tablas mueve inventario: la salida sigue ocurriendo solamente al
+crear un envío desde el pedido con `ship_order`.
 
 ### Acceso de desarrollo (temporal, quitar al terminar)
 

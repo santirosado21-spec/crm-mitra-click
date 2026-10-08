@@ -11,6 +11,7 @@ import { CountsPage } from './mitraclick/pages/CountsPage'
 import { CustomersPage } from './mitraclick/pages/CustomersPage'
 import { OrdersPage, PurchasesPage, QuotesPage } from './mitraclick/pages/DocumentListPages'
 import { FamiliesPage } from './mitraclick/pages/FamiliesPage'
+import { FreightPage } from './mitraclick/pages/FreightPage'
 import { InvoicesPage, PaymentsPage } from './mitraclick/pages/FinancePages'
 import { HomePage } from './mitraclick/pages/HomePage'
 import { ImportPage } from './mitraclick/pages/ImportPage'
@@ -60,6 +61,7 @@ const READY: Record<string, ReactNode> = {
   '/pedidos': <OrdersPage />,
   '/compras': <PurchasesPage />,
   '/envios': <ShipmentsPage />,
+  '/fletes': <FreightPage />,
   '/remisiones': <RemissionsPage />,
   '/facturas': <InvoicesPage />,
   '/pagos': <PaymentsPage />,

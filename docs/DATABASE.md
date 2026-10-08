@@ -7,6 +7,13 @@ us-east-2, plan gratuito). Es la única fuente de verdad del sistema.
 
 Las 13 migraciones del sistema operativo están **aplicadas** (7 y 8-oct-2026).
 
+Pendientes de aplicar en Supabase:
+
+| Archivo | Contenido |
+|---|---|
+| `20261008190124_logistics_freight_trips.sql` | Cotizaciones de flete y programación de viajes, sin movimientos de inventario |
+| `20261008190133_shopify_demo_data.sql` | Siembra y limpieza independiente de datos demo para la pantalla Shopify |
+
 | Archivo | Cómo se aplicó |
 |---|---|
 | `manual_op1_reset_readonly_model.sql` | A mano en el SQL Editor (borró el modelo anterior, vacío). No aparece en el historial de Supabase |
@@ -47,7 +54,7 @@ Un recorrido dentro de una transacción que siempre se revierte, con un usuario 
 | Bodega | `warehouses`, `locations`, `tags`, `stock_movements`, `stock_levels`, `stock_counts`, `incidents` |
 | Ventas | `quotes`, `quote_lines`, `sales_orders`, `sales_order_lines` |
 | Compras | `purchase_orders`, `purchase_order_lines`, `receipts`, `receipt_lines` |
-| Logística | `shipments`, `shipment_lines`, `remissions` |
+| Logística | `shipments`, `shipment_lines`, `remissions`; pendientes: `freight_quotes`, `delivery_trips` |
 | Finanzas | `invoices`, `payments` |
 | Control | `issues`, `alerts`, `reports`, `agent_runs`, `agent_findings`, `audit_log`, `sync_runs` |
 | Marketing | `tracked_links`, `link_events`, `leads`, `lead_activities` |
@@ -55,7 +62,7 @@ Un recorrido dentro de una transacción que siempre se revierte, con un usuario 
 
 Reglas que hace cumplir la base:
 
-- **Folios** consecutivos por documento: CLI, PRV, COT, PED, OC, REC, ENV, REM, PAG, INC.
+- **Folios** consecutivos por documento: CLI, PRV, COT, PED, OC, REC, ENV, REM, PAG, INC; al aplicar la migración pendiente, FLE y VIA.
 - **Pedidos** con canal `directo` o `shopify` e identificadores de Shopify.
 - **Productos:** la categoría debe pertenecer a la familia; cada reclasificación o
   cambio de precio/costo queda en `product_change_log` con quién, cuándo y motivo.

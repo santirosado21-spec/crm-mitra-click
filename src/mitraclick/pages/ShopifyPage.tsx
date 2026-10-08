@@ -43,6 +43,7 @@ export function ShopifyPage() {
   })
 
   const connected = Boolean(status.data?.configurado.dominio && status.data.configurado.token)
+  const demoRuns = (data.data?.runs ?? []).filter((run) => run.triggered_by === 'demo').length
 
   const sync = async (entidad: string, label: string) => {
     setRunning(entidad)
@@ -71,6 +72,8 @@ export function ShopifyPage() {
   return (
     <div className="space-y-5">
       <PageHeader eyebrow="Sistema" title="Shopify" description="Shopify sigue siendo la tienda. De allá llegan pedidos, clientes y productos; aquí vive la operación interna. Las credenciales se guardan como secretos del servidor: nunca se escriben ni se ven en esta pantalla." />
+
+      {demoRuns > 0 && <p className="rounded-xl border border-mc-yellow-strong/40 bg-mc-yellow-wash px-4 py-3 text-sm text-mc-ink" role="status"><strong>Datos de prueba activos.</strong> La conciliación y la bitácora incluyen {formatNumber(demoRuns)} corridas demo de Shopify; se pueden retirar con <code>purge_shopify_demo()</code>.</p>}
 
       {notice && <p className={`rounded-xl border px-4 py-3 text-sm font-semibold ${notice.tone === 'error' ? 'border-mc-danger/25 bg-mc-danger-soft text-mc-danger' : 'border-mc-success/30 bg-mc-success-soft text-mc-ink'}`} role={notice.tone === 'error' ? 'alert' : 'status'}>{notice.text}</p>}
 

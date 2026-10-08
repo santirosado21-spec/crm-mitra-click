@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { documentTotals, invoiceBalance, lineAmount, nextStatuses, pendingQuantity, validateLines, type DraftLine } from './documents'
+import { documentTotals, invoiceBalance, lineAmount, nextStatuses, pendingQuantity, statusLabel, validateLines, type DraftLine } from './documents'
 
 const line = (changes: Partial<DraftLine> = {}): DraftLine => ({ productId: 'p1', description: 'Taladro', quantity: '2', unitPrice: '100', discountPct: '0', ...changes })
 
@@ -67,6 +67,15 @@ describe('nextStatuses', () => {
 
   it('un estado desconocido no tiene salidas', () => {
     expect(nextStatuses('purchase', 'inventado')).toEqual([])
+  })
+})
+
+describe('statusLabel', () => {
+  it('presenta en español los estados de cotizaciones de flete y viajes', () => {
+    expect(statusLabel('solicitada')).toBe('Solicitada')
+    expect(statusLabel('cotizada')).toBe('Cotizada')
+    expect(statusLabel('aceptada')).toBe('Aceptada')
+    expect(statusLabel('completado')).toBe('Completado')
   })
 })
 

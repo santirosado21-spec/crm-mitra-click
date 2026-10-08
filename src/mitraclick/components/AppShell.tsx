@@ -81,17 +81,18 @@ export function AppShell() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
+  const isHome = location.pathname === '/'
   const current = findModule(location.pathname)
 
   return (
     <div className="min-h-dvh bg-mc-bg text-mc-ink">
-      <Sidebar collapsed={collapsed} mobileOpen={mobileOpen} onToggle={() => setCollapsed((value) => !value)} onClose={() => setMobileOpen(false)} />
-      <div className={`mc-shell-content min-h-dvh ${collapsed ? 'lg:pl-[76px]' : 'lg:pl-[248px]'}`}>
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-mc-line/90 bg-mc-bg/95 px-4 backdrop-blur-xl lg:hidden">
+      {!isHome && <Sidebar collapsed={collapsed} mobileOpen={mobileOpen} onToggle={() => setCollapsed((value) => !value)} onClose={() => setMobileOpen(false)} />}
+      <div className={`min-h-dvh ${isHome ? '' : `mc-shell-content ${collapsed ? 'lg:pl-[76px]' : 'lg:pl-[248px]'}`}`}>
+        {!isHome && <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-mc-line/90 bg-mc-bg/95 px-4 backdrop-blur-xl lg:hidden">
           <button type="button" className="mc-press grid h-11 w-11 place-items-center rounded-xl border border-mc-line bg-white text-mc-gray-600" onClick={() => setMobileOpen(true)} aria-label="Abrir navegación" aria-expanded={mobileOpen} aria-controls="app-sidebar"><Menu size={18} /></button>
           <p className="min-w-0 flex-1 truncate text-sm font-extrabold text-mc-ink">{current?.label ?? 'Mitra Click'}</p>
-        </header>
-        <main className="mx-auto w-full max-w-[1500px] p-4 lg:p-6"><div key={location.pathname} className="mc-page-enter"><Outlet /></div></main>
+        </header>}
+        <main className={isHome ? 'w-full p-4 lg:p-6' : 'mx-auto w-full max-w-[1500px] p-4 lg:p-6'}><div key={location.pathname} className="mc-page-enter"><Outlet /></div></main>
       </div>
     </div>
   )

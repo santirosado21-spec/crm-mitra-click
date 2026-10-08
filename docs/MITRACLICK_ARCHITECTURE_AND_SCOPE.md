@@ -63,7 +63,7 @@ Principios:
 | A | Fundación: modelo operativo, roles y RLS, auditoría, sesión obligatoria, menú, patrón lista + formulario | Escrita |
 | B | Catálogo, clientes y proveedores; importador CSV (exportaciones de Shopify) | Escrita |
 | C | Inventario y bodega: movimientos, existencias, conteos, etiquetas NFC/QR (`/b/:codigo`) | Escrita. Falta dibujar el QR |
-| D | Ciclo comercial y trazabilidad de punta a punta | Escrita |
+| D | Ciclo comercial y trazabilidad de punta a punta; cotizaciones de flete y programación de viajes | Escrita; migración de fletes pendiente de aplicar |
 | E | Conector de Shopify (webhooks con HMAC, sincronización) | Escrita. Falta el envío de existencias a Shopify |
 | F | Calidad de datos, pendientes y alertas | Escrita |
 | G | KPIs y dashboard ejecutivo | Escrita |

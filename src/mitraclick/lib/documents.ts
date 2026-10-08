@@ -114,7 +114,8 @@ export const STATUS_LABEL: Record<string, string> = {
   borrador: 'Borrador', enviada: 'Enviada', negociacion: 'En negociación', ganada: 'Ganada', perdida: 'Perdida', vencida: 'Vencida',
   nuevo: 'Nuevo', confirmado: 'Confirmado', en_compra: 'En compra', en_surtido: 'En surtido', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado',
   parcial: 'Parcial', recibida: 'Recibida', cancelada: 'Cancelada',
-  programado: 'Programado', en_ruta: 'En ruta', incidencia: 'Con incidencia',
+  solicitada: 'Solicitada', cotizada: 'Cotizada', aceptada: 'Aceptada',
+  programado: 'Programado', en_ruta: 'En ruta', completado: 'Completado', incidencia: 'Con incidencia',
   pendiente: 'Pendiente', entregada: 'Entregada', verificada: 'Verificada', rechazada: 'Rechazada',
   emitida: 'Emitida', pagada: 'Pagada', pagado: 'Pagado', reembolsado: 'Reembolsado',
 }

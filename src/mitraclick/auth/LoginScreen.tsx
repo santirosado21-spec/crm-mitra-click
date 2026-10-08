@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { KeyRound } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { readAuthError } from './authErrors'
 import { useSession } from './SessionContext'
 import { Button, Field, TextInput } from '../components/Controls'
@@ -7,6 +8,7 @@ import { Button, Field, TextInput } from '../components/Controls'
 /** Pantalla de entrada. Sin sesión no se ve nada del sistema. */
 export function LoginScreen() {
   const { signInWithPassword } = useSession()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -34,7 +36,10 @@ export function LoginScreen() {
   const submit = (event: FormEvent) => {
     event.preventDefault()
     const address = email.trim().toLowerCase()
-    void run(() => signInWithPassword(address, password))
+    void run(async () => {
+      await signInWithPassword(address, password)
+      navigate('/', { replace: true })
+    })
   }
 
   return (

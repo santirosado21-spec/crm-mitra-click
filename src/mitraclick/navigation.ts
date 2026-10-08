@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import {
-  Bot, Boxes, ClipboardCheck, Clock, ClipboardList, FileBarChart, FileSignature, FileText, FolderTree, History,
+  BadgeDollarSign, Bot, Boxes, ClipboardCheck, Clock, ClipboardList, FileBarChart, FileSignature, FileText, FolderTree, History,
   Home, LayoutDashboard, Link2, ListChecks, Map, MapPin, PackageSearch, Receipt, Repeat, ShoppingBag, ShoppingCart, Truck,
   UserCheck, UserPlus, Users, UsersRound, Wallet, Warehouse,
 } from 'lucide-react'
@@ -61,6 +61,7 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
   {
     label: 'Logística',
     modules: [
+      { path: '/fletes', label: 'Fletes y viajes', icon: BadgeDollarSign, phase: 'D', ready: true, summary: 'Cotizaciones de transporte y programación de viajes sin afectar el inventario.' },
       { path: '/envios', label: 'Envíos y rutas', icon: Truck, phase: 'D', ready: true, summary: 'Programación de entregas, rutas y estado de cada envío.' },
       { path: '/remisiones', label: 'Remisiones', icon: FileText, phase: 'D', ready: true, summary: 'Remisiones con evidencia de entrega y verificación.' },
     ],
