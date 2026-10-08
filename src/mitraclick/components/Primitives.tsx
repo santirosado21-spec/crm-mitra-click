@@ -1,27 +1,10 @@
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { AlertTriangle, CheckCircle2, CircleSlash, Database, Info, RotateCcw, TrendingDown, TrendingUp } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, CircleSlash, Info, RotateCcw, TrendingDown, TrendingUp } from 'lucide-react'
 import { formatCurrency, formatDate, initials, statusTone } from '../lib/format'
 
 /** Semáforo de desempeño: cumple, va en riesgo o no ha vendido. */
 export type PerformanceStatus = 'cumple' | 'riesgo' | 'sin-ventas'
-
-/** Indica de dónde vienen los datos que se ven: simulados o reales (Supabase). */
-export function DemoBanner({ source = 'demo', notice }: { source?: 'demo' | 'erp'; notice?: string }) {
-  const real = source === 'erp'
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${real ? 'border-mc-success/30 bg-mc-success-soft text-mc-success' : 'border-mc-yellow-strong/40 bg-mc-yellow-wash text-mc-yellow-ink'}`}
-      title={notice ?? (real ? 'Datos reales desde la base de datos' : 'Datos simulados; todavía sin conexión al ERP, Shopify ni Analytics')}
-      data-testid="data-mode"
-      data-source={source}
-    >
-      <Database size={12} aria-hidden="true" />
-      <span className="hidden sm:inline">{real ? 'Datos reales' : 'Datos simulados'}</span>
-      {notice && <span className="h-1.5 w-1.5 rounded-full bg-mc-warning" aria-label="Hay un aviso sobre los datos" />}
-    </span>
-  )
-}
 
 export function PageHeader({
   eyebrow,

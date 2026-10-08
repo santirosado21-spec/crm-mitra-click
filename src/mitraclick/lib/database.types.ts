@@ -1,6 +1,3 @@
-// Generado con Supabase (generate_typescript_types) tras aplicar las migraciones.
-// No se edita a mano: se regenera cada vez que cambia el esquema.
-
 export type Json =
   | string
   | number
@@ -796,6 +793,7 @@ export type Database = {
           max_weight: number | null
           pick_order: number
           position: number | null
+          source: Database["public"]["Enums"]["data_source"]
           updated_at: string
           warehouse_id: string
           width: number | null
@@ -815,6 +813,7 @@ export type Database = {
           max_weight?: number | null
           pick_order?: number
           position?: number | null
+          source?: Database["public"]["Enums"]["data_source"]
           updated_at?: string
           warehouse_id: string
           width?: number | null
@@ -834,6 +833,7 @@ export type Database = {
           max_weight?: number | null
           pick_order?: number
           position?: number | null
+          source?: Database["public"]["Enums"]["data_source"]
           updated_at?: string
           warehouse_id?: string
           width?: number | null
@@ -950,6 +950,213 @@ export type Database = {
           },
         ]
       }
+      pick_list_lines: {
+        Row: {
+          id: string
+          location_id: string
+          notes: string | null
+          pick_list_id: string
+          pick_order: number
+          picked_at: string | null
+          picked_by: string | null
+          product_id: string
+          quantity_picked: number | null
+          quantity_requested: number
+          sales_order_line_id: string
+          status: string
+        }
+        Insert: {
+          id?: string
+          location_id: string
+          notes?: string | null
+          pick_list_id: string
+          pick_order?: number
+          picked_at?: string | null
+          picked_by?: string | null
+          product_id: string
+          quantity_picked?: number | null
+          quantity_requested: number
+          sales_order_line_id: string
+          status?: string
+        }
+        Update: {
+          id?: string
+          location_id?: string
+          notes?: string | null
+          pick_list_id?: string
+          pick_order?: number
+          picked_at?: string | null
+          picked_by?: string | null
+          product_id?: string
+          quantity_picked?: number | null
+          quantity_requested?: number
+          sales_order_line_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pick_list_lines_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "location_contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_lines_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_lines_pick_list_id_fkey"
+            columns: ["pick_list_id"]
+            isOneToOne: false
+            referencedRelation: "pick_list_progress"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_lines_pick_list_id_fkey"
+            columns: ["pick_list_id"]
+            isOneToOne: false
+            referencedRelation: "pick_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_lines_picked_by_fkey"
+            columns: ["picked_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "shopify_inventory_differences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_lines_sales_order_line_id_fkey"
+            columns: ["sales_order_line_id"]
+            isOneToOne: false
+            referencedRelation: "order_line_facts"
+            referencedColumns: ["line_id"]
+          },
+          {
+            foreignKeyName: "pick_list_lines_sales_order_line_id_fkey"
+            columns: ["sales_order_line_id"]
+            isOneToOne: false
+            referencedRelation: "sales_order_lines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pick_list_orders: {
+        Row: {
+          pick_list_id: string
+          sales_order_id: string
+        }
+        Insert: {
+          pick_list_id: string
+          sales_order_id: string
+        }
+        Update: {
+          pick_list_id?: string
+          sales_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pick_list_orders_pick_list_id_fkey"
+            columns: ["pick_list_id"]
+            isOneToOne: false
+            referencedRelation: "pick_list_progress"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_orders_pick_list_id_fkey"
+            columns: ["pick_list_id"]
+            isOneToOne: false
+            referencedRelation: "pick_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_orders_sales_order_id_fkey"
+            columns: ["sales_order_id"]
+            isOneToOne: false
+            referencedRelation: "order_line_facts"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "pick_list_orders_sales_order_id_fkey"
+            columns: ["sales_order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pick_lists: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          folio: string | null
+          id: string
+          notes: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          folio?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          folio?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pick_lists_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_lists_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_categories: {
         Row: {
           active: boolean
@@ -957,6 +1164,7 @@ export type Database = {
           family_id: string
           id: string
           name: string
+          source: Database["public"]["Enums"]["data_source"]
           updated_at: string
         }
         Insert: {
@@ -965,6 +1173,7 @@ export type Database = {
           family_id: string
           id?: string
           name: string
+          source?: Database["public"]["Enums"]["data_source"]
           updated_at?: string
         }
         Update: {
@@ -973,6 +1182,7 @@ export type Database = {
           family_id?: string
           id?: string
           name?: string
+          source?: Database["public"]["Enums"]["data_source"]
           updated_at?: string
         }
         Relationships: [
@@ -1047,6 +1257,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          source: Database["public"]["Enums"]["data_source"]
           updated_at: string
         }
         Insert: {
@@ -1055,6 +1266,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          source?: Database["public"]["Enums"]["data_source"]
           updated_at?: string
         }
         Update: {
@@ -1063,6 +1275,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          source?: Database["public"]["Enums"]["data_source"]
           updated_at?: string
         }
         Relationships: []
@@ -2591,6 +2804,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          source: Database["public"]["Enums"]["data_source"]
           updated_at: string
         }
         Insert: {
@@ -2599,6 +2813,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          source?: Database["public"]["Enums"]["data_source"]
           updated_at?: string
         }
         Update: {
@@ -2607,6 +2822,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          source?: Database["public"]["Enums"]["data_source"]
           updated_at?: string
         }
         Relationships: []
@@ -2780,6 +2996,34 @@ export type Database = {
           },
         ]
       }
+      pick_list_progress: {
+        Row: {
+          assigned_name: string | null
+          assigned_to: string | null
+          completed_at: string | null
+          confirmed: number | null
+          created_at: string | null
+          folio: string | null
+          id: string | null
+          lines: number | null
+          missing: number | null
+          notes: string | null
+          orders: string | null
+          started_at: string | null
+          status: string | null
+          units_picked: number | null
+          units_requested: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pick_lists_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shopify_inventory_differences: {
         Row: {
           difference: number | null
@@ -2837,9 +3081,40 @@ export type Database = {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
       }
+      confirm_pick: {
+        Args: { p_line_id: string; p_notes?: string; p_quantity: number }
+        Returns: {
+          id: string
+          location_id: string
+          notes: string | null
+          pick_list_id: string
+          pick_order: number
+          picked_at: string | null
+          picked_by: string | null
+          product_id: string
+          quantity_picked: number | null
+          quantity_requested: number
+          sales_order_line_id: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pick_list_lines"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       convert_finding_to_issue: { Args: { p_id: number }; Returns: number }
       convert_lead_to_customer: { Args: { p_id: string }; Returns: string }
       convert_quote_to_order: { Args: { p_quote_id: string }; Returns: string }
+      create_pick_list: {
+        Args: {
+          p_assigned_to?: string
+          p_notes?: string
+          p_order_ids: string[]
+        }
+        Returns: string
+      }
       generate_locations: {
         Args: { p_warehouse_id: string; p_zones: Json }
         Returns: Json
@@ -2924,6 +3199,7 @@ export type Database = {
           sales: number
         }[]
       }
+      kpi_warehouse: { Args: { p_date?: string }; Returns: Json }
       load_initial_stock: {
         Args: { p_notes?: string; p_rows: Json }
         Returns: Json
@@ -2947,6 +3223,10 @@ export type Database = {
           occurred_at: string
           title: string
         }[]
+      }
+      pick_list_shipment_lines: {
+        Args: { p_list_id: string; p_order_id: string }
+        Returns: Json
       }
       receive_purchase: {
         Args: { p_lines: Json; p_notes?: string; p_purchase_id: string }
@@ -3038,6 +3318,7 @@ export type Database = {
         Args: { p_header: Json; p_id: string; p_lines: Json }
         Returns: string
       }
+      seed_demo: { Args: never; Returns: Json }
       set_control_setting: {
         Args: { p_key: string; p_value: number }
         Returns: undefined
@@ -3048,6 +3329,10 @@ export type Database = {
       }
       set_order_status: {
         Args: { p_id: string; p_status: string }
+        Returns: undefined
+      }
+      set_pick_list_status: {
+        Args: { p_id: string; p_notes?: string; p_status: string }
         Returns: undefined
       }
       set_purchase_status: {

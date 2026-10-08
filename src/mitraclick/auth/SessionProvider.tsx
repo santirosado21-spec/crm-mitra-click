@@ -2,17 +2,21 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import type { Session } from '@supabase/supabase-js'
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase'
 import { SessionContext, type Profile, type SessionStatus, type SessionValue } from './SessionContext'
+import { DEV_ACCESS, DEV_CREDENTIALS, DEV_PROFILE } from './devAccess'
 import { hasAnyRole, type AppRole } from './roles'
 
 /** Mantiene la sesión de Supabase Auth y el perfil (roles) del usuario dado de alta en app_users. */
 export function SessionProvider({ children }: { children: ReactNode }) {
   const configured = isSupabaseConfigured()
   const [session, setSession] = useState<Session | null>(null)
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [status, setStatus] = useState<SessionStatus>(configured ? 'cargando' : 'sin-configurar')
+  // Sin credenciales de desarrollo no hay sesión que esperar: se entra directo con el
+  // perfil falso. Con credenciales se arranca en 'cargando' y el efecto inicia sesión.
+  const devOnly = DEV_ACCESS && !DEV_CREDENTIALS
+  const [profile, setProfile] = useState<Profile | null>(devOnly ? DEV_PROFILE : null)
+  const [status, setStatus] = useState<SessionStatus>(devOnly ? 'listo' : configured ? 'cargando' : 'sin-configurar')
 
   useEffect(() => {
-    if (!configured) return
+    if (devOnly || !configured) return
     const supabase = getSupabaseClient()
     let active = true
 
@@ -36,7 +40,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setStatus('listo')
     }
 
-    void supabase.auth.getSession().then(({ data }) => resolve(data.session))
+    void supabase.auth.getSession().then(async ({ data }) => {
+      // Acceso de desarrollo con credenciales: entra solo, sin pasar por el login.
+      if (!data.session && DEV_CREDENTIALS) {
+        const { error } = await supabase.auth.signInWithPassword(DEV_CREDENTIALS)
+        if (error) console.warn('Acceso de desarrollo: no se pudo iniciar sesión.', error.message)
+        return
+      }
+      await resolve(data.session)
+    })
     // El callback de Supabase no debe esperar otras llamadas al cliente: se difiere.
     const { data } = supabase.auth.onAuthStateChange((_event, next) => {
       setTimeout(() => { void resolve(next) }, 0)
@@ -45,7 +57,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       active = false
       data.subscription.unsubscribe()
     }
-  }, [configured])
+  }, [configured, devOnly])
 
   const signInWithGoogle = useCallback(async () => {
     const { error } = await getSupabaseClient().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
