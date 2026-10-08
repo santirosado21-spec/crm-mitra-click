@@ -18,6 +18,7 @@ const MODULE_ROW_STYLES = [
 
 const AREA_DESCRIPTIONS: Record<string, string> = {
   'Dirección': 'Indicadores, prioridades y decisiones del negocio.',
+  'Shopify': 'Ventas en línea, marketing e integración de tu tienda.',
   'Ventas': 'De la primera cotización al pedido confirmado.',
   'Compras': 'Proveedores, abastecimiento y órdenes de compra.',
   'Bodega': 'Inventario, surtido y operación del almacén.',
@@ -25,7 +26,7 @@ const AREA_DESCRIPTIONS: Record<string, string> = {
   'Finanzas': 'Facturas, cobros y estados de cuenta.',
   'Catálogo': 'Productos, familias y categorías de Mitra Click.',
   'Marketing': 'Prospección, leads y enlaces medibles.',
-  'Sistema': 'Shopify, usuarios, permisos y trazabilidad.',
+  'Sistema': 'Usuarios, permisos y trazabilidad del sistema.',
 }
 
 const areaKey = (label: string) => label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -45,7 +46,7 @@ export function HomePage() {
   }, [selectedLabel])
 
   return (
-    <div ref={pageRef} tabIndex={-1} role="region" aria-label={selectedLabel ?? 'Selector de áreas'} className="mx-auto min-h-[calc(100dvh-2rem)] max-w-[1280px] py-1 outline-none lg:min-h-[calc(100dvh-3rem)] lg:py-2">
+    <div ref={pageRef} tabIndex={-1} role="region" aria-label={selectedLabel ?? 'Selector de áreas'} className="mc-home-focus mx-auto min-h-[calc(100dvh-2rem)] max-w-[1280px] py-1 outline-none lg:min-h-[calc(100dvh-3rem)] lg:py-2">
       <div className="mb-5 flex min-h-14 items-center justify-between gap-4 px-1">
         <img src="/mitraclick-logo.jpg" alt="Mitra Click" className="mc-brand-logo h-auto w-[145px] mix-blend-multiply sm:w-[170px]" />
         {profile && (
@@ -73,6 +74,7 @@ export function HomePage() {
         <ul className="grid auto-rows-fr grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {NAV_GROUPS.map((group, index) => {
             const tone = MODULE_ROW_STYLES[Math.floor(index / 3) % MODULE_ROW_STYLES.length]
+            const sectionCount = group.modules.filter((module) => module.path !== '/').length
             return <li key={group.label} className="mc-menu-enter h-full" style={{ animationDelay: `${index * 35}ms` }}>
               <Link to={`/?area=${areaKey(group.label)}`} data-testid={`home-area-${areaKey(group.label)}`} aria-label={`Abrir ${group.label}`} className="mc-module-card group flex h-full flex-col overflow-hidden rounded-3xl border border-mc-line bg-mc-surface shadow-mc-card">
                 <div className={`relative h-52 shrink-0 text-mc-gray-700 ${tone.card}`} data-testid="area-artwork">
@@ -83,7 +85,7 @@ export function HomePage() {
                   <h2 className="text-xl font-extrabold text-mc-ink">{group.label}</h2>
                   <p className="mb-5 mt-2 min-h-12 text-sm leading-6 text-mc-muted">{AREA_DESCRIPTIONS[group.label]}</p>
                   <div className="mt-auto flex items-center justify-between border-t border-mc-line-soft pt-4 text-xs font-semibold text-mc-muted">
-                    <span>{group.modules.filter((module) => module.path !== '/').length} secciones</span>
+                    <span>{sectionCount} {sectionCount === 1 ? 'sección' : 'secciones'}</span>
                     <span className="flex items-center gap-2 text-mc-ink">Explorar área <ArrowUpRight size={17} aria-hidden="true" /></span>
                   </div>
                 </div>

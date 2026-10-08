@@ -65,7 +65,7 @@ export function TagPage() {
   const shell = (content: React.ReactNode) => (
     <div className="min-h-dvh bg-mc-bg text-mc-ink">
       <header className="flex h-14 items-center justify-between border-b border-mc-line bg-mc-surface px-4">
-        <img src="/mitraclick-mark.svg" alt="Mitra Click" className="h-8 w-8" />
+        <img src="/mitraclick-mark.svg" alt="Mitra Click" className="mc-brand-logo h-8 w-8" />
         <Link to="/" className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-mc-muted hover:text-mc-ink"><Home size={16} aria-hidden="true" />Ir al sistema</Link>
       </header>
       <main className="mx-auto w-full max-w-md space-y-4 p-4">{content}</main>

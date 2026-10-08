@@ -8,7 +8,7 @@ import { UserAvatar } from './Primitives'
 import { ThemeToggle } from './ThemeToggle'
 
 function Brand({ compact }: { compact: boolean }) {
-  if (compact) return <img src="/mitraclick-mark.svg" alt="Mitra Click" className="h-10 w-10 shrink-0" />
+  if (compact) return <img src="/mitraclick-mark.svg" alt="Mitra Click" className="mc-brand-logo h-10 w-10 shrink-0" />
   return <img src="/mitraclick-logo.jpg" alt="Mitra Click" className="mc-brand-logo h-auto w-[160px] max-w-full mix-blend-multiply" />
 }
 

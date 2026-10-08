@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 import {
   BadgeDollarSign, Bot, Boxes, ClipboardCheck, Clock, ClipboardList, FileBarChart, FileSignature, FileText, FolderTree, History,
   Home, LayoutDashboard, Link2, ListChecks, Map, MapPin, PackageSearch, Receipt, Repeat, ShoppingBag, ShoppingCart, Truck,
-  UserCheck, UserPlus, Users, UsersRound, Wallet, Warehouse,
+  UserCheck, UserPlus, Users, UsersRound, Wallet,
 } from 'lucide-react'
 
 /** Fase del plan de construcción en la que se entrega cada módulo. */
@@ -28,6 +28,12 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
       { path: '/pendientes', label: 'Pendientes', icon: ClipboardCheck, phase: 'F', ready: true, summary: 'Excepciones detectadas por las reglas de calidad de datos, con responsable y estado de resolución.' },
       { path: '/reportes', label: 'Reportes', icon: FileBarChart, phase: 'H', ready: true, summary: 'Reportes semanales, quincenales y mensuales: ejecutivo, comercial, productos, operación e inventario.' },
       { path: '/agentes', label: 'Agentes', icon: Bot, phase: 'H', ready: true, summary: 'Supervisión, comercial, marketing y ejecutivo: hallazgos con evidencia y acción sugerida.' },
+    ],
+  },
+  {
+    label: 'Shopify',
+    modules: [
+      { path: '/shopify', label: 'Dashboards e integración', icon: ShoppingBag, phase: 'E', ready: true, summary: 'Dashboards de ventas y marketing, estado de las integraciones y sincronización con Shopify.' },
     ],
   },
   {
@@ -92,7 +98,6 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
     modules: [
       { path: '/usuarios', label: 'Usuarios y permisos', icon: Users, phase: 'A', ready: true, summary: 'Quién entra al sistema y con qué roles.' },
       { path: '/bitacora', label: 'Bitácora', icon: History, phase: 'A', ready: true, summary: 'Registro de cada cambio: quién, cuándo, antes y después.' },
-      { path: '/shopify', label: 'Shopify', icon: Warehouse, phase: 'E', ready: true, summary: 'Estado de la conexión con Shopify y de cada sincronización.' },
     ],
   },
 ]

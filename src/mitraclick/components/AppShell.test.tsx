@@ -40,11 +40,20 @@ describe('AppShell', () => {
     expect(html).not.toContain('Abrir navegación')
     expect(html).toContain('Bienvenido, Ángel')
     expect(html).toContain('Módulos del sistema')
-    expect(html.match(/data-testid="home-area-/g)).toHaveLength(9)
-    expect(html.match(/data-testid="area-artwork"/g)).toHaveLength(9)
+    expect(html.match(/data-testid="home-area-/g)).toHaveLength(10)
+    expect(html.match(/data-testid="area-artwork"/g)).toHaveLength(10)
     expect(html).not.toContain('data-testid="home-module-')
     expect(html).toContain('lg:grid-cols-3')
     expect(html).toContain('auto-rows-fr')
+  })
+
+  it('coloca Shopify como segunda área y lo separa de Sistema sin duplicar la ruta', () => {
+    expect(NAV_GROUPS[1].label).toBe('Shopify')
+    expect(NAV_GROUPS.flatMap((group) => group.modules).filter((module) => module.path === '/shopify')).toHaveLength(1)
+    expect(NAV_GROUPS.find((group) => group.label === 'Sistema')?.modules.some((module) => module.path === '/shopify')).toBe(false)
+    const html = renderShell('/')
+    expect(html.indexOf('home-area-shopify')).toBeLessThan(html.indexOf('home-area-ventas'))
+    expect(renderShell('/?area=shopify')).toContain('href="/shopify"')
   })
 
   it.each(NAV_GROUPS)('abre solamente las secciones de $label y conserva el acceso al inicio', (group) => {

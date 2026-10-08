@@ -111,11 +111,13 @@
 :root[data-theme='dark'] .hover\:bg-mc-ink:hover { background-color: color-mix(in srgb, var(--color-mc-charcoal) 82%, white); }
 :root[data-theme='dark'] .mc-sidebar-scrim { background-color: rgba(0, 0, 0, 0.64); }
 :root[data-theme='dark'] .mc-brand-logo {
-  border-radius: 0.75rem;
-  background: white;
-  padding: 0.2rem 0.4rem;
-  mix-blend-mode: normal;
+  /* Letras claras y fondo integrado; la rotación conserva el acento cálido. */
+  filter: invert(1) hue-rotate(180deg) brightness(1.8);
+  mix-blend-mode: screen;
 }
+
+/* Destino de foco programático, no es un control interactivo. */
+.mc-home-focus:focus-visible { outline: none; }
 :root[data-theme='dark'] .mc-field:focus { border-color: var(--color-mc-yellow-strong); }
 :root[data-theme='dark'] input[type='checkbox'] { accent-color: var(--color-mc-yellow); }
 :root[data-theme='dark'] ::-webkit-scrollbar-thumb { background: var(--color-mc-gray-300); }
