@@ -15,7 +15,7 @@ export function Button({ variant = 'primary', children, className = '', type = '
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={`mc-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -35,7 +35,7 @@ export function Input({ label, error, id, className = '', ...props }: InputProps
       <input
         id={id}
         aria-invalid={error ? true : undefined}
-        className={`rounded-xl border bg-white px-3 py-2 text-sm text-mc-ink outline-none transition-colors duration-150 placeholder:text-mc-subtle focus:ring-2 focus:ring-mc-yellow/50 ${error ? 'border-mc-danger' : 'border-mc-line focus:border-mc-charcoal'} ${className}`}
+        className={`mc-field min-h-11 rounded-xl border bg-white px-3 py-2 text-sm text-mc-ink outline-none placeholder:text-mc-subtle focus:ring-2 focus:ring-mc-yellow/50 ${error ? 'border-mc-danger' : 'border-mc-line focus:border-mc-charcoal'} ${className}`}
         {...props}
       />
       {error && <span className="text-xs text-mc-danger">{error}</span>}
@@ -44,7 +44,7 @@ export function Input({ label, error, id, className = '', ...props }: InputProps
 }
 
 const fieldClass = (error?: string, className = '') =>
-  `w-full rounded-xl border bg-white px-3 py-2 text-sm text-mc-ink outline-none transition-colors duration-150 placeholder:text-mc-subtle focus:ring-2 focus:ring-mc-yellow/50 disabled:bg-mc-surface-2 disabled:text-mc-muted ${error ? 'border-mc-danger' : 'border-mc-line focus:border-mc-charcoal'} ${className}`
+  `mc-field min-h-11 max-w-full w-full rounded-xl border bg-white px-3 py-2 text-sm text-mc-ink outline-none placeholder:text-mc-subtle focus:ring-2 focus:ring-mc-yellow/50 disabled:bg-mc-surface-2 disabled:text-mc-muted ${error ? 'border-mc-danger' : 'border-mc-line focus:border-mc-charcoal'} ${className}`
 
 /** Etiqueta + control + ayuda/errores, con los ids enlazados para lectores de pantalla. */
 export function Field({ id, label, required, hint, error, children }: { id: string; label: string; required?: boolean; hint?: string; error?: string; children: ReactNode }) {

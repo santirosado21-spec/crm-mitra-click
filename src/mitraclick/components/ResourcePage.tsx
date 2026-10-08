@@ -278,7 +278,7 @@ export function ResourcePage({ config, headerActions, toolbar }: { config: Resou
       {toolbar}
 
       <Panel padding={false} testId={`resource-${config.table}`}>
-        <div className="flex flex-col gap-3 border-b border-mc-line-soft p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mc-panel-heading flex flex-col gap-3 border-b border-mc-line-soft p-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="relative w-full sm:max-w-sm">
             <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mc-gray-400" aria-hidden="true" />
             <TextInput type="search" aria-label={`Buscar ${config.title.toLowerCase()}`} placeholder={config.searchPlaceholder ?? 'Buscar…'} value={draft} onChange={(event) => setDraft(event.target.value)} className="pl-9" data-testid="search-input" />
@@ -291,7 +291,7 @@ export function ResourcePage({ config, headerActions, toolbar }: { config: Resou
               </Select>
             ))}
             {config.hasActive && <Checkbox label="Mostrar inactivos" checked={showInactive} onChange={(event) => setParam({ inactivos: event.target.checked ? '1' : null, pagina: null })} />}
-            <p className="text-xs text-mc-muted tabular" data-testid="result-count" aria-live="polite">{query.loading ? 'Cargando…' : `${total} ${total === 1 ? 'registro' : 'registros'}`}</p>
+            <p className="rounded-lg border border-mc-line-soft bg-mc-surface px-2.5 py-1.5 text-xs text-mc-muted tabular" data-testid="result-count" aria-live="polite">{query.loading ? 'Cargando…' : `${total} ${total === 1 ? 'registro' : 'registros'}`}</p>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { AlertTriangle, CheckCircle2, CircleSlash, Info, RotateCcw, TrendingDown, TrendingUp } from 'lucide-react'
+import { AlertTriangle, ArrowUpRight, CheckCircle2, CircleSlash, Info, RotateCcw, TrendingDown, TrendingUp } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { formatCurrency, formatDate, initials, statusTone } from '../lib/format'
 
 /** Semáforo de desempeño: cumple, va en riesgo o no ha vendido. */
@@ -18,9 +19,9 @@ export function PageHeader({
   actions?: ReactNode
 }) {
   return (
-    <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <header className="mc-page-header mc-surface flex flex-col gap-4 p-5 lg:flex-row lg:items-end lg:justify-between lg:p-6">
       <div className="min-w-0">
-        {eyebrow && <p className="mb-1 text-xs font-semibold text-mc-yellow-ink">{eyebrow}</p>}
+        {eyebrow && <p className="mb-2 inline-flex rounded-lg bg-mc-yellow-wash px-2.5 py-1 text-[11px] font-bold text-mc-yellow-ink">{eyebrow}</p>}
         <h1 className="text-2xl font-extrabold text-mc-ink lg:text-[30px]">{title}</h1>
         <p className="mt-1 max-w-3xl text-sm leading-6 text-mc-muted">{description}</p>
       </div>
@@ -47,9 +48,9 @@ export function Panel({
   testId?: string
 }) {
   return (
-    <section className={`overflow-hidden rounded-2xl border border-mc-line bg-mc-surface shadow-mc-card ${className}`} data-testid={testId}>
+    <section className={`mc-surface mc-panel overflow-hidden ${className}`} data-testid={testId}>
       {(title || description || action) && (
-        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 border-b border-mc-line-soft px-5 py-4">
+        <div className="mc-panel-heading flex flex-wrap items-start justify-between gap-x-4 gap-y-3 border-b border-mc-line-soft px-5 py-4">
           <div className="min-w-0">
             {title && <h2 className="text-sm font-bold text-mc-ink">{title}</h2>}
             {description && <p className="mt-0.5 text-xs leading-5 text-mc-muted">{description}</p>}
@@ -98,6 +99,7 @@ export function KpiCard({
   testId,
   emphasis = false,
   unknown = false,
+  link,
 }: {
   label: string
   value: string | number
@@ -116,26 +118,37 @@ export function KpiCard({
    * pudo saber. Se dibuja un guion y se dice por qué.
    */
   unknown?: boolean
+  /** Acceso al módulo relacionado, sin sugerir que aplica los filtros del indicador. */
+  link?: { to: string; label: string }
 }) {
   const shownDelta = unknown ? undefined : delta
   const shownHelper = unknown ? 'No se pudo consultar' : helper
   return (
     <article
-      className={`flex min-w-0 flex-col rounded-2xl border p-3 shadow-mc-card sm:p-4 ${emphasis ? 'border-mc-charcoal bg-mc-charcoal text-white' : 'border-mc-line bg-mc-surface'}`}
+      className={`mc-stat-card flex min-w-0 flex-col overflow-hidden rounded-2xl border shadow-mc-card ${emphasis ? 'border-mc-charcoal bg-mc-charcoal text-white' : 'border-mc-line bg-mc-surface'}`}
       data-testid={testId}
     >
-      <div className="flex items-start justify-between gap-3">
-        <p className={`min-w-0 text-xs font-semibold ${emphasis ? 'text-white/75' : 'text-mc-muted'}`}>{label}</p>
-        <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${emphasis ? 'bg-mc-yellow text-mc-ink' : 'bg-mc-surface-2 text-mc-charcoal'}`}>
-          <Icon size={16} aria-hidden="true" />
-        </span>
-      </div>
-      <p className={`mt-2 break-words text-xl font-extrabold leading-tight tabular sm:text-[26px] ${emphasis ? 'text-white' : 'text-mc-ink'}`} data-testid={testId ? `${testId}-value` : undefined}>{unknown ? '—' : value}</p>
-      <div className="mt-1 flex flex-wrap items-center gap-2">
-        {shownDelta !== undefined && <Delta value={shownDelta} />}
-        {shownHelper && <span className={`text-[11px] ${emphasis ? 'text-white/75' : 'text-mc-muted'}`}>{shownHelper}</span>}
-      </div>
-      {(source || period) && !emphasis && <div className="mt-3 border-t border-mc-line-soft pt-2"><SourceStamp source={source ?? 'Datos simulados'} period={period} /></div>}
+      <dl className="flex-1 p-4 sm:p-5">
+        <dt className="flex items-start justify-between gap-2">
+          <span className={`min-w-0 text-xs font-semibold leading-5 ${emphasis ? 'text-white/80' : 'text-mc-muted'}`}>{label}</span>
+          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-mc-ink ${emphasis ? 'bg-mc-yellow' : 'bg-mc-yellow-soft'}`}>
+            <Icon size={16} aria-hidden="true" />
+          </span>
+        </dt>
+        <dd className={`mt-3 break-words text-2xl font-extrabold leading-tight tabular sm:text-3xl ${emphasis ? 'text-white' : 'text-mc-ink'}`} data-testid={testId ? `${testId}-value` : undefined}>{unknown ? '—' : value}</dd>
+        {shownDelta !== undefined && <dd className="mt-2"><Delta value={shownDelta} /></dd>}
+      </dl>
+      {(shownHelper || source || period || link) && (
+        <footer className={`mt-auto border-t ${emphasis ? 'border-white/15' : 'border-mc-line-soft bg-mc-surface-2/50'}`}>
+          {(shownHelper || source || period) && <div className={`space-y-1 px-4 py-3 text-[11px] leading-5 sm:px-5 ${emphasis ? 'text-white/80' : 'text-mc-muted'}`}>
+            {shownHelper && <p>{shownHelper}</p>}
+            {(source || period) && <p data-testid="source-stamp">{[source, period].filter(Boolean).join(' · ')}</p>}
+          </div>}
+          {link && <Link to={link.to} className={`mc-card-link flex min-h-11 items-center justify-between gap-2 px-4 py-3 text-xs font-bold sm:px-5 ${emphasis ? 'text-mc-yellow hover:bg-white/10' : 'text-mc-ink hover:bg-mc-yellow-wash'}`}>
+            {link.label}<span className="mc-link-arrow shrink-0"><ArrowUpRight size={15} aria-hidden="true" /></span>
+          </Link>}
+        </footer>
+      )}
     </article>
   )
 }

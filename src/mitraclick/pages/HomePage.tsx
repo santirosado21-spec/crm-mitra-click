@@ -28,21 +28,21 @@ export function HomePage() {
                 {group.label}
               </h2>
               <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {modules.map((module) => {
+                {modules.map((module, index) => {
                   const Icon = module.icon
                   return (
-                    <li key={module.path}>
+                    <li key={module.path} className="mc-menu-enter" style={{ animationDelay: `${index * 35}ms` }}>
                       <Link
                         to={module.path}
-                        className={`group flex min-h-24 w-full flex-col justify-between rounded-2xl border p-3.5 shadow-mc-card transition-colors ${module.ready ? 'border-mc-line bg-mc-surface hover:border-mc-yellow-strong hover:bg-mc-yellow-wash' : 'border-mc-line bg-mc-surface-2 text-mc-muted hover:border-mc-charcoal'}`}
+                        className={`mc-module-card group flex h-full min-h-24 w-full flex-col justify-between rounded-2xl border p-3.5 shadow-mc-card ${module.ready ? 'border-mc-line bg-mc-surface hover:border-mc-yellow-strong hover:bg-mc-yellow-wash' : 'border-mc-line bg-mc-surface-2 text-mc-muted hover:border-mc-charcoal'}`}
                         data-testid={`home-module-${module.path.slice(1)}`}
                       >
-                        <span className={`grid h-9 w-9 place-items-center rounded-xl ${module.ready ? 'bg-mc-yellow-soft text-mc-ink group-hover:bg-mc-yellow' : 'bg-mc-gray-100 text-mc-muted'}`}>
+                        <span className={`mc-module-icon grid h-9 w-9 place-items-center rounded-xl ${module.ready ? 'bg-mc-yellow-soft text-mc-ink group-hover:bg-mc-yellow' : 'bg-mc-gray-100 text-mc-muted'}`}>
                           {module.ready ? <Icon size={18} aria-hidden="true" /> : <CircleDashed size={18} aria-hidden="true" />}
                         </span>
                         <span className="mt-3 flex items-end justify-between gap-2">
                           <span className={`text-left text-sm font-bold leading-5 ${module.ready ? 'text-mc-ink' : 'text-mc-muted'}`}>{module.label}</span>
-                          {module.ready ? <ArrowUpRight size={15} className="mb-0.5 shrink-0 text-mc-muted group-hover:text-mc-ink" aria-hidden="true" /> : <span className="shrink-0 text-[10px] font-bold">Fase {module.phase}</span>}
+                          {module.ready ? <span className="mc-module-arrow mb-0.5 shrink-0 text-mc-muted group-hover:text-mc-ink"><ArrowUpRight size={15} aria-hidden="true" /></span> : <span className="text-[10px] font-bold">En construcción</span>}
                         </span>
                       </Link>
                     </li>

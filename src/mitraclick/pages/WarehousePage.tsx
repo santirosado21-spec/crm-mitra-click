@@ -158,10 +158,10 @@ export function WarehousePage() {
       </section>
 
       <section aria-label="Entrada y salida" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <KpiCard label="Recepciones del día" value={formatNumber(kpi.receipts_today)} helper={`${formatNumber(kpi.units_received_today)} unidades`} icon={ArrowDownToLine} testId="kpi-recepciones" />
-        <KpiCard label="Compras por recibir" value={formatNumber(kpi.purchases_open)} helper={kpi.purchases_due > 0 ? `${formatNumber(kpi.purchases_due)} ya debieron llegar` : undefined} icon={PackageCheck} testId="kpi-compras" />
-        <KpiCard label="Envíos del día" value={formatNumber(kpi.shipments_today)} helper={`${formatNumber(kpi.delivered_today)} entregados`} icon={ArrowUpFromLine} testId="kpi-envios" />
-        <KpiCard label="Movimientos del día" value={formatNumber(kpi.movements_today)} helper="Entradas, salidas, traspasos y ajustes" icon={Boxes} testId="kpi-movimientos" />
+        <KpiCard label="Recepciones del día" value={formatNumber(kpi.receipts_today)} helper={`${formatNumber(kpi.units_received_today)} unidades`} icon={ArrowDownToLine} testId="kpi-recepciones" link={{ to: '/compras', label: 'Ver compras' }} />
+        <KpiCard label="Compras por recibir" value={formatNumber(kpi.purchases_open)} helper={kpi.purchases_due > 0 ? `${formatNumber(kpi.purchases_due)} ya debieron llegar` : undefined} icon={PackageCheck} testId="kpi-compras" link={{ to: '/compras', label: 'Ver compras' }} />
+        <KpiCard label="Envíos del día" value={formatNumber(kpi.shipments_today)} helper={`${formatNumber(kpi.delivered_today)} entregados`} icon={ArrowUpFromLine} testId="kpi-envios" link={{ to: '/envios', label: 'Ver envíos' }} />
+        <KpiCard label="Movimientos del día" value={formatNumber(kpi.movements_today)} helper="Entradas, salidas, traspasos y ajustes" icon={Boxes} testId="kpi-movimientos" link={{ to: '/movimientos', label: 'Ver movimientos' }} />
       </section>
 
       <div className="grid gap-5 lg:grid-cols-3">

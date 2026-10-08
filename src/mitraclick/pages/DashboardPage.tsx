@@ -82,14 +82,14 @@ export function DashboardPage() {
       {header}
 
       <section aria-label="Qué está pasando" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <KpiCard label="Ventas" value={formatCurrency(Number(now.sales), true)} delta={changePct(Number(now.sales), Number(previous.sales))} helper={`${formatNumber(now.orders)} pedidos`} icon={ShoppingCart} testId="kpi-ventas" emphasis />
-        <KpiCard label="Facturación" value={formatCurrency(Number(now.invoiced), true)} delta={changePct(Number(now.invoiced), Number(previous.invoiced))} icon={Receipt} testId="kpi-facturacion" />
-        <KpiCard label="Cobranza" value={formatCurrency(Number(now.collected), true)} delta={changePct(Number(now.collected), Number(previous.collected))} helper={`Por cobrar ${formatCurrency(Number(now.receivable), true)}`} icon={Wallet} testId="kpi-cobranza" />
-        <KpiCard label="Ticket promedio" value={formatCurrency(Number(now.avg_ticket))} delta={changePct(Number(now.avg_ticket), Number(previous.avg_ticket))} icon={Banknote} testId="kpi-ticket" />
-        <KpiCard label="Cotizaciones emitidas" value={formatNumber(now.quotes_issued)} delta={changePct(now.quotes_issued, previous.quotes_issued)} helper={`${formatNumber(now.quotes_won)} ganadas`} icon={FileSignature} testId="kpi-cotizaciones" />
-        <KpiCard label="Conversión a pedido" value={now.quote_conversion === null ? '—' : formatRatio(Number(now.quote_conversion))} helper={now.quote_conversion === null ? 'Sin cotizaciones cerradas en el periodo' : 'De las cotizaciones cerradas'} icon={Target} testId="kpi-conversion" />
-        <KpiCard label="Pipeline abierto" value={formatCurrency(Number(now.pipeline_value), true)} helper={`${formatNumber(now.pipeline_count)} cotizaciones por cerrar, hoy`} icon={FileSignature} testId="kpi-pipeline" />
-        <KpiCard label="Margen" value={now.margin_pct === null ? '—' : formatRatio(Number(now.margin_pct), 1)} helper={note ?? formatCurrency(Number(now.margin), true)} icon={Percent} testId="kpi-margen" />
+        <KpiCard label="Ventas" value={formatCurrency(Number(now.sales), true)} delta={changePct(Number(now.sales), Number(previous.sales))} helper={`${formatNumber(now.orders)} pedidos`} icon={ShoppingCart} testId="kpi-ventas" emphasis link={{ to: '/pedidos', label: 'Ver pedidos' }} />
+        <KpiCard label="Facturación" value={formatCurrency(Number(now.invoiced), true)} delta={changePct(Number(now.invoiced), Number(previous.invoiced))} icon={Receipt} testId="kpi-facturacion" link={{ to: '/facturas', label: 'Ver facturas' }} />
+        <KpiCard label="Cobranza" value={formatCurrency(Number(now.collected), true)} delta={changePct(Number(now.collected), Number(previous.collected))} helper={`Por cobrar ${formatCurrency(Number(now.receivable), true)}`} icon={Wallet} testId="kpi-cobranza" link={{ to: '/pagos', label: 'Ver pagos' }} />
+        <KpiCard label="Ticket promedio" value={formatCurrency(Number(now.avg_ticket))} delta={changePct(Number(now.avg_ticket), Number(previous.avg_ticket))} icon={Banknote} testId="kpi-ticket" link={{ to: '/pedidos', label: 'Ver pedidos' }} />
+        <KpiCard label="Cotizaciones emitidas" value={formatNumber(now.quotes_issued)} delta={changePct(now.quotes_issued, previous.quotes_issued)} helper={`${formatNumber(now.quotes_won)} ganadas`} icon={FileSignature} testId="kpi-cotizaciones" link={{ to: '/cotizaciones', label: 'Ver cotizaciones' }} />
+        <KpiCard label="Conversión a pedido" value={now.quote_conversion === null ? '—' : formatRatio(Number(now.quote_conversion))} helper={now.quote_conversion === null ? 'Sin cotizaciones cerradas en el periodo' : 'De las cotizaciones cerradas'} icon={Target} testId="kpi-conversion" link={{ to: '/cotizaciones', label: 'Ver cotizaciones' }} />
+        <KpiCard label="Pipeline abierto" value={formatCurrency(Number(now.pipeline_value), true)} helper={`${formatNumber(now.pipeline_count)} cotizaciones por cerrar, hoy`} icon={FileSignature} testId="kpi-pipeline" link={{ to: '/cotizaciones', label: 'Ver cotizaciones' }} />
+        <KpiCard label="Margen" value={now.margin_pct === null ? '—' : formatRatio(Number(now.margin_pct), 1)} helper={note ?? formatCurrency(Number(now.margin), true)} icon={Percent} testId="kpi-margen" link={{ to: '/pedidos', label: 'Ver pedidos' }} />
       </section>
 
       <div className="grid gap-5 lg:grid-cols-3">
