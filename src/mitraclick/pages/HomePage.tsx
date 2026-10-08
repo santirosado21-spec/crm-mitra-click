@@ -15,6 +15,7 @@ const PHASES: { key: Phase; name: string; goal: string }[] = [
   { key: 'G', name: 'KPIs y dashboard ejecutivo', goal: 'Métricas definidas una sola vez y tablero para computadora y teléfono.' },
   { key: 'H', name: 'Agentes y reportes', goal: 'Supervisión, comercial, marketing y ejecutivo, con evidencia; reportes periódicos.' },
   { key: 'I', name: 'Adquisición medible', goal: 'Links NFC/QR con conteo, leads por fuente y seguimiento de prospección.' },
+  { key: 'K', name: 'WMS de bodega', goal: 'Layout y mapa de la bodega, carga inicial de existencias, surtido por recorrido y tablero de operación del día.' },
 ]
 
 export function HomePage() {

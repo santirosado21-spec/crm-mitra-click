@@ -1,12 +1,12 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   Bot, Boxes, ClipboardCheck, ClipboardList, FileBarChart, FileSignature, FileText, FolderTree, History,
-  Home, LayoutDashboard, Link2, MapPin, PackageSearch, Receipt, Repeat, ShoppingBag, ShoppingCart, Truck,
+  Home, LayoutDashboard, Link2, ListChecks, MapPin, PackageSearch, Receipt, Repeat, ShoppingBag, ShoppingCart, Truck,
   UserCheck, UserPlus, Users, UsersRound, Wallet, Warehouse,
 } from 'lucide-react'
 
 /** Fase del plan de construcción en la que se entrega cada módulo. */
-export type Phase = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I'
+export type Phase = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'K'
 
 export interface ModuleDef {
   path: string
@@ -51,6 +51,7 @@ export const NAV_GROUPS: { label: string; modules: ModuleDef[] }[] = [
     modules: [
       { path: '/inventario', label: 'Inventario', icon: Boxes, phase: 'C', ready: true, summary: 'Existencia por producto y ubicación, derivada del libro de movimientos.' },
       { path: '/movimientos', label: 'Movimientos', icon: Repeat, phase: 'C', ready: true, summary: 'Entradas, salidas, traspasos y ajustes con usuario, fecha, motivo y documento.' },
+      { path: '/surtido', label: 'Surtido', icon: ListChecks, phase: 'K', ready: true, summary: 'Lista de recorrido: qué recoger, cuánto y de qué ubicación, en orden por pasillo.' },
       { path: '/conteos', label: 'Conteos', icon: ClipboardList, phase: 'C', ready: true, summary: 'Conteos físicos: generan una diferencia para revisión, nunca sobrescriben.' },
       { path: '/ubicaciones', label: 'Ubicaciones y etiquetas', icon: MapPin, phase: 'C', ready: true, summary: 'Almacenes, ubicaciones y etiquetas NFC/QR para abrir el registro desde el teléfono.' },
     ],

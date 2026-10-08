@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSession } from '../auth/SessionContext'
-import { Button, Field, Select, TextArea, TextInput } from '../components/Controls'
+import { Button, Checkbox, Field, Select, TextArea, TextInput } from '../components/Controls'
 import { ActionDrawer, DocumentHeader, LineEditor, LinesTable, Notice, TotalsBox } from '../components/DocumentParts'
 import { EmptyState, Panel, StatusBadge } from '../components/Primitives'
 import { callFunction, selectRows } from '../lib/crud'
@@ -60,27 +60,62 @@ const SELECT =
   'purchases:purchase_orders(id,folio,status,total),shipments(id,folio,status,scheduled_on,carrier),invoices(id,folio,series,status,total)'
 
 /** Surtir y programar un envío: cuánto sale de cada renglón y de qué ubicación. */
+interface ShipmentLine {
+  sales_order_line_id: string
+  location_id: string
+  quantity: number
+}
+
 function ShipDrawer({ order, onClose, onSaved }: { order: OrderRow; onClose: () => void; onSaved: () => void }) {
   const locations = useChoices('locations', 'code')
   const pending = order.lines.filter((line) => line.product_id && pendingQuantity(Number(line.quantity), Number(line.quantity_fulfilled)) > 0)
   const [rows, setRows] = useState(() => Object.fromEntries(pending.map((line) => [line.id, { quantity: String(pendingQuantity(Number(line.quantity), Number(line.quantity_fulfilled))), locationId: '' }])))
   const [header, setHeader] = useState({ carrier: '', route: '', driver: '', tracking_number: '', scheduled_on: '' })
+  const [fromList, setFromList] = useState<string | null>(null)
   const set = (id: string, changes: Partial<{ quantity: string; locationId: string }>) => setRows((previous) => ({ ...previous, [id]: { ...previous[id], ...changes } }))
 
+  // Si ya se surtió con una lista, la ubicación y la cantidad salen de ahí: no se
+  // vuelven a capturar. Es el único punto donde el surtido alimenta al envío.
+  const picked = useQuery(`picked|${order.id}`, async () => {
+    const lists = await selectRows<{ pick_list_id: string; pick_lists: { folio: string; status: string } | null }>(
+      'pick_list_orders', 'pick_list_id,pick_lists(folio,status)', { filters: { sales_order_id: order.id }, limit: 20 })
+    const closed = lists.find((row) => row.pick_lists?.status === 'surtida')
+    if (!closed) return null
+    const lines = await callFunction<ShipmentLine[]>('pick_list_shipment_lines', { p_list_id: closed.pick_list_id, p_order_id: order.id })
+    return lines.length ? { folio: closed.pick_lists?.folio ?? '', lines } : null
+  })
+
   const submit = async () => {
-    const lines = pending
-      .map((line) => ({ sales_order_line_id: line.id, location_id: rows[line.id].locationId, quantity: Number(rows[line.id].quantity) }))
-      .filter((line) => line.quantity > 0)
-    if (!lines.length) throw new Error('Indica al menos una cantidad a enviar.')
-    if (lines.some((line) => !line.location_id)) throw new Error('Elige de qué ubicación sale cada renglón.')
-    if (lines.some((line) => !Number.isFinite(line.quantity))) throw new Error('Las cantidades deben ser números.')
+    let lines: ShipmentLine[]
+    if (fromList && picked.data) {
+      lines = picked.data.lines
+    } else {
+      lines = pending
+        .map((line) => ({ sales_order_line_id: line.id, location_id: rows[line.id].locationId, quantity: Number(rows[line.id].quantity) }))
+        .filter((line) => line.quantity > 0)
+      if (!lines.length) throw new Error('Indica al menos una cantidad a enviar.')
+      if (lines.some((line) => !line.location_id)) throw new Error('Elige de qué ubicación sale cada renglón.')
+      if (lines.some((line) => !Number.isFinite(line.quantity))) throw new Error('Las cantidades deben ser números.')
+    }
     await callFunction('ship_order', { p_order_id: order.id, p_header: header, p_lines: lines })
     onSaved()
   }
 
   return (
     <ActionDrawer title="Surtir y programar envío" subtitle={`${order.folio ?? ''} · Al guardar se registra la salida de bodega y se crea la remisión.`} submitLabel="Registrar envío" onClose={onClose} onSubmit={submit}>
-      {pending.length === 0 ? <p className="text-sm text-mc-muted">No queda nada por surtir en este pedido.</p> : pending.map((line) => (
+      {picked.data && (
+        <div className="rounded-xl border border-mc-success/30 bg-mc-success-soft p-3" data-testid="ship-from-pick">
+          <p className="text-sm font-semibold text-mc-ink">Ya se surtió con la lista {picked.data.folio}</p>
+          <p className="mt-0.5 text-xs leading-5 text-mc-gray-700">
+            {picked.data.lines.length} {picked.data.lines.length === 1 ? 'renglón' : 'renglones'} con su ubicación y cantidad.
+            Usarlos evita volver a capturar y evita diferencias con lo que se recogió.
+          </p>
+          <div className="mt-2">
+            <Checkbox label="Enviar lo que dice la lista de surtido" checked={fromList !== null} onChange={(event) => setFromList(event.target.checked ? picked.data!.folio : null)} />
+          </div>
+        </div>
+      )}
+      {fromList ? null : pending.length === 0 ? <p className="text-sm text-mc-muted">No queda nada por surtir en este pedido.</p> : pending.map((line) => (
         <fieldset key={line.id} className="rounded-xl border border-mc-line-soft bg-mc-surface-2/50 p-3">
           <legend className="px-1 text-xs font-semibold text-mc-muted">{line.description} · pendiente {formatNumber(pendingQuantity(Number(line.quantity), Number(line.quantity_fulfilled)))}</legend>
           <div className="grid gap-3 sm:grid-cols-2">

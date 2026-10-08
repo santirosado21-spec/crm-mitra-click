@@ -24,6 +24,7 @@ import { RemissionsPage, ShipmentsPage } from './mitraclick/pages/LogisticsPages
 import { MovementsPage } from './mitraclick/pages/MovementsPage'
 import { OrderPage } from './mitraclick/pages/OrderPage'
 import { PendingPage } from './mitraclick/pages/PendingPage'
+import { PickingPage } from './mitraclick/pages/PickingPage'
 import { ProductsPage } from './mitraclick/pages/ProductsPage'
 import { PurchasePage } from './mitraclick/pages/PurchasePage'
 import { QuotePage } from './mitraclick/pages/QuotePage'
@@ -49,6 +50,7 @@ const READY: Record<string, ReactNode> = {
   '/inventario': <InventoryPage />,
   '/movimientos': <MovementsPage />,
   '/conteos': <CountsPage />,
+  '/surtido': <PickingPage />,
   '/ubicaciones': <LocationsPage />,
   '/cotizaciones': <QuotesPage />,
   '/pedidos': <OrdersPage />,

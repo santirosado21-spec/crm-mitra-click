@@ -12,6 +12,7 @@ const PHASE_NAME: Record<ModuleDef['phase'], string> = {
   G: 'KPIs y dashboard ejecutivo',
   H: 'Agentes y reportes',
   I: 'Adquisición medible',
+  K: 'WMS de bodega',
 }
 
 /** Módulo definido en el plan que todavía no se construye. */
